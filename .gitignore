@@ -1,0 +1,7 @@
+**
+!*.php
+!.gitignore
+!linux
+!linux/**
+!common
+!common/**
