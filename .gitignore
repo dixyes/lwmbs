@@ -4,6 +4,8 @@
 !.github
 !.github/**
 !LICENSE
+!Readme.md
+!Readme.EN.md
 !linux
 !linux/**
 !common
