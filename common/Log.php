@@ -18,6 +18,7 @@
 
 final class Log
 {
+    public static $outFd = STDOUT;
     public static function log(
         LogType $type,
         ?string $tag,
@@ -30,7 +31,7 @@ final class Log
         $tag = $tag ?? "$filename:$line";
         $msg = sprintf(...$args);
 
-        echo "{$type->color()}[{$type->shortName()}:$tag]\033[0;1m $msg\033[0m\n";
+        fprintf(static::$outFd, "{$type->color()}[{$type->shortName()}:$tag]\033[0;1m $msg\033[0m\n");
     }
     public static function i(...$args)
     {
