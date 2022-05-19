@@ -31,12 +31,11 @@ class Config extends CommonConfig
         if ($lackingCommands) {
             throw new Exception("missing commands: " . implode(', ', $lackingCommands));
         }
+        @mkdir('lib/pkgconfig', recursive: true);
         $this->configureEnv = 'PKG_CONFIG_PATH=' . realpath('lib/pkgconfig');
         $this->libc = Util::chooseLibc();
         $this->concurrency = Util::getCpuCount();
         $this->arch = php_uname('m');
-
-        @mkdir('lib/pkgconfig', recursive: true);
     }
 
     public function makeAutoconfArgs(string $name, array $libSpecs): string
