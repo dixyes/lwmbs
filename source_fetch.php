@@ -1,10 +1,21 @@
+#!php
 <?php
 
-function extract_source(string $name, string $filename): void
+require __DIR__ . '/common/Log.php';
+require __DIR__ . '/common/LogType.php';
+require __DIR__ . '/common/CommonUtil.php';
+
+class Util
 {
-    logi("extracting $name source");
-    @mkdir("src/$name");
-    switch (extname($filename)) {
+    use CommonUtil;
+}
+
+function extractSource(string $name, string $filename): void
+{
+    Log::i("extracting $name source");
+    @mkdir("src/$name", recursive: true);
+    $ret = 0;
+    switch (Util::extname($filename)) {
         case 'xz':
         case 'txz':
             passthru('cat ' . $filename . ' | xz -d | tar -x -C src/' . $name . ' --strip-components 1',  $ret);
@@ -27,34 +38,38 @@ function extract_source(string $name, string $filename): void
             passthru('tar -xf ' . $filename . ' -C src/' . $name . ' --strip-components 1', $ret);
             break;
         default:
-            loge("unknown archive format: " . $filename);
-            exit(1);
+            throw new Exception("unknown archive format: " . $filename);
     }
     if ($ret !== 0) {
-        loge("failed to extract $name source");
-        exit(1);
+        passthru("rm -r src/$name");
+        throw new Exception("failed to extract $name source");
     }
 }
 
-function fetch_sources(array $sources, callable $filter)
+function fetchSources(string $srcFile, callable $filter)
 {
-    $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
-    $github_context = stream_context_create([
-        "http" => [
-            'proxy' => preg_replace('|^http://|','tcp://',getenv('https_proxy')),
-            "header" => "Authorization: Basic $auth\r\nUser-Agent: lwmbs/0\r\n"
-        ]
-    ]);
-    $proxy_context = stream_context_create([
-        "http" => [
-            'proxy' => preg_replace('|^http://|','tcp://',getenv('https_proxy')),
-            "header" => "User-Agent: lwmbs/0\r\n"
-        ]
-    ]);
+    $sources = json_decode(file_get_contents($srcFile), true);
     $sources = array_filter($sources, $filter, ARRAY_FILTER_USE_BOTH);
+
     foreach ($sources['libs'] as $name => $source) {
+        $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
+        $github_context = stream_context_create([
+            "http" => [
+                'proxy' => preg_replace('|^http://|', 'tcp://', getenv('https_proxy')),
+                "header" => "Authorization: Basic $auth\r\nAccept: */*\r\nUser-Agent: lwmbs/0\r\n",
+                'request_fulluri' => true,
+            ]
+        ]);
+        $proxy_context = stream_context_create([
+            "http" => [
+                'proxy' => preg_replace('|^http://|', 'tcp://', getenv('https_proxy')),
+                "header" => "User-Agent: lwmbs/0\r\nAccept: */*\r\n",
+                'request_fulluri' => true,
+            ]
+        ]);
         switch ($source['type']) {
             case 'ghrel':
+                Log::i("finding $name source from github releases");
                 $data = json_decode(file_get_contents("https://api.github.com/repos/{$source['repo']}/releases", context: $github_context), true);
                 $url = null;
                 foreach ($data[0]['assets'] as $asset) {
@@ -64,8 +79,7 @@ function fetch_sources(array $sources, callable $filter)
                     }
                 }
                 if (!$url) {
-                    loge("failed to find $name source");
-                    exit(1);
+                    throw new Exception("failed to find $name source");
                 }
                 $filename = basename($url);
                 goto download;
@@ -73,29 +87,66 @@ function fetch_sources(array $sources, callable $filter)
                 $url = $source['url'];
                 $filename = $source['name'];
                 download:
-                if (file_exists($filename)) {
-                    logi("$name source already exists");
+                if (!file_exists("downloads/$filename")) {
+                    Log::i("downloading $name source from $url");
+                    file_put_contents("downloads/$filename", file_get_contents($url, context: $proxy_context));
+                } else {
+                    Log::i("$name source already exists");
+                }
+                if (is_dir("src/$name")) {
+                    Log::i("$name source already extracted");
                     break;
                 }
-                logi("downloading $name source");
-                file_put_contents($filename, file_get_contents($url,context:$proxy_context));
-                extract_source($name, $filename);
+                extractSource($name, "downloads/$filename");
                 break;
             case 'git':
-                if (file_exists('src/' . $name)) {
-                    logi("$name source already exists");
+                if (file_exists("src/{$source['path']}")) {
+                    Log::i("$name source already exists");
                     break;
                 }
-                logi("cloning $name source");
-                passthru('git clone ' . $source['url'] . ' src/' . $name, $ret);
+                Log::i("cloning $name source");
+                passthru(
+                    "git clone --branch '{$source['rev']}' '{$source['url']}' 'src/{$source['path']}'",
+                    $ret
+                );
                 if ($ret !== 0) {
-                    loge("failed to clone $name source");
-                    exit(1);
+                    throw new Exception("failed to clone $name source");
                 }
                 break;
             default:
-                loge("unknown source type: " . $source['type']);
-                exit(1);
+                throw new Exception("unknown source type: " . $source['type']);
         }
     }
 }
+
+function patch()
+{
+    Log::i('patching php');
+    $ret = 0;
+    passthru(
+        'cd src/php-src && '.
+        'git checkout HEAD . && '.
+        'git apply sapi/micro/patches/disable_huge_page.patch && '.
+        'git apply sapi/micro/patches/cli_checks_81.patch && '.
+        './buildconf --force',
+        $ret
+    );
+    if ($ret != 0) {
+        throw new Exception("failed to patch php");
+    }
+}
+
+function mian($argv): int
+{
+    Util::setErrorHandler();
+    @mkdir('downloads');
+    // TODO:implement filter
+    // download all sources
+    fetchSources($argv[1], fn ($x) => true);
+    patch();
+    Log::i('done');
+
+    return 0;
+}
+
+exit(mian($argv));
