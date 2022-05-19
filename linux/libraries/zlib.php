@@ -64,7 +64,6 @@ EOF,
                 "cd {$this->sourceDir} && " .
                 "{$this->config->configureEnv} " . $this->config->libc->getCCEnv() . ' ./configure ' .
                 '--static ' .
-                "--archs=\"-arch {$this->config->arch}\" " .
                 '--prefix= && ' . //use prefix=/
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
