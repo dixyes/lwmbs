@@ -28,7 +28,7 @@ EOF
     ];
 
     use LinuxLibraryTrait;
-    
+
     protected function build():void
     {
         Log::i("building {$this->name}");
@@ -42,6 +42,8 @@ EOF
                     '-idirafter ' . realpath('include') . ' '.
                     '-idirafter /usr/include/ '.
                     '-idirafter /usr/include/x86_64-linux-gnu/"';
+                break;
+            case CLib::GLIBC:
                 break;
             default:
                 throw new Exception("unsupported libc: {$this->config->libc->name}");

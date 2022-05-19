@@ -14,12 +14,12 @@ class MicroBuild{
         $ret = 0;
     
         $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
-        $envs = '';
+        $envs = $this->config->configureEnv;
         $seds = '';
     
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
-                $envs = 'CFLAGS="-static-libgcc -I' . realpath('include') . '" ' .
+                $envs .= ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ' .
                     $this->config->libc->getCCEnv(true);
                 $seds = 
                 ' sed -i "s|#define HAVE_STRLCPY 1||g" main/php_config.h && ' .
@@ -38,10 +38,11 @@ class MicroBuild{
                 $extra_libs  .= ' ' . realpath('lib/dl_libc.a');
                 */
                 break;
-            default:
-                $envs = 'CFLAGS="-static-libgcc -I' . realpath('include') . '" ' .
-                    'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '" ';
+            case CLib::GLIBC:
+                $envs = ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ';
                 $extra_libs  .= ' -lrt -lm -lpthread -lresolv';
+                break;
+            default:
                 throw new Exception('not implemented');
         }
         $curl = $this->config->getExt('curl');

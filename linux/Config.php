@@ -19,6 +19,8 @@ class Config extends CommonConfig
         $this->libc = Util::chooseLibc();
         $this->concurrency = Util::getCpuCount();
         $this->arch = php_uname('m');
+        
+        @mkdir('lib/pkgconfig', recursive: true);
     }
 
     public function makeAutoconfArgs(string $name, array $libSpecs): string

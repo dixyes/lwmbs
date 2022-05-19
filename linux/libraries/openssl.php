@@ -76,6 +76,8 @@ EOF,
                     '-idirafter /usr/include/ ' .
                     '-idirafter /usr/include/x86_64-linux-gnu/"';
                 break;
+            case Clib::GLIBC:
+                break;
             default:
                 throw new Exception("unsupported libc: {$this->config->libc->name}");
         }

@@ -34,7 +34,7 @@ EOF
     ];
 
     use LinuxLibraryTrait;
-    
+
     protected function build():void
     {
         Log::i("building {$this->name}");
@@ -70,6 +70,14 @@ EOF
                 '-DNGHTTP2_INCLUDE_DIR="' . realpath('include') . '" ';
         }
 
+        $ldap = '-DCURL_DISABLE_LDAP=ON ';
+        $libldap = $this->config->getLib('ldap');
+        if ($libldap) {
+            $ldap = '-DCURL_DISABLE_LDAP=OFF ' ;
+            // TODO: LDAP support
+            throw new Exception('LDAP support is not implemented yet');
+        }
+    
         $ret = 0;
         passthru(
             $this->config->setX . ' && ' .
@@ -85,6 +93,7 @@ EOF
                 $zlib .
                 $brotli .
                 $nghttp2 .
+                $ldap .
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .

@@ -143,7 +143,7 @@ final class Util
             return CLib::MUSL_WRAPPER;
         } else {
             $distro = static::getOSRelease();
-            if ($distro['distro'] !== 'redhat' || !str_starts_with($distro['ver'], '6')) {
+            if ($distro['dist'] !== 'redhat' || !str_starts_with($distro['ver'], '6')) {
                 Log::w("using glibc on {$distro['dist']} {$distro['ver']} may require target machines glibc version");
             }
             Log::i("using glibc");
