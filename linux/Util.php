@@ -19,7 +19,7 @@
 final class Util
 {
     use CommonUtil;
-    public const NEEDED_COMMANDS = ['gcc', 'make', 'bison', 'flex', 'pkgconf', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
+    public const NEEDED_COMMANDS = ['gcc', 'make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
     public static function findStaticLib(string $name): ?array
     {
         $paths = getenv('LIBPATH');
