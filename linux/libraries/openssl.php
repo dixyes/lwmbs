@@ -72,13 +72,13 @@ EOF,
     {
         Log::i("building {$this->name}");
         $ret = 0;
-        $ex_lib = '-pthread -dl';
+        $ex_lib = '-ldl -pthread';
         $zlib = '';
         $libzlib = $this->config->getLib('zlib');
         //var_dump($libzlib);
         if ($libzlib) {
             Log::i("{$this->name} with zlib support");
-            $ex_lib .= ' ' . $libzlib->getStaticLibFiles();
+            $ex_lib = $libzlib->getStaticLibFiles() . ' ' . $ex_lib;
             $zlib = "zlib";
         }
         $env = $this->config->configureEnv;
