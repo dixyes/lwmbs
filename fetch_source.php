@@ -67,7 +67,7 @@ function fetchSources(string $srcFile, callable $filter)
     $sources = json_decode(file_get_contents($srcFile), true);
     $sources = array_filter($sources, $filter, ARRAY_FILTER_USE_BOTH);
 
-    foreach ($sources['libs'] as $name => $source) {
+    foreach ($sources['src'] as $name => $source) {
         $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
         $github_context = stream_context_create([
             "http" => [
