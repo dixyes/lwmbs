@@ -1,17 +1,17 @@
 <?php
 
-class Liblibssh2 implements ILibrary
+class Liblibssh2 extends Library
 {
-    private string $name = 'libssh2';
-    private array $staticLibs = [
+    protected string $name = 'libssh2';
+    protected array $staticLibs = [
         'libssh2.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'libssh2.h',
         'libssh2_publickey.h',
         'libssh2_sftp.h',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'libssh2.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
@@ -27,10 +27,14 @@ Libs.private:
 Cflags: -I${includedir}
 EOF
     ];
+    protected array $depNames = [
+        'zlib' => true,
+        'openssl' => false,
+    ];
 
-    use Library;
+    use LinuxLibraryTrait;
 
-    private function build()
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $libopenssl = $this->config->getLib('openssl');

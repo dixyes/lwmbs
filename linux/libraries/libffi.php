@@ -1,16 +1,16 @@
 <?php
 
-class Liblibffi implements ILibrary
+class Liblibffi extends Library
 {
-    private string $name = 'libffi';
-    private array $staticLibs = [
+    protected string $name = 'libffi';
+    protected array $staticLibs = [
         'libffi.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'ffi.h',
         'ffitarget.h',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'libffi.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
@@ -24,10 +24,12 @@ Libs: -L${toolexeclibdir} -lffi
 Cflags: -I${includedir}
 EOF
     ];
+    protected array $depNames = [
+    ];
 
-    use Library;
-
-    private function build()
+    use LinuxLibraryTrait;
+    
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $ret = 0;

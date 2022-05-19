@@ -36,25 +36,63 @@ function mian($argv): int
     $config = new Config($argv);
 
     $libNames = [
+        'libssh2',
+        'curl',
         'zlib',
         'brotli',
         'libiconv',
-        'xz',
+        'libffi',
         'openssl',
+        'libzip',
         'bzip2',
         'nghttp2',
         'onig',
-        'libssh2',
-        'libffi',
-        'libzip',
+        'xz',
+    ];
+
+    $extNames = [
+        'pdo',
+        'phar',
+        'mysqli',
+        'pdo',
+        'pdo_mysql',
+        'mbstring',
+        'mbregex',
+        'session',
+        'pcntl',
+        'posix',
+        'ctype',
+        'fileinfo',
+        'filter',
+        'tokenizer',
         'curl',
+        'ffi',
+        'swow',
+        'redis',
+        'parallel',
+        'sockets',
+        'openssl',
+        'zlib',
+        'bz2',
     ];
 
     foreach ($libNames as $name) {
         $lib = new ("Lib$name")($config);
-        $lib->prove();
         $config->addLib($lib);
     }
+    //var_dump(array_map(fn($x)=>$x->getName(),$config->makeLibArray()));
+
+    foreach ($config->makeLibArray() as $lib) {
+        $lib->prove();
+    }
+
+    foreach ($extNames as $name) {
+        $ext = new Extension(name: $name, config: $config);
+        $config->addExt($ext);
+    }
+
+    $build = new MicroBuild($config);
+    $build->build();
 
     return 0;
 }

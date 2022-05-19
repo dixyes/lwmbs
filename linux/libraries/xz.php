@@ -1,15 +1,15 @@
 <?php
 
-class Libxz implements ILibrary
+class Libxz extends Library
 {
-    private string $name = 'xz';
-    private array $staticLibs = [
+    protected string $name = 'xz';
+    protected array $staticLibs = [
         'liblzma.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'lzma',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'liblzma.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
@@ -24,10 +24,13 @@ Libs: -L${libdir} -llzma
 Libs.private: -pthread -lpthread
 EOF,
     ];
+    protected array $depNames = [
+        'libiconv' => true,
+    ];
 
-    use Library;
+    use LinuxLibraryTrait;
 
-    private function build()
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $ret = 0;
@@ -50,7 +53,7 @@ EOF,
                 '--disable-doc ' .
                 "$libiconv " .
                 '--prefix= && ' . //use prefix=/
-                "make -j {$this->config->concurrency} && " .
+                "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret
         );

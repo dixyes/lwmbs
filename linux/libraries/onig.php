@@ -1,16 +1,16 @@
 <?php
 
-class Libonig implements ILibrary
+class Libonig extends Library
 {
-    private string $name = 'onig';
-    private array $staticLibs = [
+    protected string $name = 'onig';
+    protected array $staticLibs = [
         'libonig.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'oniggnu.h',
         'oniguruma.h',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'oniguruma.pc' =><<<'EOF'
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
@@ -26,10 +26,12 @@ Libs: -L${libdir} -lonig
 Cflags: -I${includedir}
 EOF
     ];
+    protected array $depNames = [
+    ];
 
-    use Library;
+    use LinuxLibraryTrait;
 
-    private function build()
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $ret = 0;
@@ -40,7 +42,7 @@ EOF
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--prefix= && ' . //use prefix=/
-                "make -j {$this->config->concurrency} && " .
+                "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret
         );

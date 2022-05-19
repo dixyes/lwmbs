@@ -1,16 +1,16 @@
 <?php
 
-class Libzlib implements ILibrary
+class Libzlib extends Library
 {
-    private string $name = 'zlib';
-    private array $staticLibs = [
+    protected string $name = 'zlib';
+    protected array $staticLibs = [
         'libz.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'zlib.h',
         'zconf.h',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'zlib.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
@@ -25,10 +25,12 @@ Libs: -L${libdir} -L${sharedlibdir} -lz
 Cflags: -I${includedir}
 EOF,
     ];
+    protected array $depNames = [
+    ];
 
-    use Library;
+    use LinuxLibraryTrait;
 
-    private function build()
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $ret = 0;
@@ -39,7 +41,7 @@ EOF,
                 '--static ' .
                 "--archs=\"-arch {$this->config->arch}\" " .
                 '--prefix= && ' . //use prefix=/
-                "make -j$this->config->concurrency && " .
+                "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret
         );

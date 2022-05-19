@@ -1,22 +1,24 @@
 <?php
 
-class Liblibiconv implements ILibrary
+class Liblibiconv extends Library
 {
-    private string $name = 'libiconv';
-    private array $staticLibs = [
+    protected string $name = 'libiconv';
+    protected array $staticLibs = [
         'libiconv.a',
         'libcharset.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'iconv.h',
         'libcharset.h',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
+    ];
+    protected array $depNames = [
     ];
 
-    use Library;
+    use LinuxLibraryTrait;
 
-    private function build()
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $ret = 0;

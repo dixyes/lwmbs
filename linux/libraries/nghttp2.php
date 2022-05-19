@@ -1,15 +1,15 @@
 <?php
 
-class Libnghttp2 implements ILibrary
+class Libnghttp2 extends Library
 {
-    private string $name = 'nghttp2';
-    private array $staticLibs = [
+    protected string $name = 'nghttp2';
+    protected array $staticLibs = [
         'libnghttp2.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'nghttp2',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'libnghttp2.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
@@ -23,10 +23,25 @@ Libs: -L${libdir} -lnghttp2
 Cflags: -I${includedir}
 EOF
     ];
+    protected array $depNames = [
+        'zlib' => false,
+        'openssl' => false,
+        'libxml2' => true,
+        'libev' => true,
+        'libcares' => true,
+        'libngtcp2' => true,
+        'libnghttp3' => true,
+        'libbpf' => true,
+        'libevent-openssl' => true,
+        'jansson' => true,
+        'jemalloc' => true,
+        'systemd' => true,
+        'cunit' => true,
+    ];
 
-    use Library;
+    use LinuxLibraryTrait;
 
-    private function build()
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $ret = 0;

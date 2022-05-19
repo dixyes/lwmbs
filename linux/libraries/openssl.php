@@ -1,16 +1,16 @@
 <?php
 
-class Libopenssl implements ILibrary
+class Libopenssl extends Library
 {
-    private string $name = 'openssl';
-    private array $staticLibs = [
+    protected string $name = 'openssl';
+    protected array $staticLibs = [
         'libssl.a',
         'libcrypto.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'openssl',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'openssl.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${prefix}/lib
@@ -47,17 +47,20 @@ Libs.private: -lz -ldl -pthread
 Cflags: -I${includedir}
 EOF,
     ];
+    protected array $depNames = [
+        'zlib' => true,
+    ];
 
-    use Library;
+    use LinuxLibraryTrait;
 
-    private function build()
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $ret = 0;
         $ex_lib = '-pthread -dl';
         $zlib = '';
         $libzlib = $this->config->getLib('zlib');
-        var_dump($libzlib);
+        //var_dump($libzlib);
         if ($libzlib) {
             Log::i("{$this->name} with zlib support");
             $ex_lib .= ' ' . $libzlib->getStaticLibFiles();

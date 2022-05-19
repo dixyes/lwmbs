@@ -1,17 +1,17 @@
 <?php
 
-class Libbrotli implements ILibrary
+class Libbrotli extends Library
 {
-    private string $name = 'brotli';
-    private array $staticLibs = [
+    protected string $name = 'brotli';
+    protected array $staticLibs = [
         'libbrotlidec-static.a',
         'libbrotlienc-static.a',
         'libbrotlicommon-static.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'brotli'
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'libbrotlicommon.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${prefix}/lib
@@ -51,10 +51,12 @@ Requires.private: libbrotlicommon >= 1.0.2
 Cflags: -I${includedir}
 EOF,
     ];
+    protected array $depNames = [
+    ];
 
-    use Library;
-
-    private function build()
+    use LinuxLibraryTrait;
+    
+    protected function build():void
     {
         throw new Exception("not implemented");
     }

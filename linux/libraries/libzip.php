@@ -1,16 +1,16 @@
 <?php
 
-class Liblibzip implements ILibrary
+class Liblibzip extends Library
 {
-    private string $name = 'libzip';
-    private array $staticLibs = [
+    protected string $name = 'libzip';
+    protected array $staticLibs = [
         'libzip.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'zip.h',
         'zipconf.h',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'libzip.pc' => <<<'EOF'
 exec_prefix=${prefix}
 bindir=/usr/bin
@@ -27,10 +27,16 @@ Libs.private:  -lbz2 -llzma -lZstd::Zstd -lgnutls -lnettle -lz
 Cflags: -I${includedir}
 EOF,
     ];
+    protected array $depNames = [
+        'zlib' => false,
+        'bzip2' => true,
+        'xz' => true,
+        'zstd' => true,
+    ];
 
-    use Library;
-
-    private function build()
+    use LinuxLibraryTrait;
+    
+    protected function build():void
     {
         Log::i("building {$this->name}");
         $ret = 0;

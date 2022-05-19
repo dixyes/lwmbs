@@ -1,15 +1,15 @@
 <?php
 
-class Libcurl implements ILibrary
+class Libcurl extends Library
 {
-    private string $name = 'curl';
-    private array $staticLibs = [
+    protected string $name = 'curl';
+    protected array $staticLibs = [
         'libcurl.a',
     ];
-    private array $headers = [
+    protected array $headers = [
         'curl',
     ];
-    private array $pkgconfs = [
+    protected array $pkgconfs = [
         'libcurl.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
@@ -26,10 +26,16 @@ Libs.private: -lnghttp2 -lidn2 -lssh2 -lssh2 -lpsl -lssl -lcrypto -lssl -lcrypto
 Cflags: -I${includedir}
 EOF
     ];
+    protected array $depNames = [
+        'zlib'=>false,
+        'libssh2'=>true,
+        'brotli'=>true,
+        'nghttp2'=>true,
+    ];
 
-    use Library;
-
-    private function build()
+    use LinuxLibraryTrait;
+    
+    protected function build():void
     {
         Log::i("building {$this->name}");
 
