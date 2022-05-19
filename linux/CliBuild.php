@@ -1,6 +1,6 @@
 <?php
 
-class MicroBuild
+class CliBuild
 {
     public function __construct(
         private Config $config
@@ -9,7 +9,7 @@ class MicroBuild
 
     public function build(bool $allStatic = false): void
     {
-        Log::i("building micro");
+        Log::i("building cli");
         $ret = 0;
 
         $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
@@ -63,7 +63,7 @@ class MicroBuild
                 '--disable-all '.
                 '--disable-cgi '.
                 '--disable-phpdbg '.
-                '--enable-micro' .($allStatic ? '=all-static' : '') .' '.
+                '--enable-cli '.
                 ($this->config->zts ? '--enable-zts': '').' '.
                 Extension::makeExtensionArgs($this->config) . ' ' .
                 $envs . ' ' .
@@ -72,14 +72,8 @@ class MicroBuild
                 "make -j{$this->config->concurrency} "  .
                 'EXTRA_CFLAGS="-g -Os -fno-ident -Xcompiler -march=nehalem -Xcompiler -mtune=haswell" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
-                'POST_MICRO_BUILD_COMMANDS="sh -xc \'' .
-                    'cd sapi/micro && ' .
-                    'objcopy --only-keep-debug micro.sfx micro.sfx.debug && '.
-                    'elfedit --output-osabi linux micro.sfx && ' .
-                    'strip --strip-all micro.sfx && ' .
-                    'objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx \'' .
-                '" ' .
-                'micro ',
+                ($allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ': '') .
+                'cli ',
             $ret
         );
         if ($ret !== 0) {
