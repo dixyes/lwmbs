@@ -88,7 +88,7 @@ function getLatestGithubRelease(string $name, array $source): array {
     return [$url, $filename];
 }
 
-function fetchSources(array $data, callable $filter)
+function fetchSources(array $data, callable $filter, bool $shallowClone = false)
 {
     $sources = array_filter($data['src'], $filter, ARRAY_FILTER_USE_BOTH);
 
@@ -127,7 +127,7 @@ function fetchSources(array $data, callable $filter)
                 }
                 Log::i("cloning $name source");
                 passthru(
-                    "git clone --branch '{$source['rev']}' '{$source['url']}' 'src/{$source['path']}'",
+                    "git clone --branch '{$source['rev']}' ".($shallowClone?'--depth 1 --single-branch':'')." --recursive '{$source['url']}' 'src/{$source['path']}'",
                     $ret
                 );
                 if ($ret !== 0) {
@@ -160,7 +160,7 @@ function patch()
 function mian($argv): int
 {
     if (count($argv) < 2) {
-        Log::e("usage: php build.php <src-file> [--hash]\n");
+        Log::e("usage: php build.php <src-file> [--hash] [--shallow-clone]\n");
         return 1;
     }
     $data = json_decode(file_get_contents($argv[1]), true);
@@ -181,11 +181,15 @@ function mian($argv): int
         echo hash('sha256', implode('|', $files)). "\n";
         return 0;
     }
+    $shallowClone = false;
+    if (in_array('--shallow-clone', $argv, true)){
+        $shallowClone = true;
+    }
     Util::setErrorHandler();
     @mkdir('downloads');
     // TODO:implement filter
     // download all sources
-    fetchSources($data, fn ($x) => true);
+    fetchSources($data, fn ($x) => true, $shallowClone);
     patch();
     Log::i('done');
 
