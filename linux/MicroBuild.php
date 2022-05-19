@@ -7,7 +7,7 @@ class MicroBuild
     ) {
     }
 
-    public function build(): void
+    public function build(bool $allStatic = false): void
     {
         Log::i("building micro");
         $ret = 0;
@@ -63,14 +63,14 @@ class MicroBuild
                 '--disable-all '.
                 '--disable-cgi '.
                 '--disable-phpdbg '.
-                '--enable-micro '.
+                '--enable-micro' .($allStatic ? '=all-static' : '') .' '.
                 '--enable-zts '.
                 Extension::makeExtensionArgs($this->config) . ' ' .
                 $envs . ' ' .
                 ' && ' .
                 $seds . ' ' .
                 "make -j{$this->config->concurrency} "  .
-                'EXTRA_CFLAGS="-g -Os -fno-ident -Xcompiler -march=nehalem -Xcompiler -mtune=haswell" '.
+                'EXTRA_CFLAGS="-g -Os -fno-ident -Xcompiler -march=nehalem -Xcompiler -mtune=haswell" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 'POST_MICRO_BUILD_COMMANDS="sh -xc \'' .
                     'cd sapi/micro && ' .

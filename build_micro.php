@@ -92,7 +92,11 @@ function mian($argv): int
     }
 
     $build = new MicroBuild($config);
-    $build->build();
+    $allStatic = false;
+    if (in_array('all-static', $argv, true)) {
+        $allStatic = true;
+    }
+    $build->build($allStatic);
 
     return 0;
 }
