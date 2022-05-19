@@ -57,6 +57,7 @@ class MicroBuild{
                 'cd src/php-src && ' .
                 './configure ' .
                 '--prefix= ' .
+                '--with-valgrind=no '.
                 '--enable-shared=no '.
                 '--enable-static=yes '.
                 '--disable-all '.

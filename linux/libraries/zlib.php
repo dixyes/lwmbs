@@ -28,7 +28,17 @@ EOF,
     protected array $depNames = [
     ];
 
-    use LinuxLibraryTrait;
+    use LinuxLibraryTrait {
+        LinuxLibraryTrait::prove as _prove;
+    }
+
+    public function prove(bool $forceBuild = false): void
+    {
+        if ($this->config->libc===Clib::MUSL_WRAPPER) {
+            $forceBuild = true;
+        }
+        $this->_prove($forceBuild);
+    }
 
     protected function build():void
     {

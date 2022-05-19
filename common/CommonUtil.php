@@ -67,6 +67,7 @@ trait CommonUtil
                 mkdir($target, recursive: true);
             } else {
                 Log::i("copying $item to $target");
+                @mkdir(dirname($target), recursive: true);
                 copy($item, $target);
             }
         }
