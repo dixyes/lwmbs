@@ -3,6 +3,7 @@
 !.gitignore
 !.github
 !.github/**
+!LICENSE
 !linux
 !linux/**
 !common
