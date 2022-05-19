@@ -67,7 +67,7 @@ EOF
             $libs .= $libzlib->getStaticLibFiles() . ' ';
         }
 
-        $libs = rtrim($libs) . '"';
+        $libs = rtrim($libs) . ' -lpthread -ldl"';
 
         passthru(
             $this->config->setX . ' && ' .
@@ -78,7 +78,6 @@ EOF
                 '--disable-rpath ' .
                 '--with-crypto=openssl ' .
                 '--with-libssl-prefix=' . realpath('.') . ' ' .
-                '--with-libcrypto-prefix=' . realpath('.') . ' ' .
                 $zlib . ' ' .
                 $libs . ' ' .
                 '--prefix= && ' . //use prefix=/
