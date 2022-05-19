@@ -2,6 +2,9 @@
 
 class Libzlib extends Library
 {
+    use LinuxLibraryTrait {
+        LinuxLibraryTrait::prove as _prove;
+    }
     protected string $name = 'zlib';
     protected array $staticLibs = [
         'libz.a',
@@ -28,10 +31,6 @@ EOF,
     protected array $depNames = [
     ];
 
-    use LinuxLibraryTrait {
-        LinuxLibraryTrait::prove as _prove;
-    }
-
     public function prove(bool $forceBuild = false): void
     {
         if ($this->config->libc===Clib::MUSL_WRAPPER) {
@@ -40,7 +39,7 @@ EOF,
         $this->_prove($forceBuild);
     }
 
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;

@@ -1,5 +1,5 @@
 <?php
 
-trait SourceTrait {
-    
+trait SourceTrait
+{
 }

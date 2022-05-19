@@ -2,6 +2,7 @@
 
 class Libxz extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'xz';
     protected array $staticLibs = [
         'liblzma.a',
@@ -28,9 +29,7 @@ EOF,
         'libiconv' => true,
     ];
 
-    use LinuxLibraryTrait;
-
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;

@@ -2,6 +2,7 @@
 
 class Libonig extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'onig';
     protected array $staticLibs = [
         'libonig.a',
@@ -29,9 +30,7 @@ EOF
     protected array $depNames = [
     ];
 
-    use LinuxLibraryTrait;
-
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;

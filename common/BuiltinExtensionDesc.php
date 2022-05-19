@@ -3,7 +3,7 @@
 class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
 {
     private string $arg;
-    const BUILTIN_EXTENSIONS = [
+    public const BUILTIN_EXTENSIONS = [
         'phar' => [
             'libDeps' => ['zlib' => true],
         ],

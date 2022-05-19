@@ -2,6 +2,7 @@
 
 class Liblibzip extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'libzip';
     protected array $staticLibs = [
         'libzip.a',
@@ -34,9 +35,7 @@ EOF,
         'zstd' => true,
     ];
 
-    use LinuxLibraryTrait;
-    
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;
@@ -44,7 +43,7 @@ EOF,
         $zlib = '';
         $libzlib = $this->config->getLib('zlib');
         if ($libzlib) {
-            $zlib = '-DZLIB_LIBRARY="' . $libzlib->getStaticLibFiles(style:'cmake') . '" ' .
+            $zlib = '-DZLIB_LIBRARY="' . $libzlib->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DZLIB_INCLUDE_DIR=' . realpath('include') . ' ';
         }
 
@@ -52,7 +51,7 @@ EOF,
         $libbzip2 = $this->config->getLib('bzip2');
         if ($libbzip2) {
             $bzip2 = '-DENABLE_BZIP2=ON ' .
-                '-DBZIP2_LIBRARIES="' . $libbzip2->getStaticLibFiles(style:'cmake') . '" ' .
+                '-DBZIP2_LIBRARIES="' . $libbzip2->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DBZIP2_INCLUDE_DIR=' . realpath('include') . ' ';
         }
 
@@ -60,7 +59,7 @@ EOF,
         $libxz = $this->config->getLib('xz');
         if ($libxz) {
             $xz = '-DENABLE_LZMA=ON ' .
-                '-DLIBLZMA_LIBRARY="' . $libxz->getStaticLibFiles(style:'cmake') . '" ' .
+                '-DLIBLZMA_LIBRARY="' . $libxz->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DLIBLZMA_INCLUDE_DIR=' . realpath('include') . ' ';
         }
 

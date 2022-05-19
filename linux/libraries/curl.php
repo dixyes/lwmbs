@@ -2,6 +2,7 @@
 
 class Libcurl extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'curl';
     protected array $staticLibs = [
         'libcurl.a',
@@ -27,29 +28,27 @@ Cflags: -I${includedir}
 EOF
     ];
     protected array $depNames = [
-        'zlib'=>false,
-        'libssh2'=>true,
-        'brotli'=>true,
-        'nghttp2'=>true,
+        'zlib' => false,
+        'libssh2' => true,
+        'brotli' => true,
+        'nghttp2' => true,
     ];
 
-    use LinuxLibraryTrait;
-
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
 
         $zlib = '';
         $libzlib = $this->config->getLib('zlib');
         if ($libzlib) {
-            $zlib = '-DZLIB_LIBRARY="' . $libzlib->getStaticLibFiles(style:'cmake') . '" ' .
+            $zlib = '-DZLIB_LIBRARY="' . $libzlib->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DZLIB_INCLUDE_DIR=' . realpath('include') . ' ';
         }
 
         $libssh2 = '';
         $liblibssh2 = $this->config->getLib('libssh2');
         if ($liblibssh2) {
-            $libssh2 = '-DLIBSSH2_LIBRARY="' . $liblibssh2->getStaticLibFiles(style:'cmake') . '" ' .
+            $libssh2 = '-DLIBSSH2_LIBRARY="' . $liblibssh2->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DLIBSSH2_INCLUDE_DIR="' . realpath('include') . '" ';
         }
 
@@ -66,18 +65,18 @@ EOF
         $libnghttp2 = $this->config->getLib('nghttp2');
         if ($libnghttp2) {
             $nghttp2 = '-DUSE_NGHTTP2=ON ' .
-                '-DNGHTTP2_LIBRARY="' . $libnghttp2->getStaticLibFiles(style:'cmake') . '" ' .
+                '-DNGHTTP2_LIBRARY="' . $libnghttp2->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DNGHTTP2_INCLUDE_DIR="' . realpath('include') . '" ';
         }
 
         $ldap = '-DCURL_DISABLE_LDAP=ON ';
         $libldap = $this->config->getLib('ldap');
         if ($libldap) {
-            $ldap = '-DCURL_DISABLE_LDAP=OFF ' ;
+            $ldap = '-DCURL_DISABLE_LDAP=OFF ';
             // TODO: LDAP support
             throw new Exception('LDAP support is not implemented yet');
         }
-    
+
         $ret = 0;
         passthru(
             $this->config->setX . ' && ' .

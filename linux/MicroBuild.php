@@ -1,27 +1,26 @@
 <?php
 
-class MicroBuild{
+class MicroBuild
+{
     public function __construct(
         private Config $config
-    )
-    {
-        
+    ) {
     }
 
     public function build(): void
     {
         Log::i("building micro");
         $ret = 0;
-    
+
         $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
         $envs = $this->config->configureEnv;
         $seds = '';
-    
+
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
                 $envs .= ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ' .
                     $this->config->libc->getCCEnv(true);
-                $seds = 
+                $seds =
                 ' sed -i "s|#define HAVE_STRLCPY 1||g" main/php_config.h && ' .
                 ' sed -i "s|#define HAVE_STRLCAT 1||g" main/php_config.h && ';
                 /*
@@ -80,8 +79,9 @@ class MicroBuild{
                     'strip --strip-all micro.sfx && ' .
                     'objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx \'' .
                 '" ' .
-                'micro '
-            ,$ret);
+                'micro ',
+            $ret
+        );
         if ($ret !== 0) {
             throw new Exception("failed to build micro");
         }

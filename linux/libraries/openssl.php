@@ -2,6 +2,7 @@
 
 class Libopenssl extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'openssl';
     protected array $staticLibs = [
         'libssl.a',
@@ -51,9 +52,7 @@ EOF,
         'zlib' => true,
     ];
 
-    use LinuxLibraryTrait;
-
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;

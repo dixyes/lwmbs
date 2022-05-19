@@ -2,6 +2,7 @@
 
 class Liblibffi extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'libffi';
     protected array $staticLibs = [
         'libffi.a',
@@ -24,23 +25,20 @@ Libs: -L${toolexeclibdir} -lffi
 Cflags: -I${includedir}
 EOF
     ];
-    protected array $depNames = [
-    ];
+    protected array $depNames = [];
 
-    use LinuxLibraryTrait;
-
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;
         $env = $this->config->configureEnv;
-        switch ($this->config->libc){
+        switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
-                $env .= ' CC="' . 
+                $env .= ' CC="' .
                     $this->config->libc->getCC() . ' ' .
-                    '-static '.
-                    '-idirafter ' . realpath('include') . ' '.
-                    '-idirafter /usr/include/ '.
+                    '-static ' .
+                    '-idirafter ' . realpath('include') . ' ' .
+                    '-idirafter /usr/include/ ' .
                     '-idirafter /usr/include/x86_64-linux-gnu/"';
                 break;
             case CLib::GLIBC:
@@ -51,8 +49,8 @@ EOF
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "$env ./configure ".
-                '--enable-static '.
+                "$env ./configure " .
+                '--enable-static ' .
                 '--disable-shared ' .
                 '--prefix= && ' . //use prefix=/
                 "make -j{$this->config->concurrency} && " .

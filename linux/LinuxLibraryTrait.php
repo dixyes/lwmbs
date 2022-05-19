@@ -76,7 +76,6 @@ trait LinuxLibraryTrait
     }
     public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
     {
-
         $libs = [$this];
         if ($recursive) {
             array_unshift($libs, ...$this->getDependencies(recursive: true));

@@ -1,8 +1,9 @@
 <?php
 
-trait CommonLibraryTrait {
+trait CommonLibraryTrait
+{
     use SourceTrait;
-    
+
     public function __construct(
         private Config $config,
         ?string $sourceDir = null,
@@ -11,21 +12,23 @@ trait CommonLibraryTrait {
         $this->sourceDir = $sourceDir ?? ('src' . '/' . $this->name);
     }
 
-    public function getName():string {
+    public function getName(): string
+    {
         return $this->name;
     }
 
-    public function getDependencies(bool $recursive = false):array {
+    public function getDependencies(bool $recursive = false): array
+    {
         $ret = $this->dependencies;
-        if (!$recursive){
+        if (!$recursive) {
             return $ret;
         }
-    
+
         $added = 1;
-        while($added !==0) {
+        while ($added !==0) {
             $added = 0;
-            foreach($ret as $dep) {
-                foreach ($dep->getDependencies(true) as $depdep){
+            foreach ($ret as $dep) {
+                foreach ($dep->getDependencies(true) as $depdep) {
                     if (!in_array($depdep, $ret, true)) {
                         array_push($ret, $depdep);
                         $added++;
@@ -37,13 +40,15 @@ trait CommonLibraryTrait {
         return $ret;
     }
 
-    public function calcDependency():void{
-        foreach($this->depNames as $depName => $optional) {
+    public function calcDependency(): void
+    {
+        foreach ($this->depNames as $depName => $optional) {
             $this->addLibraryDependency($depName, $optional);
         }
     }
 
-    private function addLibraryDependency(string $name, bool $optional = false) {
+    private function addLibraryDependency(string $name, bool $optional = false)
+    {
         $depLib =$this->config->getLib($name);
         if (!$depLib) {
             if (!$optional) {
@@ -55,5 +60,4 @@ trait CommonLibraryTrait {
             $this->dependencies[] = $depLib;
         }
     }
-    
 }

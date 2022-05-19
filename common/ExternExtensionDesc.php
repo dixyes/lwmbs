@@ -1,7 +1,8 @@
 <?php
 
-class ExternExtensionDesc extends \stdClass implements ExtensionDesc{
-    const EXTERN_EXTENSIONS = [
+class ExternExtensionDesc extends \stdClass implements ExtensionDesc
+{
+    public const EXTERN_EXTENSIONS = [
         'swoole' => [
             'libDeps' => [
                 'openssl' => false,
@@ -27,23 +28,24 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc{
         public array $extDeps = [],
         private ?string $extDir = null,
         string $argType='enable',
-    )
-    {
+    ) {
         $_name = str_replace('_', '-', $name);
-        $this->arg = match($argType) {
+        $this->arg = match ($argType) {
             'enable' => '--enable-' . $_name,
             'with' => '--with-' . $_name,
         };
         $this->dirName = $dirName ?? $name;
     }
-    public static function getAll():array {
+    public static function getAll(): array
+    {
         $ret =[];
-        foreach (static::EXTERN_EXTENSIONS as $name=>$args){
+        foreach (static::EXTERN_EXTENSIONS as $name=>$args) {
             $ret[$name]=new static($name, ...$args);
         }
         return $ret;
     }
-    public function getArg():string {
+    public function getArg(): string
+    {
         return $this->arg;
     }
     public function getExtDeps(): array

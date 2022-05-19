@@ -2,6 +2,7 @@
 
 class Liblibssh2 extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'libssh2';
     protected array $staticLibs = [
         'libssh2.a',
@@ -32,9 +33,7 @@ EOF
         'openssl' => false,
     ];
 
-    use LinuxLibraryTrait;
-
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $libopenssl = $this->config->getLib('openssl');

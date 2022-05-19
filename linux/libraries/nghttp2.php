@@ -2,6 +2,7 @@
 
 class Libnghttp2 extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'nghttp2';
     protected array $staticLibs = [
         'libnghttp2.a',
@@ -39,13 +40,11 @@ EOF
         'cunit' => true,
     ];
 
-    use LinuxLibraryTrait;
-
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;
-    
+
         $args = $this->config->makeAutoconfArgs($this->name, [
             'zlib' => null,
             'openssl' => null,
@@ -61,7 +60,7 @@ EOF
             'systemd' => null,
             'cunit' => null,
         ]);
-    
+
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .

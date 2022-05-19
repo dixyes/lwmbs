@@ -2,6 +2,7 @@
 
 class Liblibiconv extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'libiconv';
     protected array $staticLibs = [
         'libiconv.a',
@@ -11,14 +12,10 @@ class Liblibiconv extends Library
         'iconv.h',
         'libcharset.h',
     ];
-    protected array $pkgconfs = [
-    ];
-    protected array $depNames = [
-    ];
+    protected array $pkgconfs = [];
+    protected array $depNames = [];
 
-    use LinuxLibraryTrait;
-
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;
@@ -26,7 +23,7 @@ class Liblibiconv extends Library
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
                 "{$this->config->configureEnv} " . $this->config->libc->getCCEnv() . ' ./configure ' .
-                '--enable-static '.
+                '--enable-static ' .
                 '--disable-shared ' .
                 '--prefix= && ' . //use prefix=/
                 "make -j{$this->config->concurrency} && " .

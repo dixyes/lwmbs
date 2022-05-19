@@ -1,6 +1,7 @@
 <?php
 
 // stub
-class Library {
+class Library
+{
     use LinuxLibraryTrait;
 }

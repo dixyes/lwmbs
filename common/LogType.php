@@ -10,7 +10,8 @@ enum LogType
         switch ($this) {
             case static::ERROR:
                 return 'E';
-                // no break
+            
+            // no break
             case static::WARNING:
                 return 'W';
             case static::INFO:

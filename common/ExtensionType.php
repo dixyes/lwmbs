@@ -1,6 +1,7 @@
 <?php
 
-enum ExtensionType {
+enum ExtensionType
+{
     case BUILTIN;
     case EXTERN;
 }

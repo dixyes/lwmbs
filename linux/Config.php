@@ -19,7 +19,7 @@ class Config extends CommonConfig
         $this->libc = Util::chooseLibc();
         $this->concurrency = Util::getCpuCount();
         $this->arch = php_uname('m');
-        
+
         @mkdir('lib/pkgconfig', recursive: true);
     }
 
@@ -46,7 +46,6 @@ class Config extends CommonConfig
 
     public function getAllStaticLibFiles(): array
     {
-
         $libs = [];
 
         // reorder libs

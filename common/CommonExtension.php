@@ -4,9 +4,9 @@ class CommonExtension
 {
     use SourceTrait;
 
-    static private ?array $allExtensionDescs = null;
+    private static ?array $allExtensionDescs = null;
 
-    static public function getAllExtensionDescs(): array
+    public static function getAllExtensionDescs(): array
     {
         if (!static::$allExtensionDescs) {
             static::$allExtensionDescs = BuiltinExtensionDesc::getAll();
@@ -61,16 +61,16 @@ class CommonExtension
     }
     public function getLibraryDependencies(bool $recursive = false): array
     {
-        $ret = array_filter($this->dependencies, fn($x)=> $x instanceof Library);
-        if (!$recursive){
+        $ret = array_filter($this->dependencies, fn ($x) => $x instanceof Library);
+        if (!$recursive) {
             return $ret;
         }
-    
+
         $added = 1;
-        while($added !==0) {
+        while ($added !==0) {
             $added = 0;
-            foreach($ret as $dep) {
-                foreach ($dep->getDependencies(true) as $depdep){
+            foreach ($ret as $dep) {
+                foreach ($dep->getDependencies(true) as $depdep) {
                     if (!in_array($depdep, $ret, true)) {
                         array_push($ret, $depdep);
                         $added++;

@@ -2,6 +2,7 @@
 
 class Libbzip2 extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'bzip2';
     protected array $staticLibs = [
         'libbz2.a',
@@ -23,12 +24,9 @@ Libs: -L${libdir} -lbz2
 Cflags: -I${includedir}
 EOF
     ];
-    protected array $depNames = [
-    ];
+    protected array $depNames = [];
 
-    use LinuxLibraryTrait;
-    
-    protected function build():void
+    protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;

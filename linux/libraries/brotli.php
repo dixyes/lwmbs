@@ -2,6 +2,7 @@
 
 class Libbrotli extends Library
 {
+    use LinuxLibraryTrait;
     protected string $name = 'brotli';
     protected array $staticLibs = [
         'libbrotlidec-static.a',
@@ -51,12 +52,9 @@ Requires.private: libbrotlicommon >= 1.0.2
 Cflags: -I${includedir}
 EOF,
     ];
-    protected array $depNames = [
-    ];
+    protected array $depNames = [];
 
-    use LinuxLibraryTrait;
-    
-    protected function build():void
+    protected function build(): void
     {
         throw new Exception("not implemented");
     }
