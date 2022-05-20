@@ -57,7 +57,7 @@ class MicroBuild
                 break;
             case CLib::GLIBC:
                 $envs = ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ';
-                $extra_libs  .= ' -lrt -lm -lpthread -lresolv';
+                $extra_libs  .= ' -lrt -lm -lpthread -lresolv -ldl -lcrypt';
                 break;
             default:
                 throw new Exception('not implemented');
