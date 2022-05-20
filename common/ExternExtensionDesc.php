@@ -16,6 +16,8 @@
  * See the Mulan PSL v2 for more details.
  */
 
+declare(strict_types=1);
+
 class ExternExtensionDesc extends \stdClass implements ExtensionDesc
 {
     public const EXTERN_EXTENSIONS = [

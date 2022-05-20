@@ -16,6 +16,8 @@
  * See the Mulan PSL v2 for more details.
  */
 
+declare(strict_types=1);
+
 final class Util
 {
     use CommonUtil;
