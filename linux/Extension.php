@@ -66,6 +66,11 @@ class Extension extends CommonExtension
                     'LIBZIP_CFLAGS=-I"' . realpath('include') . '" ' .
                     'LIBZIP_LIBS="' . $this->getStaticLibFiles() . '" ';
                 break;
+            case 'mbregex':
+                $arg .= ' ' .
+                    'ONIG_CFLAGS=-I"' . realpath('include') . '" ' .
+                    'ONIG_LIBS="' . $this->getStaticLibFiles() . '" ';
+                break;
         }
         return $arg;
     }
