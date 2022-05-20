@@ -1,0 +1,104 @@
+{
+    "src": {
+        "zlib": {
+            "type": "filelist",
+            "url": "https://zlib.net/",
+            "regex": "/href=\"(?<file>zlib-(?<version>[^\"]+)\\.tar\\.gz)\"/i"
+        },
+        "openssl": {
+            "type": "filelist",
+            "url": "https://www.openssl.org/source/",
+            "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "libressl": {
+            "type": "filelist",
+            "url": "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/",
+            "regex": "/href=\"(?<file>libressl-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "libiconv": {
+            "type": "filelist",
+            "url": "https://ftp.gnu.org/pub/gnu/libiconv/",
+            "regex": "/href=\"(?<file>libiconv-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "xz": {
+            "type": "filelist",
+            "url": "https://tukaani.org/xz/",
+            "regex": "/href=\"(?<file>xz-(?<version>[^\"]+)\\.tar\\.xz)\"/"
+        },
+        "bzip2": {
+            "type": "filelist",
+            "url": "https://sourceware.org/pub/bzip2/",
+            "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+        },
+        "nghttp2": {
+            "type": "ghrel",
+            "repo": "nghttp2/nghttp2",
+            "match": "nghttp2.+\\.tar\\.xz"
+        },
+        "onig": {
+            "type": "ghrel",
+            "repo": "kkos/oniguruma",
+            "match": "onig-.+\\.tar\\.gz"
+        },
+        "libssh2": {
+            "type": "ghrel",
+            "repo": "libssh2/libssh2",
+            "match": "libssh2.+\\.tar\\.gz"
+        },
+        "libffi": {
+            "type": "ghrel",
+            "repo": "libffi/libffi",
+            "match": "libffi.+\\.tar\\.gz"
+        },
+        "libzip": {
+            "type": "ghrel",
+            "repo": "nih-at/libzip",
+            "match": "libzip.+\\.tar\\.xz"
+        },
+        "curl": {
+            "type": "ghrel",
+            "repo": "curl/curl",
+            "match": "curl.+\\.tar\\.xz"
+        },
+        "brotli": {
+            "type": "ghtar",
+            "repo": "google/brotli"
+        },
+        "php": {
+            "type": "git",
+            "path": "php-src",
+            "rev": "php-8.1.6",
+            "url": "https://github.com/php/php-src"
+        },
+        "swoole": {
+            "type": "git",
+            "path": "php-src/ext/swoole",
+            "rev": "master",
+            "url": "https://github.com/swoole/swoole-src"
+        },
+        "swow": {
+            "type": "git",
+            "path": "php-src/ext/swow-src",
+            "rev": "ci",
+            "url": "https://github.com/swow/swow"
+        },
+        "parallel": {
+            "type": "git",
+            "path": "php-src/ext/parallel",
+            "rev": "dixyes-dev",
+            "url": "https://github.com/dixyes/parallel"
+        },
+        "redis": {
+            "type": "git",
+            "path": "php-src/ext/redis",
+            "rev": "5.3.7",
+            "url": "https://github.com/phpredis/phpredis"
+        },
+        "micro": {
+            "type": "git",
+            "path": "php-src/sapi/micro",
+            "rev": "master",
+            "url": "https://github.com/dixyes/phpmicro"
+        }
+    }
+}

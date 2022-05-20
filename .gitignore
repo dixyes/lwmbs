@@ -10,3 +10,4 @@
 !linux/**
 !common
 !common/**
+!src.json
