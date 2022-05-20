@@ -9,11 +9,11 @@
 export https_proxy=https://someproxy
 export GITHUB_USER=someuser
 export GITHUB_TOKEN=ghp_dsad
+# not optional
 mkdir build
 cd build
 # prepare sources
-../update_source.php some.json
-../fetch_source.php some.json
+../update_source.php ../src.json
 # build micro
 ../build_micro.php
 ```
