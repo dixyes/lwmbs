@@ -102,9 +102,10 @@ EOF,
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
                 "$env ./Configure no-shared $zlib " .
-                '--prefix=/ ' .
-                '--libdir=/lib && ' . //use prefix=/
-                "make -j{$this->config->concurrency} build_sw CNF_EX_LIBS=\"$ex_lib\" && " .
+                '--prefix=/ ' . //use prefix=/
+                '--libdir=/lib ' .
+                " linux-{$this->config->arch} && " .
+                "make -j{$this->config->concurrency} CNF_EX_LIBS=\"$ex_lib\" && " .
                 'make install_sw DESTDIR=' . realpath('.'),
             $ret
         );
