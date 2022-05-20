@@ -198,7 +198,7 @@ final class Util
 
     }
     public static function genExtraLibs(Config $config) {
-        if ($config === CLib::GLIBC) {
+        if ($config->libc === CLib::GLIBC) {
             $glibcLibs = [
                 'rt',
                 'm',
