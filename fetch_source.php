@@ -221,10 +221,24 @@ function patch()
     }
 }
 
+function linkSwow()
+{
+    Log::i('linking swow');
+    $ret = 0;
+    passthru(
+        'cd src/php-src/ext && '.
+        'ln -s swow-src/ext swow ',
+        $ret
+    );
+    if ($ret != 0) {
+        throw new Exception("failed to patch php");
+    }
+}
+
 function mian($argv): int
 {
     if (count($argv) < 2) {
-        Log::e("usage: php build.php <src-file> [--hash] [--shallow-clone]\n");
+        Log::e("usage: php {$argv[0]} <src-file> [--hash] [--shallow-clone]\n");
         return 1;
     }
     $data = json_decode(file_get_contents($argv[1]), true);
@@ -266,6 +280,7 @@ function mian($argv): int
     // download all sources
     fetchSources($data, fn ($x) => true, $shallowClone);
     patch();
+    linkSwow();
     Log::i('done');
 
     return 0;
