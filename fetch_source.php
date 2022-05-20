@@ -209,15 +209,16 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
     }
 }
 
-function patch()
+function patch(string $majMin)
 {
     Log::i('patching php');
+    $majMin = implode('', explode('.', $majMin));
     $ret = 0;
     passthru(
         'cd src/php-src && ' .
             'git checkout HEAD . && ' .
             'git apply sapi/micro/patches/disable_huge_page.patch && ' .
-            'git apply sapi/micro/patches/cli_checks_81.patch && ' .
+            "git apply sapi/micro/patches/cli_checks_{$majMin}.patch && " .
             $ret
     );
     if ($ret != 0) {
@@ -307,7 +308,7 @@ function mian($argv): int
     ], fn ($x) => true, $shallowClone);
     // download all sources
     fetchSources($data, fn ($x) => true, $shallowClone);
-    patch();
+    patch($argv[2]);
     linkSwow();
     Log::i('done');
 
