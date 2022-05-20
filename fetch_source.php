@@ -255,18 +255,33 @@ function latestPHP(string $majMin){
 function mian($argv): int
 {
     if (count($argv) < 3) {
-        Log::e("usage: php {$argv[0]} <src-file> <maj.min> [--hash] [--shallow-clone]\n");
+        Log::e("usage: php {$argv[0]} <src-file> <maj.min> [--hash] [--shallow-clone] [--openssl11]\n");
         return 1;
     }
     preg_match('/^\d+\.\d+$/', $argv[2], $matches);
     if (!$matches || !file_exists($argv[1])) {
-        Log::e("usage: php {$argv[0]} <src-file> <maj.min> [--hash] [--shallow-clone]\n");
+        Log::e("usage: php {$argv[0]} <src-file> <maj.min> [--hash] [--shallow-clone] [--openssl11]\n");
         return 1;
+    }
+    if (in_array('--hash', $argv)) {
+        Log::$outFd = STDERR;
+    }
+
+    $openssl11 = false;
+    if (in_array('--openssl11', $argv)) {
+        $openssl11 = true;
+    }
+
+    if (version_compare($argv[2], '8.1', '<')) {
+        $openssl11 = true;
     }
 
     $data = json_decode(file_get_contents($argv[1]), true);
+    if ($openssl11) {
+        Log::i('using openssl 1.1');
+        $data['src']['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
+    }
     if (in_array('--hash', $argv)) {
-        Log::$outFd = STDERR;
         $files = [];
         foreach ($data['src'] as $name => $source) {
             switch ($source['type']) {
