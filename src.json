@@ -64,12 +64,6 @@
             "type": "ghtar",
             "repo": "google/brotli"
         },
-        "php": {
-            "type": "git",
-            "path": "php-src",
-            "rev": "php-8.1.6",
-            "url": "https://github.com/php/php-src"
-        },
         "swoole": {
             "type": "git",
             "path": "php-src/ext/swoole",

@@ -79,8 +79,8 @@ function fetch(string $url, string $method = 'GET', array $headers = []): string
         'HEAD' => '-I',
         default => "-X $method",
     };
-    $headerArg = implode(' ', array_map(fn ($v) => "-H\"$v\"", $headers));
-    return `curl -sfSL $methodArg $headerArg $url`;
+    $headerArg = implode(' ', array_map(fn ($v) => "-H'$v'", $headers));
+    return `curl -sfSL $methodArg $headerArg '$url'`;
 }
 
 function getLatestGithubTarball(string $name, array $source): array
@@ -239,12 +239,30 @@ function linkSwow()
     }
 }
 
+function latestPHP(string $majMin){
+    $info = json_decode(download("https://www.php.net/releases/index.php?json&version=$majMin"), true);
+    $version = $info['version'];
+
+    return [
+        'type'=> 'git',
+        'path'=> 'php-src',
+        'rev'=> "php-$version",
+        'url'=> 'https://github.com/php/php-src',
+    ];
+}
+
 function mian($argv): int
 {
-    if (count($argv) < 2) {
-        Log::e("usage: php {$argv[0]} <src-file> [--hash] [--shallow-clone]\n");
+    if (count($argv) < 3) {
+        Log::e("usage: php {$argv[0]} <src-file> <maj.min> [--hash] [--shallow-clone]\n");
         return 1;
     }
+    preg_match('/^\d+\.\d+$/', $argv[2], $matches);
+    if (!$matches || !file_exists($argv[1])) {
+        Log::e("usage: php {$argv[0]} <src-file> <maj.min> [--hash] [--shallow-clone]\n");
+        return 1;
+    }
+
     $data = json_decode(file_get_contents($argv[1]), true);
     if (in_array('--hash', $argv)) {
         Log::$outFd = STDERR;
@@ -281,6 +299,12 @@ function mian($argv): int
     Util::setErrorHandler();
     @mkdir('downloads');
     // TODO:implement filter
+    // download php first
+    fetchSources([
+        'src' => [
+            'php' => latestPHP($argv[2]),
+        ]
+    ], fn ($x) => true, $shallowClone);
     // download all sources
     fetchSources($data, fn ($x) => true, $shallowClone);
     patch();
