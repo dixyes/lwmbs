@@ -57,7 +57,7 @@ class CliBuild
                 break;
             case CLib::GLIBC:
                 $envs = ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ';
-                $extra_libs  .= ' -lrt -lm -lpthread -lresolv';
+                $extra_libs  .= ' -lrt -lm -lpthread -lresolv -ldl -lcrypt';
                 break;
             default:
                 throw new Exception('not implemented');
@@ -91,7 +91,12 @@ class CliBuild
                 'EXTRA_CFLAGS="-g -Os -fno-ident -Xcompiler -march=nehalem -Xcompiler -mtune=haswell" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 ($allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ': '') .
-                'cli ',
+                'cli && ' .
+                'cd sapi/cli && ' .
+                'objcopy --only-keep-debug php php.debug && ' .
+                'elfedit --output-osabi linux php && ' .
+                'strip --strip-all php && ' .
+                'objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php',
             $ret
         );
         if ($ret !== 0) {
