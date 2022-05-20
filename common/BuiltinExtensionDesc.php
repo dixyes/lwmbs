@@ -108,10 +108,6 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
             'argType' => 'with',
             'libDeps' => ['ldap' => false],
         ],
-        'libxml' => [
-            'argType' => 'with',
-            'libDeps' => ['libxml2' => false],
-        ],
         'oci8' => [
             'argType' => 'with',
             'libDeps' => ['oci8' => false],

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -20,10 +21,16 @@ declare(strict_types=1);
 
 class Extension extends CommonExtension
 {
-    public function getExtensionArg(): string
+    public function getExtensionEnabledArg(): string
     {
         $arg = $this->desc->getArg();
         switch ($this->name) {
+            case 'iconv':
+                $arg = '--with-iconv="' . realpath('.') . '" ';
+                break;
+            case 'bz2':
+                $arg = '--with-bz2="' . realpath('.') . '" ';
+                break;
             case 'openssl':
                 $arg .= ' ' .
                     'OPENSSL_CFLAGS=-I"' . realpath('include') . '" ' .
@@ -34,13 +41,30 @@ class Extension extends CommonExtension
                     'CURL_CFLAGS=-I"' . realpath('include') . '" ' .
                     'CURL_LIBS="' . $this->getStaticLibFiles() . '" ';
                 break;
-            case 'bz2':
-                $arg = '--with-bz2="' . realpath('.') . '" ';
-                break;
+            case 'phar':
             case 'zlib':
                 $arg .= ' ' .
                     'ZLIB_CFLAGS=-I"' . realpath('include') . '" ' .
                     'ZLIB_LIBS="' . $this->getStaticLibFiles() . '" ';
+                break;
+            case 'soap':
+            case 'xml':
+            case 'xmlreader':
+            case 'xmlwriter':
+            case 'dom':
+                $arg .= ' ' .
+                    'LIBXML_CFLAGS=-I"' . realpath('include') . '" ' .
+                    'LIBXML_LIBS="' . $this->getStaticLibFiles() . '" ';
+                break;
+            case 'ffi':
+                $arg .= ' ' .
+                    'LIBFFI_CFLAGS=-I"' . realpath('include') . '" ' .
+                    'LIBFFI_LIBS="' . $this->getStaticLibFiles() . '" ';
+                break;
+            case 'zip':
+                $arg .= ' ' .
+                    'LIBZIP_CFLAGS=-I"' . realpath('include') . '" ' .
+                    'LIBZIP_LIBS="' . $this->getStaticLibFiles() . '" ';
                 break;
         }
         return $arg;
@@ -56,7 +80,7 @@ class Extension extends CommonExtension
         $desc = static::getAllExtensionDescs();
         foreach ($desc as $ext) {
             if (array_key_exists($ext->name, $config->exts)) {
-                $ret[] = $config->exts[$ext->name]->getExtensionArg();
+                $ret[] = $config->exts[$ext->name]->getExtensionEnabledArg();
             } else {
                 $ret[] = $ext->getArg() . '=no';
             }
