@@ -13,7 +13,7 @@ export GITHUB_TOKEN=ghp_dsad
 mkdir build
 cd build
 # prepare sources
-../update_source.php ../src.json
+../update_source.php ../src.json 8.1
 # build micro
 ../build_micro.php
 ```
