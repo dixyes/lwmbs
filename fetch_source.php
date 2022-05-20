@@ -62,26 +62,29 @@ function extractSource(string $name, string $filename): void
     }
 }
 
-function download(string $url, array $headers = [], bool $useGithubToken = false): string {
+function download(string $url, array $headers = [], bool $useGithubToken = false): string
+{
     if ($useGithubToken && getenv('GITHUB_TOKEN')) {
         $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
-        $headers []= "Authorization: Basic $auth";
+        $headers[] = "Authorization: Basic $auth";
     }
 
     return fetch(url: $url, headers: $headers);
 }
 
-function fetch(string $url, string $method='GET', array $headers = []): string {
+function fetch(string $url, string $method = 'GET', array $headers = []): string
+{
     $methodArg = match ($method) {
         'GET' => '',
         'HEAD' => '-I',
         default => "-X $method",
     };
-    $headerArg = implode(' ', array_map(fn($v) => "-H\"$v\"", $headers));
+    $headerArg = implode(' ', array_map(fn ($v) => "-H\"$v\"", $headers));
     return `curl -sfSL $methodArg $headerArg $url`;
 }
 
-function getLatestGithubTarball(string $name, array $source): array {
+function getLatestGithubTarball(string $name, array $source): array
+{
     Log::i("finding $name source from github releases tarball");
     $data = json_decode(download(
         "https://api.github.com/repos/{$source['repo']}/releases",
@@ -91,7 +94,7 @@ function getLatestGithubTarball(string $name, array $source): array {
     if (!$url) {
         throw new Exception("failed to find $name source");
     }
-    $headers = fetch($url, method:'HEAD');
+    $headers = fetch($url, method: 'HEAD');
     preg_match('/^content-disposition:\s+attachment;\s*filename=("{0,1})(?<filename>.+\.tar\.gz)\1/im', $headers, $matches);
     if ($matches) {
         $filename = $matches['filename'];
@@ -102,7 +105,8 @@ function getLatestGithubTarball(string $name, array $source): array {
     return [$url, $filename];
 }
 
-function getLatestGithubRelease(string $name, array $source): array {
+function getLatestGithubRelease(string $name, array $source): array
+{
     Log::i("finding $name source from github releases assests");
     $data = json_decode(download(
         "https://api.github.com/repos/{$source['repo']}/releases",
@@ -123,7 +127,8 @@ function getLatestGithubRelease(string $name, array $source): array {
     return [$url, $filename];
 }
 
-function getFromFileList(string $name, array $source): array {
+function getFromFileList(string $name, array $source): array
+{
     Log::i("finding $name source from file list");
     $page = download($source['url']);
     preg_match_all($source['regex'], $page, $matches);
@@ -131,7 +136,7 @@ function getFromFileList(string $name, array $source): array {
         throw new Exception("Failed to get $name version");
     }
     $versions = [];
-    foreach($matches['version'] as $i => $version) {
+    foreach ($matches['version'] as $i => $version) {
         $lowerVersion = strtolower($version);
         foreach ([
             'alpha',
@@ -141,7 +146,7 @@ function getFromFileList(string $name, array $source): array {
             'nightly',
             'snapshot',
             'dev',
-        ] as$betaVersion) {
+        ] as $betaVersion) {
             if (str_contains($lowerVersion, $betaVersion)) {
                 continue 2;
             }
@@ -164,13 +169,13 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
         }
         switch ($source['type']) {
             case 'ghtar':
-                [$url, $filename]=getLatestGithubTarball($name, $source);
+                [$url, $filename] = getLatestGithubTarball($name, $source);
                 goto download;
             case 'ghrel':
-                [$url, $filename]=getLatestGithubRelease($name, $source);
+                [$url, $filename] = getLatestGithubRelease($name, $source);
                 goto download;
             case 'filelist':
-                [$url, $filename]=getFromFileList($name, $source);
+                [$url, $filename] = getFromFileList($name, $source);
                 goto download;
             case 'url':
                 $url = $source['url'];
@@ -191,7 +196,7 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
                 }
                 Log::i("cloning $name source");
                 passthru(
-                    "git clone --branch '{$source['rev']}' ".($shallowClone?'--depth 1 --single-branch':'')." --recursive '{$source['url']}' 'src/{$source['path']}'",
+                    "git clone --branch '{$source['rev']}' " . ($shallowClone ? '--depth 1 --single-branch' : '') . " --recursive '{$source['url']}' 'src/{$source['path']}'",
                     $ret
                 );
                 if ($ret !== 0) {
@@ -209,12 +214,11 @@ function patch()
     Log::i('patching php');
     $ret = 0;
     passthru(
-        'cd src/php-src && '.
-        'git checkout HEAD . && '.
-        'git apply sapi/micro/patches/disable_huge_page.patch && '.
-        'git apply sapi/micro/patches/cli_checks_81.patch && '.
-        './buildconf --force',
-        $ret
+        'cd src/php-src && ' .
+            'git checkout HEAD . && ' .
+            'git apply sapi/micro/patches/disable_huge_page.patch && ' .
+            'git apply sapi/micro/patches/cli_checks_81.patch && ' .
+            $ret
     );
     if ($ret != 0) {
         throw new Exception("failed to patch php");
@@ -226,8 +230,22 @@ function linkSwow()
     Log::i('linking swow');
     $ret = 0;
     passthru(
-        'cd src/php-src/ext && '.
-        'ln -s swow-src/ext swow ',
+        'cd src/php-src/ext && ' .
+            'ln -s swow-src/ext swow ',
+        $ret
+    );
+    if ($ret != 0) {
+        throw new Exception("failed to patch php");
+    }
+}
+
+function buildconf()
+{
+    Log::i('make buildconf');
+    $ret = 0;
+    passthru(
+        'cd src/php-src && ' .
+            './buildconf --force',
         $ret
     );
     if ($ret != 0) {
@@ -246,17 +264,17 @@ function mian($argv): int
         Log::$outFd = STDERR;
         $files = [];
         foreach ($data['src'] as $name => $source) {
-            switch($source['type']) {
+            switch ($source['type']) {
                 case 'git':
                     continue 2;
                 case 'ghtar':
-                    [$_, $filename]=getLatestGithubTarball($name, $source);
+                    [$_, $filename] = getLatestGithubTarball($name, $source);
                     break;
                 case 'ghrel':
-                    [$_, $filename]=getLatestGithubRelease($name, $source);
+                    [$_, $filename] = getLatestGithubRelease($name, $source);
                     break;
                 case 'filelist':
-                    [$url, $filename]=getFromFileList($name, $source);
+                    [$url, $filename] = getFromFileList($name, $source);
                     break;
                 case 'url':
                     $filename = $source['name'];
@@ -265,13 +283,13 @@ function mian($argv): int
                     throw new Exception("unknown source type: " . $source['type']);
             }
             Log::i("found $name source: $filename");
-            $files[]=$filename;
+            $files[] = $filename;
         }
-        echo hash('sha256', implode('|', $files)). "\n";
+        echo hash('sha256', implode('|', $files)) . "\n";
         return 0;
     }
     $shallowClone = false;
-    if (in_array('--shallow-clone', $argv, true)){
+    if (in_array('--shallow-clone', $argv, true)) {
         $shallowClone = true;
     }
     Util::setErrorHandler();
@@ -281,6 +299,7 @@ function mian($argv): int
     fetchSources($data, fn ($x) => true, $shallowClone);
     patch();
     linkSwow();
+    buildconf();
     Log::i('done');
 
     return 0;
