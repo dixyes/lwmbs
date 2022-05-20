@@ -77,16 +77,19 @@ trait CommonUtil
 
     public static function copyDir(string $from, string $to)
     {
-        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($from, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($from, FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_FILEINFO), RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $item) {
-            $target = $to . substr($item, strlen($from));
+            /**
+             * @var SplFileInfo $item
+             */
+            $target = $to . substr($item->getPathname(), strlen($from));
             if ($item->isDir()) {
                 Log::i("mkdir $target");
                 mkdir($target, recursive: true);
             } else {
                 Log::i("copying $item to $target");
                 @mkdir(dirname($target), recursive: true);
-                copy($item, $target);
+                copy($item->getPathname(), $target);
             }
         }
     }
