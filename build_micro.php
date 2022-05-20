@@ -49,6 +49,11 @@ function mian($argv): int
 {
     Util::setErrorHandler();
 
+    $allStatic = false;
+    if (in_array('all-static', $argv, true)) {
+        $allStatic = true;
+    }
+
     $config = new Config($argv);
 
     $libNames = [
@@ -92,6 +97,11 @@ function mian($argv): int
         'bz2',
     ];
 
+    if ($allStatic) {
+        unset($libNames[array_search('libffi', $libNames, true)]);
+        unset($extNames[array_search('ffi', $extNames, true)]);
+    }
+
     foreach ($libNames as $name) {
         $lib = new ("Lib$name")($config);
         $config->addLib($lib);
@@ -108,10 +118,6 @@ function mian($argv): int
     }
 
     $build = new MicroBuild($config);
-    $allStatic = false;
-    if (in_array('all-static', $argv, true)) {
-        $allStatic = true;
-    }
     $build->build($allStatic);
 
     return 0;
