@@ -74,6 +74,28 @@ EOF,
 
     protected function build(): void
     {
-        throw new Exception("not implemented");
+        Log::i("building {$this->name}");
+        $ret = 0;
+        passthru(
+            $this->config->setX . ' && ' .
+                "cd {$this->sourceDir} && " .
+                'rm -rf build && ' .
+                'mkdir -p build && ' .
+                'cd build && ' .
+                "{$this->config->configureEnv} " . $this->config->libc->getCCEnv() . ' cmake ' .
+                // '--debug-find ' .
+                '-DCMAKE_BUILD_TYPE=Release ' .
+                '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DCMAKE_INSTALL_PREFIX=/ ' .
+                '-DCMAKE_INSTALL_LIBDIR=/lib ' .
+                '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
+                '.. && ' .
+                "make -j{$this->config->concurrency} && " .
+                'make install DESTDIR=' . realpath('.'),
+            $ret
+        );
+        if ($ret !== 0) {
+            throw new Exception("failed to build {$this->name}");
+        }
     }
 }
