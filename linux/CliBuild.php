@@ -55,7 +55,6 @@ class CliBuild
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
-                './buildconf --force && ' .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
@@ -73,7 +72,7 @@ class CliBuild
             $ret
         );
         if ($ret !== 0) {
-            throw new Exception("failed to configure micro");
+            throw new Exception("failed to configure cli");
         }
     
         $extra_libs .= Util::genExtraLibs($this->config);
@@ -95,7 +94,7 @@ class CliBuild
             $ret
         );
         if ($ret !== 0) {
-            throw new Exception("failed to build micro");
+            throw new Exception("failed to build cli");
         }
     }
 }
