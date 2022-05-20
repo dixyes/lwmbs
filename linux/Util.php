@@ -168,4 +168,63 @@ final class Util
             return CLib::GLIBC;
         }
     }
+
+    public static function patchConfigure(Config $config) {
+
+        passthru(
+            $config->setX . ' && ' .
+                'cd src/php-src && ' .
+                './buildconf --force',
+            $ret
+        );
+        if ($ret !== 0) {
+            throw new Exception("failed to configure micro");
+        }
+
+        $curl = $config->getExt('curl');
+        if ($curl) {
+            Log::i('patching configure for curl checks');
+            $configure = file_get_contents('src/php-src/configure');
+            $configure = preg_replace('/-lcurl/', $curl->getStaticLibFiles(), $configure);
+            file_put_contents('src/php-src/configure', $configure);
+        }
+        $bzip2 = $config->getExt('bzip2');
+        if ($bzip2) {
+            Log::i('patching configure for bzip2 checks');
+            $configure = file_get_contents('src/php-src/configure');
+            $configure = preg_replace('/-lbz2/', $bzip2->getStaticLibFiles(), $configure);
+            file_put_contents('src/php-src/configure', $configure);
+        }
+
+    }
+    public static function genExtraLibs(Config $config) {
+        if ($config === CLib::GLIBC) {
+            $glibcLibs = [
+                'rt',
+                'm',
+                'c',
+                'pthread',
+                'dl',
+                'nsl',
+                'anl',
+                'crypt',
+                'resolv',
+                'util',
+            ];
+            $makefile = file_get_contents('src/php-src/Makefile');
+            preg_match('/^EXTRA_LIBS\s*=\s*(.*)$/m', $makefile, $matches);
+            if (!$matches) {
+                throw new Exception("failed to find EXTRA_LIBS in Makefile");
+            }
+            $_extra_libs = [];
+            foreach (array_filter(explode(' ', $matches[1])) as $used) {
+                foreach ($glibcLibs as $libName) {
+                    if ("-l$libName" === $used && !in_array("-l$libName", $_extra_libs, true)) {
+                        array_unshift($_extra_libs, "-l$libName");
+                    }
+                }
+            }
+            return ' ' . implode(' ', $_extra_libs);
+        }
+    }
 }

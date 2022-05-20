@@ -42,19 +42,6 @@ class CliBuild
                 $seds =
                     ' sed -i "s|#define HAVE_STRLCPY 1||g" main/php_config.h && ' .
                     ' sed -i "s|#define HAVE_STRLCAT 1||g" main/php_config.h';
-                /*
-                $info = `echo | musl-gcc -v -x c - 2>&1`;
-                $r = preg_match("/'-specs=([^']+)\/musl-gcc.specs'/", $info, $m);
-                if (!$r) {
-                    loge("failed to find musl libc");
-                    exit(1);
-                }
-                $spec_path = $m[1];
-                // remove stubs for dl things
-                copy("$spec_path/libc.a", 'lib/dl_libc.a');
-                passthru('ar d lib/dl_libc.a dlopen.lo dlclose.lo dlsym.lo dlinfo.lo dlerror.lo dladdr.lo');
-                $extra_libs  .= ' ' . realpath('lib/dl_libc.a');
-                */
                 break;
             case CLib::GLIBC:
                 $envs = ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ';
@@ -62,18 +49,13 @@ class CliBuild
             default:
                 throw new Exception('not implemented');
         }
-        $curl = $this->config->getExt('curl');
-        if ($curl) {
-            Log::i('patching configure for curl checks');
-            $configure = file_get_contents('src/php-src/configure');
-            $configure = preg_replace('/-lcurl/', $curl->getStaticLibFiles(), $configure);
-            file_put_contents('src/php-src/configure', $configure);
-        }
-        file_put_contents('/tmp/comment', "... If we meet some day, and you think this stuff is worth it, you can buy me a beer in return.\0");
+
+        Util::patchConfigure($this->config);
 
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
+                './buildconf --force && ' .
                 './configure ' .
                 '--prefix= ' .
                 '--with-valgrind=no ' .
@@ -93,34 +75,9 @@ class CliBuild
         if ($ret !== 0) {
             throw new Exception("failed to configure micro");
         }
-        if ($this->config->libc === CLib::GLIBC) {
-            $glibcLibs = [
-                'rt',
-                'm',
-                'c',
-                'pthread',
-                'dl',
-                'nsl',
-                'anl',
-                'crypt',
-                'resolv',
-                'util',
-            ];
-            $makefile = file_get_contents('src/php-src/Makefile');
-            preg_match('/^EXTRA_LIBS\s*=\s*(.*)$/m', $makefile, $matches);
-            if (!$matches) {
-                throw new Exception("failed to find EXTRA_LIBS in Makefile");
-            }
-            $_extra_libs = [];
-            foreach (array_filter(explode(' ', $matches[1])) as $used) {
-                foreach ($glibcLibs as $libName) {
-                    if ("-l$libName" === $used && !in_array("-l$libName", $_extra_libs, true)) {
-                        array_unshift($_extra_libs, "-l$libName");
-                    }
-                }
-            }
-            $extra_libs .= ' ' . implode(' ', $_extra_libs);
-        }
+    
+        $extra_libs .= Util::genExtraLibs($this->config);
+        file_put_contents('/tmp/comment', "... If we meet some day, and you think this stuff is worth it, you can buy me a beer in return.\0");
 
         passthru(
             $this->config->setX . ' && ' .

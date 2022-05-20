@@ -239,20 +239,6 @@ function linkSwow()
     }
 }
 
-function buildconf()
-{
-    Log::i('make buildconf');
-    $ret = 0;
-    passthru(
-        'cd src/php-src && ' .
-            './buildconf --force',
-        $ret
-    );
-    if ($ret != 0) {
-        throw new Exception("failed to patch php");
-    }
-}
-
 function mian($argv): int
 {
     if (count($argv) < 2) {
@@ -299,7 +285,6 @@ function mian($argv): int
     fetchSources($data, fn ($x) => true, $shallowClone);
     patch();
     linkSwow();
-    buildconf();
     Log::i('done');
 
     return 0;

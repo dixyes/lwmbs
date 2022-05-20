@@ -76,7 +76,7 @@ class Extension extends CommonExtension
     }
     public function getStaticLibFiles(): string
     {
-        $ret = array_map(fn ($x) => $x->getStaticLibFiles(), $this->getLibraryDependencies());
+        $ret = array_map(fn ($x) => $x->getStaticLibFiles(), $this->getLibraryDependencies(recursive: true));
         return implode(' ', $ret);
     }
     public static function makeExtensionArgs($config): string
