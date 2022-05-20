@@ -188,7 +188,7 @@ final class Util
             $configure = preg_replace('/-lcurl/', $curl->getStaticLibFiles(), $configure);
             file_put_contents('src/php-src/configure', $configure);
         }
-        $bzip2 = $config->getExt('bzip2');
+        $bzip2 = $config->getExt('bz2');
         if ($bzip2) {
             Log::i('patching configure for bzip2 checks');
             $configure = file_get_contents('src/php-src/configure');

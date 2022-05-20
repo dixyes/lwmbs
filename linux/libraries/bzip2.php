@@ -51,7 +51,7 @@ EOF
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} make -j{$this->config->concurrency} && " .
+                "make -j{$this->config->concurrency} " . $this->config->libc->getCCEnv() . ' && ' .
                 'make install PREFIX=' . realpath('.'),
             $ret
         );
