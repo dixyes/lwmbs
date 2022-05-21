@@ -33,15 +33,11 @@ class MicroBuild
 
         $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
         $envs = $this->config->configureEnv;
-        $seds = null;
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
                 $envs .= ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ' .
                     $this->config->libc->getCCEnv(true);
-                $seds =
-                    ' sed -i "s|#define HAVE_STRLCPY 1||g" main/php_config.h && ' .
-                    ' sed -i "s|#define HAVE_STRLCAT 1||g" main/php_config.h';
                 break;
             case CLib::GLIBC:
                 $envs = ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ';
@@ -69,9 +65,7 @@ class MicroBuild
                 '--enable-micro' . ($allStatic ? '=all-static' : '') . ' ' .
                 ($this->config->zts ? '--enable-zts' : '') . ' ' .
                 Extension::makeExtensionArgs($this->config) . ' ' .
-                $envs . ' ' .
-                ' && ' .
-                ($seds ?? ':'),
+                $envs,
             $ret
         );
         if ($ret !== 0) {
@@ -79,6 +73,9 @@ class MicroBuild
         }
 
         $extra_libs .= Util::genExtraLibs($this->config);
+
+        Util::patchConfigHeader($this->config);
+
         file_put_contents('/tmp/comment', $this->config->noteSection);
 
         passthru(

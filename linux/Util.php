@@ -199,8 +199,34 @@ final class Util
             $configure = preg_replace('/-lbz2/', $bzip2->getStaticLibFiles(), $configure);
             file_put_contents('src/php-src/configure', $configure);
         }
-
     }
+    
+    public static function replaceConfigHeaderLine(string $line, string $replace = '') {
+        $header = file_get_contents('src/php-src/main/php_config.h');
+        $header = preg_replace('/^'.$line.'$/m', $replace, $header);
+        file_put_contents('src/php-src/main/php_config.h', $header);
+    }
+
+    public static function patchConfigHeader(Config $config) {
+        switch ($config->libc) {
+            case CLib::MUSL_WRAPPER:
+                // bad checks
+                static::removeConfigHeaderLine('#define HAVE_STRLCPY 1');
+                static::removeConfigHeaderLine('#define HAVE_STRLCAT 1');
+                break;
+            case CLib::GLIBC:
+                // avoid lcrypt dependency
+                static::replaceConfigHeaderLine('#define HAVE_CRYPT 1');
+                static::replaceConfigHeaderLine('#define HAVE_CRYPT_R 1');
+                static::replaceConfigHeaderLine('#define HAVE_CRYPT_H 1');
+                break;
+            case CLib::MUSL:
+                break;
+            default:
+                throw new Exception('not implemented');
+        }
+    }
+
     public static function genExtraLibs(Config $config) {
         if ($config->libc === CLib::GLIBC) {
             $glibcLibs = [
@@ -211,7 +237,7 @@ final class Util
                 'dl',
                 'nsl',
                 'anl',
-                'crypt',
+                //'crypt',
                 'resolv',
                 'util',
             ];
