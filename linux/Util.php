@@ -211,8 +211,8 @@ final class Util
         switch ($config->libc) {
             case CLib::MUSL_WRAPPER:
                 // bad checks
-                static::removeConfigHeaderLine('#define HAVE_STRLCPY 1');
-                static::removeConfigHeaderLine('#define HAVE_STRLCAT 1');
+                static::replaceConfigHeaderLine('#define HAVE_STRLCPY 1');
+                static::replaceConfigHeaderLine('#define HAVE_STRLCAT 1');
                 break;
             case CLib::GLIBC:
                 // avoid lcrypt dependency
