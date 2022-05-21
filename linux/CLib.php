@@ -32,8 +32,8 @@ enum CLib
             case 'x86_64':
                 return match ($this) {
                     static::GLIBC => 'ld-linux-x86-64.so.2',
-                    static::MUSL => 'ld-musl-x86-64.so.1',
-                    static::MUSL_WRAPPER => 'ld-musl-x86-64.so.1',
+                    static::MUSL => 'ld-musl-x86_64.so.1',
+                    static::MUSL_WRAPPER => 'ld-musl-x86_64.so.1',
                 };
             default:
                 throw new Exception("Unsupported architecture: " . $arch);
