@@ -8,6 +8,10 @@
 !Readme.EN.md
 !linux
 !linux/**
+!macos
+!macos/**
+!windows
+!windows/**
 !common
 !common/**
 !src.json
