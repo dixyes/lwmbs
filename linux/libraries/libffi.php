@@ -72,7 +72,8 @@ EOF
                 "$env ./configure " .
                 '--enable-static ' .
                 '--disable-shared ' .
-                '--prefix= && ' . //use prefix=/
+                '--prefix= ' . //use prefix=/
+                '--libdir=/lib && ' .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret

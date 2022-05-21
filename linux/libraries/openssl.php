@@ -86,10 +86,9 @@ EOF,
                     '-idirafter /usr/include/ ' .
                     '-idirafter /usr/include/x86_64-linux-gnu/"';
                 break;
-            case Clib::GLIBC:
-                break;
             case Clib::MUSL:
                 $ex_lib = '';
+            case Clib::GLIBC:
                 $env .= ' CC="' .
                     $this->config->libc->getCC() . ' ' .
                     '-static ' .

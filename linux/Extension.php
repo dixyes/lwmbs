@@ -58,8 +58,8 @@ class Extension extends CommonExtension
                 break;
             case 'ffi':
                 $arg .= ' ' .
-                    'LIBFFI_CFLAGS=-I"' . realpath('include') . '" ' .
-                    'LIBFFI_LIBS="' . $this->getStaticLibFiles() . '" ';
+                    'FFI_CFLAGS=-I"' . realpath('include') . '" ' .
+                    'FFI_LIBS="' . $this->getStaticLibFiles() . '" ';
                 break;
             case 'zip':
                 $arg .= ' ' .
