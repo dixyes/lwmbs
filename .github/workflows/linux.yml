@@ -99,14 +99,15 @@ jobs:
   build:
     needs:
       - cache
-    name: PHP ${{ matrix.php-version }} ${{ matrix.libc }}
+    name: PHP ${{ matrix.php-version }} ${{ matrix.sapi }} ${{ matrix.libc }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         php-version: ["8.1", "8.0"]
+        sapi: ['cli', 'micro']
         libc: ['musl', 'glibc']
-      max-parallel: 4
+      max-parallel: 8
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -145,70 +146,50 @@ jobs:
           sudo apt-get install -yy --no-install-recommends \
             bison re2c ${{ matrix.libc == 'musl' && 'musl musl-tools' || '' }}
           mkdir \
-            ../micro_shared \
-            ../micro_static \
-            ../cli_shared \
-            ../cli_static
+            ../${{ matrix.sapi }}_shared \
+            ../${{ matrix.sapi }}_static
           php ../fetch_source.php ../src.json ${{ matrix.php-version }} --shallow-clone
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v3
 
-      - name: Build micro
+      - name: Build ${{ matrix.sapi }}
         shell: bash
         working-directory: build
         run: |
-          php ../build_micro.php
-          cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ../micro_shared
+          php ../build_${{ matrix.sapi }}.php
+          if [ 'micro' = '${{ matrix.sapi }}' ]
+          then
+            cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ../micro_shared
+          else
+            cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ../cli_shared
+          fi
 
-      - name: Upload artifact for micro
+      - name: Upload artifact for ${{ matrix.sapi }}
         uses: actions/upload-artifact@v3
         with:
-          name: micro_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ steps.src_upgrade.outputs.hash }}
+          name: ${{ matrix.sapi }}_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ steps.src_upgrade.outputs.hash }}
           path: |
-            micro_shared
+            ${{ matrix.sapi }}_shared
 
-      - name: Build micro all-static
+      - name: Build ${{ matrix.sapi }} all-static
         shell: bash
         working-directory: build
         run: |
-          php ../build_micro.php all-static
-          cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ../micro_static
+          php ../build_${{ matrix.sapi }}.php all-static
+          if [ 'micro' = '${{ matrix.sapi }}' ]
+          then
+            cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ../micro_static
+          else
+            cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ../cli_static
+          fi
 
-      - name: Upload artifact for micro static
+      - name: Upload artifact for ${{ matrix.sapi }} static
         uses: actions/upload-artifact@v3
         with:
-          name: micro_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ steps.src_upgrade.outputs.hash }}
+          name: ${{ matrix.sapi }}_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ steps.src_upgrade.outputs.hash }}
           path: |
-            micro_static
-
-      - name: Build cli
-        shell: bash
-        working-directory: build
-        run: |
-          php ../build_cli.php
-          cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ../cli_shared
-
-      - name: Upload artifact for cli
-        uses: actions/upload-artifact@v3
-        with:
-          name: cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ steps.src_upgrade.outputs.hash }}
-          path: |
-            cli_shared
-
-      - name: Build cli all-static
-        shell: bash
-        working-directory: build
-        run: |
-          php ../build_cli.php  all-static
-          cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ../cli_static
-
-      - name: Upload artifact for cli static
-        uses: actions/upload-artifact@v3
-        with:
-          name: cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ steps.src_upgrade.outputs.hash }}
-          path: |
-            cli_static
+            ${{ matrix.sapi }}_static
 
       - name: Remove php src to avoid cache
         shell: bash
