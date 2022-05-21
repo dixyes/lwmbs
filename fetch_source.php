@@ -218,7 +218,7 @@ function patch(string $majMin)
         'cd src/php-src && ' .
             'git checkout HEAD . && ' .
             'git apply sapi/micro/patches/disable_huge_page.patch && ' .
-            "git apply sapi/micro/patches/cli_checks_{$majMin}.patch && " .
+            "git apply sapi/micro/patches/cli_checks_{$majMin}.patch",
             $ret
     );
     if ($ret != 0) {
