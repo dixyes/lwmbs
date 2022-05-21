@@ -21,6 +21,7 @@ declare(strict_types=1);
 final class Util
 {
     use CommonUtil;
+    use UnixUtil;
     public const NEEDED_COMMANDS = ['gcc', 'make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
     public static function findStaticLib(string $name): ?array
     {
@@ -256,15 +257,6 @@ final class Util
             }
             return ' ' . implode(' ', $_extra_libs);
         }
-    }
-
-    public static function checkCCFlag(string $flag):string {
-        $ret = 0;
-        exec("echo | gcc -E -x c - $flag", $dummy, $ret);
-        if ($ret != 0) {
-            return "";
-        }
-        return $flag;   
     }
 
     public static function checkCCFlags(array $flags):array {
