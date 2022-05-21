@@ -75,15 +75,8 @@ EOF,
         Log::i("building {$this->name}");
         $ret = 0;
         $ex_lib = '-ldl -pthread';
-        $zlib = '';
-        $libzlib = $this->config->getLib('zlib');
-        //var_dump($libzlib);
-        if ($libzlib) {
-            Log::i("{$this->name} with zlib support");
-            $ex_lib = $libzlib->getStaticLibFiles() . ' ' . $ex_lib;
-            $zlib = "zlib";
-        }
         $env = $this->config->configureEnv;
+
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
                 $env .= ' CC="' .
@@ -95,15 +88,36 @@ EOF,
                 break;
             case Clib::GLIBC:
                 break;
+            case Clib::MUSL:
+                $ex_lib = '';
+                $env .= ' CC="' .
+                    $this->config->libc->getCC() . ' ' .
+                    '-static ' .
+                    '-idirafter ' . realpath('include') . ' ' .
+                    '-idirafter /usr/include/" ';
+                break;
             default:
                 throw new Exception("unsupported libc: {$this->config->libc->name}");
         }
+
+        $zlib = '';
+        $libzlib = $this->config->getLib('zlib');
+        //var_dump($libzlib);
+        if ($libzlib) {
+            Log::i("{$this->name} with zlib support");
+            $ex_lib = $libzlib->getStaticLibFiles() . ' ' . $ex_lib;
+            $zlib = "zlib";
+        }
+
+        $ex_lib = trim($ex_lib);
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
                 "$env ./Configure no-shared $zlib " .
                 '--prefix=/ ' . //use prefix=/
                 '--libdir=/lib ' .
+                '--static ' .
+                '-static ' .
                 " linux-{$this->config->arch} && " .
                 "make -j{$this->config->concurrency} CNF_EX_LIBS=\"$ex_lib\" && " .
                 'make install_sw DESTDIR=' . realpath('.'),

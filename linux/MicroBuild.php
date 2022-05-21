@@ -46,6 +46,8 @@ class MicroBuild
             case CLib::GLIBC:
                 $envs = ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ';
                 break;
+            case CLib::MUSL:
+                break;
             default:
                 throw new Exception('not implemented');
         }

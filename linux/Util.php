@@ -151,7 +151,6 @@ final class Util
         if ($matches) {
             // if we are musl, use native musl
             Log::i("using native musl");
-            throw new Exception("unsupported libc");
             return CLib::MUSL;
         }
 

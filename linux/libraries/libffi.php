@@ -61,6 +61,8 @@ EOF
                 break;
             case CLib::GLIBC:
                 break;
+            case CLib::MUSL:
+                break;
             default:
                 throw new Exception("unsupported libc: {$this->config->libc->name}");
         }
