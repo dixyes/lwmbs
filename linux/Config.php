@@ -26,6 +26,12 @@ class Config extends CommonConfig
     public string $configureEnv = '';
     public CLib $libc;
     public string $arch;
+    public array $tuneCFlags;
+
+    const TUNE_CFLAGS = [
+        '-march=corei7',
+        '-mtune=core-avx2',
+    ];
 
     public function __construct()
     {
@@ -38,6 +44,7 @@ class Config extends CommonConfig
         $this->libc = Util::chooseLibc();
         $this->concurrency = Util::getCpuCount();
         $this->arch = php_uname('m');
+        $this->tuneCFlags = Util::checkCCFlags(static::TUNE_CFLAGS);
     }
 
     public function makeAutoconfArgs(string $name, array $libSpecs): string

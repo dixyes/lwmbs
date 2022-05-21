@@ -85,7 +85,7 @@ class MicroBuild
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
                 "make -j{$this->config->concurrency} "  .
-                'EXTRA_CFLAGS="-g -Os -fno-ident -Xcompiler -march=nehalem -Xcompiler -mtune=haswell" ' .
+                'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . '" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 'POST_MICRO_BUILD_COMMANDS="sh -xc \'' .
                     'cd sapi/micro && ' .

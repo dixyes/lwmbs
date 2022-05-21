@@ -226,4 +226,21 @@ final class Util
             return ' ' . implode(' ', $_extra_libs);
         }
     }
+
+    public static function checkCCFlag(string $flag):string {
+        $ret = 0;
+        exec("echo | gcc -E -x c - $flag", $dummy, $ret);
+        if ($ret != 0) {
+            return "";
+        }
+        return $flag;   
+    }
+
+    public static function checkCCFlags(array $flags):array {
+        return array_filter($flags, fn ($flag) => static::checkCCFlag($flag));
+    }
+
+    public static function libtoolCCFlags(array $flags):string {
+        return implode(' ', array_map(fn($x)=> "-Xcompiler $x", $flags));
+    }
 }

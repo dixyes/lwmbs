@@ -83,7 +83,7 @@ class CliBuild
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
                 "make -j{$this->config->concurrency} "  .
-                'EXTRA_CFLAGS="-g -Os -fno-ident -Xcompiler -march=nehalem -Xcompiler -mtune=haswell" ' .
+                'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . '" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 ($allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ' : '') .
                 'cli && ' .
