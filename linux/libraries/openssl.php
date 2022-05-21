@@ -114,7 +114,7 @@ EOF,
                 "cd {$this->sourceDir} && " .
                 "$env ./Configure no-shared $zlib " .
                 '--prefix=/ ' . //use prefix=/
-                '--libdir=/lib ' .
+                '--libdir=lib ' .
                 '--static ' .
                 '-static ' .
                 " linux-{$this->config->arch} && " .

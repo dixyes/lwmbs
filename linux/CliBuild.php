@@ -53,7 +53,6 @@ class CliBuild
                 'cd src/php-src && ' .
                 './configure ' .
                 '--prefix= ' .
-                '--libdir=/lib' .
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
