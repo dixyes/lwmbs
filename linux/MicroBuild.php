@@ -79,7 +79,7 @@ class MicroBuild
         }
 
         $extra_libs .= Util::genExtraLibs($this->config);
-        file_put_contents('/tmp/comment', "... If we meet some day, and you think this stuff is worth it, you can buy me a beer in return.\0");
+        file_put_contents('/tmp/comment', $this->config->noteSection);
 
         passthru(
             $this->config->setX . ' && ' .

@@ -24,6 +24,7 @@ class Config extends CommonConfig
     //public string $workspace = '.';
     public string $setX = 'set -x';
     public string $configureEnv = '';
+    public string $noteSection = "Je pense, donc je suis\0";
     public CLib $libc;
     public string $arch;
     public array $tuneCFlags;
