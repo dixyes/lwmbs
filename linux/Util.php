@@ -108,6 +108,11 @@ final class Util
                         $ret['ver'] = $matches[1];
                     }
                 }
+                $ret['dist'] = trim($ret['dist'], '"\'');
+                $ret['ver'] = trim($ret['ver'], '"\'');
+                if (0 === strcasecmp($ret['dist'], 'centos')) {
+                    $ret['dist'] = 'redhat';
+                }
                 break;
             case file_exists('/etc/centos-release'):
                 $lines = file('/etc/centos-release');
@@ -160,7 +165,7 @@ final class Util
             return CLib::MUSL_WRAPPER;
         } else {
             $distro = static::getOSRelease();
-            if ($distro['dist'] !== 'redhat' || !str_starts_with($distro['ver'], '6')) {
+            if ($distro['dist'] !== 'redhat' || !str_starts_with($distro['ver'], '7')) {
                 Log::w("using glibc on {$distro['dist']} {$distro['ver']} may require target machines glibc version");
             }
             Log::i("using glibc");
