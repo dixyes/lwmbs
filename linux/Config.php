@@ -45,10 +45,13 @@ class Config extends CommonConfig
         ?string $arch=null,
     )
     {
+        Log::i("check commands");
         $lackingCommands = Util::lackingCommands(static::NEEDED_COMMANDS);
         if ($lackingCommands) {
             throw new Exception("missing commands: " . implode(', ', $lackingCommands));
         }
+
+        Log::i("mkdir -p lib/pkgconfig");
         @mkdir('lib/pkgconfig', recursive: true);
 
         $this->cc = $cc ?? Util::chooseCC();

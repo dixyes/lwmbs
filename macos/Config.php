@@ -33,7 +33,7 @@ class Config extends CommonConfig
     public string $archCXXFlags;
     public string $cmakeToolchainFile;
 
-    public const NEEDED_COMMANDS = ['gcc', 'make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
+    public const NEEDED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
 
     public function __construct(
         ?string $cc=null,
@@ -41,10 +41,12 @@ class Config extends CommonConfig
         ?string $arch=null,
     )
     {
+        Log::i("check commands");
         $lackingCommands = Util::lackingCommands(static::NEEDED_COMMANDS);
         if ($lackingCommands) {
             throw new Exception("missing commands: " . implode(', ', $lackingCommands));
         }
+
         Log::i("mkdir -p lib/pkgconfig");
         @mkdir('lib/pkgconfig', recursive: true);
 
