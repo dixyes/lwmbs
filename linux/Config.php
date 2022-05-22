@@ -80,7 +80,7 @@ class Config extends CommonConfig
             $this->pkgconfEnv . ' ' .
             "CC='{$this->cc}' ".
             "CXX='{$this->cxx}' " .
-            "CFLAGS='{$this->archCFlags}'";
+            (php_uname('m') === $arch?'':"CFLAGS='{$this->archCFlags}'");
         if (php_uname('m') !== $this->arch){
             $this->crossCompilePrefix =Util::getCrossCompilePrefix($this->cc, $this->arch);
             Log::i('using cross compile prefix '.$this->crossCompilePrefix);

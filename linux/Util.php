@@ -312,6 +312,9 @@ final class Util
     }
 
     public static function getArchCFlags(string $cc, string $arch):string {
+        if (php_uname('m') === $arch) {
+            return '';
+        }
         return match(static::getCCType($cc)) {
             'clang' => match ($arch) {
                 'x86_64' => '--target=x86_64-unknown-linux',
