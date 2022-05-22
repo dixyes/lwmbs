@@ -29,7 +29,7 @@ trait CommonUtilTrait
         $paths = getenv('PATH');
         foreach (explode(PATH_SEPARATOR, $paths) as $path) {
             if (file_exists($path . DIRECTORY_SEPARATOR . $name)) {
-                return $path . $name;
+                return $path . DIRECTORY_SEPARATOR . $name;
             }
         }
         return null;
