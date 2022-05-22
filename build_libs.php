@@ -23,7 +23,24 @@ function mian($argv): int
 {
     Util::setErrorHandler();
 
-    $config = new Config($argv);
+    $cmdArgs = Util::parseArgs($argv);
+    foreach (array_keys($cmdArgs) as $k) {
+        if (!in_array($k, [
+            'cc',
+            'cxx',
+            'arch',
+        ], true)) {
+            Log::e("Unknown argument: $k");
+            Log::w("Usage: {$argv[0]} [--cc=<compiler>] [--cxx=<compiler>] [--arch=<arch>]");
+            exit(1);
+        }
+    }
+
+    $config = new Config(
+        cc: $cmdArgs['cc'] ?? null,
+        cxx: $cmdArgs['cxx'] ?? null,
+        arch: $cmdArgs['arch'] ?? null,
+    );
 
     $libNames = [
         'libssh2',
