@@ -97,6 +97,7 @@ CMAKE;
                 break;
             case $cc === 'clang++':
             case $cc === 'clang':
+            case str_starts_with($cc, 'musl-clang'):
                 $ccType = 'clang';
                 break;
             default:
