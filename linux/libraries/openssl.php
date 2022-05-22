@@ -75,8 +75,8 @@ EOF,
         Log::i("building {$this->name}");
         $ret = 0;
         $ex_lib = '-ldl -pthread';
-        $env = $this->config->pkgconfEnv .
-            "CFLAGS='{$this->archCFlags}'";
+        $env = $this->config->pkgconfEnv . ' ' .
+            "CFLAGS='{$this->config->archCFlags}'";
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
