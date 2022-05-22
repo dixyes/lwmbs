@@ -86,8 +86,7 @@ EOF,
                     ($this->config->arch === php_uname('m') ? '-idirafter /usr/include/ ' : '') .
                     "-idirafter /usr/include/{$this->config->arch}-linux-gnu/'";
                 break;
-            case Clib::MUSL:
-                $env .= " CC='{$this->config->cc}'";
+            case Clib::MUSL:    
                 $ex_lib = '';
             case Clib::GLIBC:
                 $env .= " CC='{$this->config->cc} " .
