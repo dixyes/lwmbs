@@ -20,8 +20,8 @@ declare(strict_types=1);
 
 final class Util
 {
-    use CommonUtil;
-    use UnixUtil;
+    use CommonUtilTrait;
+    use UnixUtilTrait;
 
     public static function getArchCFlags(string $arch):string {
         return match ($arch) {

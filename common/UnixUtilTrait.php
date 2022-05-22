@@ -1,0 +1,75 @@
+<?php
+/**
+ * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
+ *
+ * lwmbs is licensed under Mulan PSL v2. You can use this
+ * software according to the terms and conditions of the
+ * Mulan PSL v2. You may obtain a copy of Mulan PSL v2 at:
+ *
+ * http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS,
+ * WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ *
+ * See the Mulan PSL v2 for more details.
+ */
+
+declare(strict_types=1);
+
+trait UnixUtilTrait {
+    public static function checkCCFlag(string $flag):string {
+        $ret = 0;
+        exec("echo | cc -E -x c - $flag", $dummy, $ret);
+        if ($ret != 0) {
+            return "";
+        }
+        return $flag;   
+    }
+    
+    public static function checkCCFlags(array $flags):array {
+        return array_filter($flags, fn ($flag) => static::checkCCFlag($flag));
+    }
+
+    public static function libtoolCCFlags(array $flags):string {
+        return implode(' ', array_map(fn($x)=> "-Xcompiler $x", $flags));
+    }
+
+    public static function makeCmakeToolchainFile(string $os, string $targetArch, string $cflags):string {
+        Log::i("making cmake tool chain file for $os $targetArch with $cflags");
+        $root = realpath('.');
+        $toolchain = <<<CMAKE
+SET(CMAKE_SYSTEM_NAME $os)
+SET(CMAKE_SYSTEM_PROCESSOR $targetArch)
+SET(CMAKE_C_FLAGS "$cflags")
+SET(CMAKE_CXX_FLAGS "$cflags")
+SET(CMAKE_FIND_ROOT_PATH "$root")
+CMAKE;
+        file_put_contents('./toolchain.cmake', $toolchain);
+        return realpath('./toolchain.cmake');
+    }
+
+    public static function replaceConfigHeaderLine(string $line, string $replace = '', string $file = 'src/php-src/main/php_config.h') {
+        $header = file_get_contents('src/php-src/main/php_config.h');
+        $header = preg_replace('/^'.$line.'$/m', $replace, $header);
+        file_put_contents('src/php-src/main/php_config.h', $header);
+    }
+
+    public static function patchPHPConfigure(Config $config) {
+        $curl = $config->getExt('curl');
+        if ($curl) {
+            Log::i('patching configure for curl checks');
+            $configure = file_get_contents('src/php-src/configure');
+            $configure = preg_replace('/-lcurl/', $curl->getStaticLibFiles(), $configure);
+            file_put_contents('src/php-src/configure', $configure);
+        }
+        $bzip2 = $config->getExt('bz2');
+        if ($bzip2) {
+            Log::i('patching configure for bzip2 checks');
+            $configure = file_get_contents('src/php-src/configure');
+            $configure = preg_replace('/-lbz2/', $bzip2->getStaticLibFiles(), $configure);
+            file_put_contents('src/php-src/configure', $configure);
+        }
+    }
+}

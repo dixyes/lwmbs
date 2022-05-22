@@ -20,8 +20,8 @@ declare(strict_types=1);
 
 final class Util
 {
-    use CommonUtil;
-    use UnixUtil;
+    use CommonUtilTrait;
+    use UnixUtilTrait;
     public const NEEDED_COMMANDS = ['gcc', 'make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
     public static function findStaticLib(string $name): ?array
     {
@@ -257,13 +257,5 @@ final class Util
             }
             return ' ' . implode(' ', $_extra_libs);
         }
-    }
-
-    public static function checkCCFlags(array $flags):array {
-        return array_filter($flags, fn ($flag) => static::checkCCFlag($flag));
-    }
-
-    public static function libtoolCCFlags(array $flags):string {
-        return implode(' ', array_map(fn($x)=> "-Xcompiler $x", $flags));
     }
 }

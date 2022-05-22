@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-trait CommonUtil
+trait CommonUtilTrait
 {
     private function __construct()
     {

@@ -46,7 +46,17 @@ class CliBuild
                 throw new Exception('not implemented');
         }
 
-        Util::patchConfigure($this->config);
+        passthru(
+            $this->config->setX . ' && ' .
+                'cd src/php-src && ' .
+                './buildconf --force',
+            $ret
+        );
+        if ($ret !== 0) {
+            throw new Exception("failed to configure cli");
+        }
+    
+        Util::patchPHPConfigure($this->config);
 
         passthru(
             $this->config->setX . ' && ' .

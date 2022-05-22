@@ -78,6 +78,9 @@ EOF
                 '--enable-static ' .
                 '--disable-shared ' .
                 '--disable-rpath ' .
+                '--enable-hidden-symbols ' .
+                '--disable-examples-build ' .
+                '--disable-ossfuzzers ' .
                 '--with-crypto=openssl ' .
                 '--with-libssl-prefix=' . realpath('.') . ' ' .
                 $zlib . ' ' .
