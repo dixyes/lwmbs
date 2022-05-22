@@ -32,7 +32,9 @@ false "why?"
 # bsd
 false "will lwmbs support them?"
 # macos
-false "not implemented"
+brew install bison re2c
+export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/re2c/bin:$PATH"
+# you need also a working php 8.1 cli (brew install it
 # windows
 false "not implemented"
 ```
@@ -55,5 +57,6 @@ cd build
 
 1. musl wrapper may not work
 2. old version of glibc do not support all-static
+3. 
 
 # Nothin else
