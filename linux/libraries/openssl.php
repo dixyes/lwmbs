@@ -75,7 +75,8 @@ EOF,
         Log::i("building {$this->name}");
         $ret = 0;
         $ex_lib = '-ldl -pthread';
-        $env = $this->config->pkgconfEnv;
+        $env = $this->config->pkgconfEnv .
+            "CFLAGS='{$this->archCFlags}'";
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
@@ -86,6 +87,7 @@ EOF,
                     "-idirafter /usr/include/{$this->config->arch}-linux-gnu/'";
                 break;
             case Clib::MUSL:
+                $env .= " CC='{$this->config->cc}'";
                 $ex_lib = '';
             case Clib::GLIBC:
                 $env .= " CC='{$this->config->cc} " .

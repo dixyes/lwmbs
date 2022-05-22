@@ -49,23 +49,25 @@ EOF
     {
         Log::i("building {$this->name}");
         $ret = 0;
-        $env = $this->config->configureEnv;
+        $env = $this->config->pkgconfEnv . ' ' .
+            "CFLAGS='{$this->config->archCFlags}'";
+
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
-                $env .= ' CC="' .
-                    $this->config->libc->getCC() . ' ' .
+                $env .= " CC='{$this->config->cc} " .
                     '-static ' .
                     '-idirafter ' . realpath('include') . ' ' .
-                    '-idirafter /usr/include/ ' .
-                    '-idirafter /usr/include/x86_64-linux-gnu/"';
-                break;
-            case CLib::GLIBC:
+                    ($this->config->arch === php_uname('m') ? '-idirafter /usr/include/ ' : '') .
+                    "-idirafter /usr/include/{$this->config->arch}-linux-gnu/'";
                 break;
             case CLib::MUSL:
+            case CLib::GLIBC:
+                $env .= " CC='{$this->config->cc}'";
                 break;
             default:
                 throw new Exception("unsupported libc: {$this->config->libc->name}");
         }
+
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
