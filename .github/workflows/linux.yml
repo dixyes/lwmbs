@@ -5,194 +5,247 @@ on:
   push:
 
 jobs:
-  source-fetch:
-    name: Cache PHP ${{ matrix.php-version }} sources
+  libs:
+    name: ${{ matrix.libc }} PHP ${{ matrix.php-version }} ${{ matrix.arch }}
     runs-on: ubuntu-latest
+    container: ${{ (matrix.libc == 'musl' && 'alpine:edge') || ( matrix.arch == 'x86_64' && 'centos:7' || 'fedora:rawhide') }}
     strategy:
       fail-fast: false
       matrix:
         php-version: ["8.1", "8.0"]
-      max-parallel: 2
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Update sources
-        shell: bash
-        id: src_upgrade
-        run: |
-          mkdir build
-          printf '::set-output name=hash::'
-          php fetch_source.php ./src.json ${{ matrix.php-version }} --hash
-          echo
-
-      - name: Cache sources
-        uses: actions/cache@v3
-        with:
-          path: |
-            build/src
-            build/downloads
-          # note: match this
-          key: linux-src-v3-${{ steps.src_upgrade.outputs.hash }}
-
-  cache:
-    needs:
-      - source-fetch
-    name: Cache ${{ matrix.libc }} PHP ${{ matrix.php-version }} libraries
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: ["8.1", "8.0"]
-        libc: ['musl', 'glibc']
-      max-parallel: 4
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Update sources
-        shell: bash
-        id: src_upgrade
-        run: |
-          mkdir build
-          printf '::set-output name=hash::'
-          php fetch_source.php ./src.json ${{ matrix.php-version }} --hash
-          echo
-
-      - name: Cache sources
-        uses: actions/cache@v3
-        with:
-          path: |
-            build/src
-            build/downloads
-          # note: match this
-          key: linux-src-v3-${{ steps.src_upgrade.outputs.hash }}
-
-      - name: Cache libs
-        id: libs-cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            build/lib
-            build/include
-          # note: match this
-          key: linux-lib-${{ matrix.libc }}-v3-${{ steps.src_upgrade.outputs.hash }}
-
-      - name: Prepare and fetch sources
-        shell: bash
-        if: steps.libs-cache.outputs.cache-hit != 'true'
-        working-directory: build
-        run: |
-          sudo apt-get install -yy --no-install-recommends \
-            bison re2c ${{ matrix.libc == 'musl' && 'musl musl-tools' || '' }}
-          php ../fetch_source.php ../src.json ${{ matrix.php-version }} --shallow-clone
-
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-
-      - name: Build libraries
-        shell: bash
-        working-directory: build
-        run: |
-          php ../build_libs.php
-
-  build:
-    needs:
-      - cache
-    name: PHP ${{ matrix.php-version }} ${{ matrix.sapi }} ${{ matrix.libc }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: ["8.1", "8.0"]
-        sapi: ['cli', 'micro']
-        libc: ['musl', 'glibc']
+        libc: ["musl", "glibc"]
+        arch: ["x86_64", "aarch64"]
       max-parallel: 8
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Update sources
-        shell: bash
-        id: src_upgrade
+      - name: Setup Fedora mirror
+        if: matrix.libc == 'glibc' && matrix.arch == 'aarch64'
         run: |
-          mkdir build
+          FEDORA_MIRROR='mirror.facebook.net/fedora/linux/'
+          find /etc/yum.repos.d -name "*cisco*.repo" -exec rm {} \;
+          sed -i 's/^metalink=/#metalink=/g' /etc/yum.repos.d/*.repo
+          sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/*.repo
+          sed -i 's|^#baseurl=http://download.example/pub/fedora/linux/|baseurl=https://'$FEDORA_MIRROR'|g' /etc/yum.repos.d/*.repo
+
+      - name: Setup CentOS and EPEL mirror
+        if: matrix.libc == 'glibc' && matrix.arch == 'x86_64'
+        run: |
+          CENTOS_MIRROR='mirror.facebook.net/centos/'
+          sed -i 's/^metalink=/#metalink=/g' /etc/yum.repos.d/*.repo
+          sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/*.repo
+          sed -i 's|^#baseurl=http://mirror\.centos\.org/centos/|baseurl=https://'$CENTOS_MIRROR'|g' /etc/yum.repos.d/*.repo
+          yum install -yy epel-release
+          EPEL_MIRROR='mirror.facebook.net/fedora/epel/'
+          sed -i 's/^metalink=/#metalink=/g' /etc/yum.repos.d/*.repo
+          sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/*.repo
+          sed -i 's|^#baseurl=http://download.fedoraproject.org/pub/epel/|baseurl=https://'$EPEL_MIRROR'|g' /etc/yum.repos.d/*.repo
+
+      - name: Cache PHP 8.1 for CentOS
+        uses: actions/cache@v3
+        id: cache_php
+        if: matrix.libc == 'glibc' && matrix.arch == 'x86_64'
+        with:
+          path: |
+            /opt/cmake
+            /opt/php
+          # note: match this
+          key: linux-centos-v2
+
+      - name: Cache fedora arm64 things
+        uses: actions/cache@v3
+        id: cache_arm64
+        if: matrix.libc == 'glibc' && matrix.arch == 'aarch64'
+        with:
+          path: |
+            /usr/aarch64-linux-gnu/sys-root
+          # note: match this
+          key: linux-fedora-arm64-v1
+
+      - name: Cache failed
+        if: ((matrix.libc == 'glibc' && matrix.arch == 'aarch64') && !steps.cache_arm64.outcome) || ((matrix.libc == 'glibc' && matrix.arch == 'x86_64') && !steps.cache_php.outcome)
+        run: |
+          false
+
+      - name: Calc sources hash
+        id: src_hash
+        run: |
+          set -xeo pipefail
+          case "${{ matrix.libc }}-${{ matrix.arch }}" in
+            "musl-x86_64") apk add php81 curl xz tar bzip2 zstd && ln -sf "$(which php81)" /usr/bin/php;;
+            "musl-aarch64") apk add php81 curl xz tar bzip2 zstd && ln -sf "$(which php81)" /usr/bin/php;;
+            "glibc-x86_64") export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH";;
+            "glibc-aarch64") dnf install -yy php;;
+          esac
           printf '::set-output name=hash::'
-          php fetch_source.php ./src.json ${{ matrix.php-version }} --hash
+          php fetch_source.php ./src.json "${{ matrix.php-version }}" --hash
           echo
 
-      - name: Cache sources
+      - name: Cache libraries
         uses: actions/cache@v3
+        id: cache
         with:
           path: |
-            build/src
-            build/downloads
-          # note: match this
-          key: linux-src-v3-${{ steps.src_upgrade.outputs.hash }}
+            /src
+            /downloads
+            /lib/*.a
+            /lib/pkgconfig
+            /include
+          key: linux-${{ matrix.libc }}-${{ matrix.arch }}-v3-${{ steps.src_hash.outputs.hash }}
 
-      - name: Cache libs
-        uses: actions/cache@v3
-        with:
-          path: |
-            build/lib
-            build/include
-          # note: match this
-          key: linux-lib-${{ matrix.libc }}-v3-${{ steps.src_upgrade.outputs.hash }}
-
-      - name: Prepare and fetch sources
-        shell: bash
-        working-directory: build
+      - name: Prepare tools and sources
+        id: prepare
         run: |
-          sudo apt-get install -yy --no-install-recommends \
-            bison re2c ${{ matrix.libc == 'musl' && 'musl musl-tools' || '' }}
-          mkdir \
-            ../${{ matrix.sapi }}_shared \
-            ../${{ matrix.sapi }}_static
-          php ../fetch_source.php ../src.json ${{ matrix.php-version }} --shallow-clone
+          set -xeo pipefail
+          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          cd /
+          case "${{ matrix.libc }}-${{ matrix.arch }}" in
+            "musl-aarch64") apk add --no-cache \
+                alpine-sdk automake autoconf bison flex re2c cmake \
+                vim \
+                xz tar &&
+              mkdir -p downloads &&
+              {
+                test -f downloads/aarch64-linux-musl-cross.tgz ||
+                curl -o downloads/aarch64-linux-musl-cross.tgz https://musl.cc/aarch64-linux-musl-cross.tgz
+              } &&
+              {
+                tar -xvf downloads/aarch64-linux-musl-cross.tgz -C / --strip-components=1 || :
+              } &&
+              export LWMBS_CC=aarch64-linux-musl-gcc &&
+              export LWMBS_CXX==aarch64-linux-musl-g++
+              ;;
+            "musl-x86_64") apk add --no-cache \
+                alpine-sdk automake autoconf bison flex re2c cmake clang linux-headers \
+                vim \
+                zlib-static zlib-dev \
+                bzip2 bzip2-static bzip2-dev \
+                zstd zstd-static zstd-dev &&
+              export LWMBS_CC=clang &&
+              export LWMBS_CXX=clang++
+              ;;
+            "glibc-aarch64") 
+              dnf install -yy \
+                git diffstat gettext git patch patchutils \
+                file less make ncurses pkgconf pkgconf-m4 pkgconf-pkg-config \
+                procps-ng unzip util-linux zip diffutils \
+                re2c perl bison flex autoconf automake cmake \
+                vim \
+                glibc-static \
+                xz zstd bzip2 tar curl \
+                binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu gcc-c++-aarch64-linux-gnu &&
+              export LWMBS_CC=aarch64-linux-gnu-gcc &&
+              export LWMBS_CXX=aarch64-linux-gnu-g++
+              ;;
+            "glibc-x86_64") 
+              yum install -yy \
+                perl m4 autoconf automake bison byacc cscope ctags \
+                diffstat elfutils flex gcc gcc-c++ gettext \
+                git libtool make patch patchutils cpp file \
+                glibc-headers glibc-devel kernel-headers less \
+                libstdc++-devel mpfr nettle zip unzip \
+                re2c perl \
+                vim \
+                glibc-static \
+                xz zstd bzip2 tar curl &&
+              export LWMBS_CC=gcc &&
+              export LWMBS_CXX=g++
+              ;;
+          esac
+          echo "::set-output name=cc::$LWMBS_CC"
+          echo "::set-output name=cxx::$LWMBS_CXX"
+          php ${GITHUB_WORKSPACE}/fetch_source.php ${GITHUB_WORKSPACE}/src.json ${{ matrix.php-version }} --shallow-clone
 
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-
-      - name: Build ${{ matrix.sapi }}
-        shell: bash
-        working-directory: build
+      - name: Prepare libraries
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          php ../build_${{ matrix.sapi }}.php
-          if [ 'micro' = '${{ matrix.sapi }}' ]
-          then
-            cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ../micro_shared
-          else
-            cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ../cli_shared
-          fi
+          set -xeo pipefail
+          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          cd /
+          php ${GITHUB_WORKSPACE}/build_libs.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
 
-      - name: Upload artifact for ${{ matrix.sapi }}
+      - name: Build micro
+        id: micro_shared
+        continue-on-error: true
+        run: |
+          set -xeo pipefail
+          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          cd /
+          php ${GITHUB_WORKSPACE}/build_micro.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
+          mkdir -p ${GITHUB_WORKSPACE}/micro_shared
+          cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_shared/
+
+      - name: Upload artifact for micro
+        if: steps.micro_shared.outcome
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.sapi }}_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ steps.src_upgrade.outputs.hash }}
+          name: micro_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
           path: |
-            ${{ matrix.sapi }}_shared
+            micro_shared
 
-      - name: Build ${{ matrix.sapi }} all-static
-        shell: bash
-        working-directory: build
+      - name: Build micro static
+        id: micro_static
+        continue-on-error: true
         run: |
-          php ../build_${{ matrix.sapi }}.php all-static
-          if [ 'micro' = '${{ matrix.sapi }}' ]
-          then
-            cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ../micro_static
-          else
-            cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ../cli_static
-          fi
+          set -xeo pipefail
+          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          cd /
+          php ${GITHUB_WORKSPACE}/build_micro.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }} --all-static
+          mkdir -p ${GITHUB_WORKSPACE}/micro_static
+          cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_static/
 
-      - name: Upload artifact for ${{ matrix.sapi }} static
+      - name: Upload artifact for micro static
+        if: steps.micro_static.outcome
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.sapi }}_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ steps.src_upgrade.outputs.hash }}
+          name: micro_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
           path: |
-            ${{ matrix.sapi }}_static
+            micro_static
+
+      - name: Build cli
+        id: cli_shared
+        continue-on-error: true
+        run: |
+          set -xeo pipefail
+          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          cd /
+          php ${GITHUB_WORKSPACE}/build_cli.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
+          mkdir -p ${GITHUB_WORKSPACE}/cli_shared
+          cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_shared/
+
+      - name: Upload artifact for cli
+        if: steps.cli_shared.outcome
+        uses: actions/upload-artifact@v3
+        with:
+          name: cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          path: |
+            cli_shared
+
+      - name: Build cli static
+        id: cli_static
+        continue-on-error: true
+        run: |
+          set -xeo pipefail
+          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          cd /
+          php ${GITHUB_WORKSPACE}/build_cli.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }} --all-static
+          mkdir -p ${GITHUB_WORKSPACE}/cli_static
+          cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_static/
+
+      - name: Upload artifact for cli static
+        if: steps.cli_static.outcome
+        uses: actions/upload-artifact@v3
+        with:
+          name: cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          path: |
+            cli_static
+
+      - name: Fail if anything failed
+        if: ${{ !(steps.micro_shared.outcome && (steps.micro_static.outcome || matrix.libc == 'glibc') && steps.cli_shared.outcome && (steps.cli_static.outcome || matrix.libc == 'glibc')) }}
+        run: |
+          false
 
       - name: Remove php src to avoid cache
-        shell: bash
-        working-directory: build
         run: |
-          rm -rf src/php-src
+          rm -rf /src/php-src
