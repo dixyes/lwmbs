@@ -68,8 +68,6 @@ class MicroBuild
             throw new Exception("failed to configure micro");
         }
 
-        Util::replaceConfigHeaderLine('#define HAVE_DNS_SEARCH 1');
-
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .

@@ -310,4 +310,15 @@ final class Util
             'gcc' => str_replace('-cc', '',str_replace('-gcc', '', $cc)) . '-',
         };
     }
+
+    public static function getArchCFlags(string $cc, string $arch):string {
+        return match(static::getCCType($cc)) {
+            'clang' => match ($arch) {
+                'x86_64' => '--target=x86_64-unknown-linux',
+                'arm64','aarch64' => '--target=arm64-unknown-linux',
+                default => throw new Exception('unsupported arch: ' . $arch),
+            },
+            'gcc' => '',
+        };
+    }
 }

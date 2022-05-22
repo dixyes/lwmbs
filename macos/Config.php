@@ -29,6 +29,7 @@ class Config extends CommonConfig
     public string $cc;
     public string $cxx;
     public string $arch;
+    public string $gnuArch;
     public string $archCFlags;
     public string $archCXXFlags;
     public string $cmakeToolchainFile;
@@ -56,10 +57,17 @@ class Config extends CommonConfig
         Log::i('choose cxx: ' . $this->cxx);
         $this->arch = $arch ?? php_uname('m');
         Log::i('choose arch: ' . $this->arch);
+
+        $this->gnuArch = match($this->arch) {
+            'arm64' => 'aarch64',
+            'armv7' => 'arm',
+            default => $this->arch,
+        };
+
     
         $this->concurrency = Util::getCpuCount();
-        $this->archCFlags = Util::getArchCFlags($this->cc, $this->arch);
-        $this->archCXXFlags = Util::getArchCFlags($this->cxx, $this->arch);
+        $this->archCFlags = Util::getArchCFlags($this->arch);
+        $this->archCXXFlags = Util::getArchCFlags($this->arch);
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(
             os: 'Darwin',
             targetArch: $this->arch,
@@ -71,7 +79,7 @@ class Config extends CommonConfig
             'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '" '.
             "CC='{$this->cc}' ".
             "CXX='{$this->cxx}' " .
-            "CFLAGS='{$this->config->archCFlags}'";
+            "CFLAGS='{$this->archCFlags}'";
     }
 
     public function makeAutoconfArgs(string $name, array $libSpecs): string

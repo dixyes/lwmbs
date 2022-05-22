@@ -33,4 +33,11 @@ final class Util
         return (int) $output[0];
     }
 
+    public static function getArchCFlags(string $arch):string {
+        return match ($arch) {
+            'x86_64' => '--target=x86_64-apple-darwin',
+            'arm64','aarch64' => '--target=arm64-apple-darwin',
+            default => throw new Exception('unsupported arch: ' . $arch),
+        };
+    }
 }

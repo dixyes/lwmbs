@@ -39,7 +39,7 @@ class Libzlib extends Library
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} ' ./configure " .
+                "{$this->config->configureEnv} ./configure " .
                 '--static ' .
                 '--prefix= && ' . //use prefix=/
                 "make clean && " .

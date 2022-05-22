@@ -47,7 +47,7 @@ class Libxz extends Library
                 "{$this->config->configureEnv} ./configure " .
                 '--enable-static ' .
                 '--disable-shared ' .
-                "--host={$this->config->arch}-apple-darwin " .
+                "--host={$this->config->gnuArch}-apple-darwin " .
                 '--disable-xz ' .
                 '--disable-xzdec ' .
                 '--disable-lzmadec ' .

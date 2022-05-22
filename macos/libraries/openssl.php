@@ -53,7 +53,7 @@ class Libopenssl extends Library
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "$env : ./Configure no-shared $zlib " .
+                "$env ./Configure no-shared $zlib " .
                 '--prefix=/ ' . //use prefix=/
                 '--libdir=/lib ' .
                 " darwin64-{$this->config->arch} && " .

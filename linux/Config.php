@@ -136,9 +136,9 @@ class Config extends CommonConfig
     public function getCCEnv(bool $usedCXX = false): string
     {
         return match ($this->libc) {
-            static::GLIBC => '',
-            static::MUSL => '',
-            static::MUSL_WRAPPER => 
+            CLib::GLIBC => '',
+            CLib::MUSL => '',
+            CLib::MUSL_WRAPPER => 
                 'CC='.$this->cc . ($usedCXX ? ' CXX="' . $this->cxx . '"' : ''),
         };
     }

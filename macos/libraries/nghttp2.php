@@ -71,7 +71,7 @@ class Libnghttp2 extends Library
                 "{$this->config->configureEnv} ". ' ./configure ' .
                 '--enable-static '.
                 '--disable-shared ' .
-                "--host={$this->config->arch}-apple-darwin " .
+                "--host={$this->config->gnuArch}-apple-darwin " .
                 '--enable-lib-only ' .
                 '--with-boost=no ' .
                 $args . ' ' .
