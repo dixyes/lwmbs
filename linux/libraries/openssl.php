@@ -91,6 +91,7 @@ EOF,
             case Clib::GLIBC:
                 $env .= " CC='{$this->config->cc} " .
                     '-static ' .
+                    '-static-libgcc ' .
                     '-idirafter ' . realpath('include') . ' ' .
                     ($this->config->arch === php_uname('m') ? '-idirafter /usr/include/ ' : '') . "' ";
                 break;
@@ -108,6 +109,9 @@ EOF,
         }
 
         $ex_lib = trim($ex_lib);
+
+        $clangPostfix = Util::getCCType($this->config->cc) === 'clang' ? '-clang' : '';
+
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
@@ -116,7 +120,7 @@ EOF,
                 '--libdir=lib ' .
                 '--static ' .
                 '-static ' .
-                " linux-{$this->config->arch} && " .
+                " linux-{$this->config->arch}{$clangPostfix} && " .
                 "make clean && " .
                 "make -j{$this->config->concurrency} CNF_EX_LIBS=\"$ex_lib\" && " .
                 'make install_sw DESTDIR=' . realpath('.'),
