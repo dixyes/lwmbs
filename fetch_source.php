@@ -19,11 +19,11 @@
 
 require __DIR__ . '/common/Log.php';
 require __DIR__ . '/common/LogType.php';
-require __DIR__ . '/common/CommonUtil.php';
+require __DIR__ . '/common/CommonUtilTrait.php';
 
 class Util
 {
-    use CommonUtil;
+    use CommonUtilTrait;
 }
 
 function extractSource(string $name, string $filename): void
