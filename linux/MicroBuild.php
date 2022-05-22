@@ -32,18 +32,23 @@ class MicroBuild
         $ret = 0;
 
         $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
-        $envs = $this->config->configureEnv;
+        $envs = $this->config->pkgconfEnv . ' ' .
+            "CC='{$this->config->cc}' ".
+            "CXX='{$this->config->cxx}' ";
+        $cflags = $this->config->archCFlags;
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
             case CLib::GLIBC:
-                $envs .= " CFLAGS='{$this->config->archCFlags} -static-libgcc -I" . realpath('include') . " ' ";
+                $cflags .= ' -static-libgcc -I"' . realpath('include') . '"';
                 break;
             case CLib::MUSL:
                 break;
             default:
                 throw new Exception('not implemented');
         }
+
+        $envs = "$envs CFLAGS='$cflags'";
 
         passthru(
             $this->config->setX . ' && ' .

@@ -81,8 +81,9 @@ EOF
                 'make install DESTDIR=' . realpath('.'),
             $ret
         );
-        if (is_dir('lib64')){
+        if (is_file('lib64/libffi.a')){
             copy('lib64/libffi.a', 'lib/libffi.a');
+            unlink('lib64/libffi.a');
         }
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
