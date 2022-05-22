@@ -17,44 +17,33 @@
  * See the Mulan PSL v2 for more details.
  */
 
-spl_autoload_register(function ($class) {
-    if (strpos($class, '\\') !== false) {
-        // never here
-        throw new Exception('???');
-    }
-
-    $osDir = match (PHP_OS_FAMILY) {
-        'Windows', 'WINNT', 'Cygwin' => 'windows',
-        'Linux' => 'linux',
-        'Darwin' => 'macos',
-    };
-
-    if (str_starts_with($class, 'Lib') && $class !== 'Library') {
-        $libName = substr($class, 3);
-        $file = __DIR__ . "/$osDir/libraries/$libName.php";
-        require $file;
-        return;
-    }
-
-    $file = __DIR__ . "/$osDir/$class.php";
-    if (is_file($file)) {
-        require $file;
-    } else {
-        require __DIR__ . "/common/$class.php";
-    }
-});
-
+require __DIR__ . '/autoload.php';
 
 function mian($argv): int
 {
     Util::setErrorHandler();
 
-    $allStatic = false;
-    if (in_array('all-static', $argv, true)) {
-        $allStatic = true;
+    $cmdArgs = Util::parseArgs($argv);
+    foreach (array_keys($cmdArgs) as $k) {
+        if (!in_array($k, [
+            'all-static',
+            'cc',
+            'cxx',
+            'arch',
+        ], true)) {
+            Log::e("Unknown argument: $k");
+            Log::w("Usage: {$argv[0]} [--all-static] [--cc=<compiler>] [--cxx=<compiler>] [--arch=<arch>]");
+            exit(1);
+        }
     }
 
-    $config = new Config($argv);
+    $allStatic = (bool)($cmdArgs['all-static'] ?? false);
+
+    $config = new Config(
+        cc: $cmdArgs['cc'] ?? null,
+        cxx: $cmdArgs['cxx'] ?? null,
+        arch: $cmdArgs['arch'] ?? null,
+    );
 
     $libNames = [
         'libssh2',

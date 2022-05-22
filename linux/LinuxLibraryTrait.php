@@ -30,21 +30,27 @@ trait LinuxLibraryTrait
         //return;
         foreach ($this->staticLibs as $name) {
             if (!file_exists("lib/{$name}")) {
+                Log::i("{$this->name} lib $name not found, reproving");
                 goto make;
             }
         }
         foreach ($this->headers as $name) {
             if (!file_exists("include/{$name}")) {
+                Log::i("{$this->name} header $name not found, reproving");
                 goto make;
             }
         }
         Log::i("{$this->name} already proven");
         return;
         make:
+        if ($forceBuild || php_uname('m') !== $this->config->arch ) {
+            goto build;
+        }
 
         $staticLibPathes = Util::findStaticLibs($this->staticLibs);
         $headerPathes = Util::findHeaders($this->headers);
-        if (!$staticLibPathes || !$headerPathes || $forceBuild) {
+        if (!$staticLibPathes || !$headerPathes) {
+            build:
             $this->build();
         } else {
             if ($this->config->libc === CLib::MUSL_WRAPPER) {

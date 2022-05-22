@@ -22,7 +22,6 @@ final class Util
 {
     use CommonUtilTrait;
     use UnixUtilTrait;
-    public const NEEDED_COMMANDS = ['gcc', 'make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
     public static function findStaticLib(string $name): ?array
     {
         $paths = getenv('LIBPATH');
@@ -149,7 +148,7 @@ final class Util
         }
     }
 
-    public static function chooseLibc()
+    public static function chooseLibc(string $cc):Clib
     {
         Log::i('checking libc');
         $self = file_get_contents('/proc/self/exe', length: 4096);
@@ -160,9 +159,12 @@ final class Util
             return CLib::MUSL;
         }
 
-        // else try to use musl-gcc wrapper
-        if (static::findCommand('musl-gcc')) {
+        // else try to use musl cc wrapper
+        if ($cc === 'musl-gcc' || $cc === 'musl-clang') {
             Log::i("using musl wrapper");
+            if ($cc === 'musl-clang') {
+                Log::w("musl-clang is buggy");
+            }
             return CLib::MUSL_WRAPPER;
         } else {
             $distro = static::getOSRelease();
@@ -172,6 +174,32 @@ final class Util
             Log::i("using glibc");
             return CLib::GLIBC;
         }
+    }
+
+    public static function chooseCC():string
+    {
+        Log::i('checking cc');
+        if (Util::findCommand('clang')) {
+            Log::i("using clang");
+            return 'clang';
+        } else if (Util::findCommand('gcc')){
+            Log::i("using gcc");
+            return 'gcc';
+        }
+        throw new Exception("no supported cc found");
+    }
+
+    public static function chooseCXX():string
+    {
+        Log::i('checking cxx');
+        if (Util::findCommand('clang++')) {
+            Log::i("using clang++");
+            return 'clang++';
+        } else if (Util::findCommand('g++')){
+            Log::i("using g++");
+            return 'g++';
+        }
+        return static::chooseCC();
     }
 
     public static function patchConfigure(Config $config) {
@@ -257,5 +285,29 @@ final class Util
             }
             return ' ' . implode(' ', $_extra_libs);
         }
+    }
+
+    public static function getTuneCFlags(string $arch):array{
+        return match($arch) {
+            'x86_64' => [
+                '-march=corei7',
+                '-mtune=core-avx2',
+            ],
+            'arm64','aarch64' => [],
+            default => throw new Exception('unsupported arch: ' . $arch),
+        };
+    }
+
+    public static function getCrossCompilePrefix(string $cc, string $arch, ):string {
+        return match(static::getCCType($cc)) {
+            // guessing clang toolchains
+            'clang' => match ($arch) {
+                'x86_64' => 'x86_64-linux-gnu-',
+                'arm64','aarch64' => 'aarch64-linux-gnu-',
+                default => throw new Exception('unsupported arch: ' . $arch),
+            },
+            // remove gcc postfix
+            'gcc' => str_replace('-cc', '',str_replace('-gcc', '', $cc)) . '-',
+        };
     }
 }

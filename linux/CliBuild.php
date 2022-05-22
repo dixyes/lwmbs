@@ -36,11 +36,10 @@ class CliBuild
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
-                $envs .= ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ' .
-                    $this->config->libc->getCCEnv(true);
-                break;
             case CLib::GLIBC:
-                $envs = ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ';
+                $envs .= " CFLAGS='{$this->config->archCFlags} -static-libgcc -I" . realpath('include') . " ' ";
+                break;
+            case CLib::MUSL:
                 break;
             default:
                 throw new Exception('not implemented');
@@ -66,6 +65,7 @@ class CliBuild
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
+                "--host={$this->config->arch}-unknown-linux " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -94,10 +94,10 @@ class CliBuild
                 ($allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ' : '') .
                 'cli && ' .
                 'cd sapi/cli && ' .
-                'objcopy --only-keep-debug php php.debug && ' .
+                "{$this->config->crossCompilePrefix}objcopy --only-keep-debug php php.debug && " .
                 'elfedit --output-osabi linux php && ' .
-                'strip --strip-all php && ' .
-                'objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php',
+                "{$this->config->crossCompilePrefix}strip --strip-all php && " .
+                "{$this->config->crossCompilePrefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=php.debug --remove-section=.note php",
             $ret
         );
         if ($ret !== 0) {

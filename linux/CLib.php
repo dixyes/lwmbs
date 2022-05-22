@@ -40,31 +40,4 @@ enum CLib
         }
     }
 
-    public function getCC(): string
-    {
-        return match ($this) {
-            static::GLIBC => 'cc',
-            static::MUSL => 'cc',
-            static::MUSL_WRAPPER => 'musl-gcc',
-        };
-    }
-
-    public function getCXX(): string
-    {
-        return $this->getCC() . ' -x c++';
-    }
-
-    public function getCPP(): string
-    {
-        return $this->getCC() . ' -E';
-    }
-
-    public function getCCEnv(bool $usedCXX = false): string
-    {
-        return match ($this) {
-            static::GLIBC => '',
-            static::MUSL => '',
-            static::MUSL_WRAPPER => 'CC=musl-gcc' . ($usedCXX ? ' CXX="musl-gcc -x c++"' : ''),
-        };
-    }
 }

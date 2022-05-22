@@ -36,11 +36,8 @@ class MicroBuild
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
-                $envs .= ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ' .
-                    $this->config->libc->getCCEnv(true);
-                break;
             case CLib::GLIBC:
-                $envs = ' CFLAGS="-static-libgcc -I' . realpath('include') . '" ';
+                $envs .= " CFLAGS='{$this->config->archCFlags} -static-libgcc -I" . realpath('include') . " ' ";
                 break;
             case CLib::MUSL:
                 break;
@@ -68,6 +65,7 @@ class MicroBuild
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
+                "--host={$this->config->arch}-unknown-linux " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -95,10 +93,10 @@ class MicroBuild
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 'POST_MICRO_BUILD_COMMANDS="sh -xc \'' .
                     'cd sapi/micro && ' .
-                    'objcopy --only-keep-debug micro.sfx micro.sfx.debug && ' .
+                    "{$this->config->crossCompilePrefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug && " .
                     'elfedit --output-osabi linux micro.sfx && ' .
-                    'strip --strip-all micro.sfx && ' .
-                    'objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx \'' .
+                    "{$this->config->crossCompilePrefix}strip --strip-all micro.sfx && " .
+                    "{$this->config->crossCompilePrefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx'" .
                 '" ' .
                 'micro',
             $ret

@@ -72,12 +72,18 @@ EOF
                 "$env ./configure " .
                 '--enable-static ' .
                 '--disable-shared ' .
+                "--host={$this->config->arch}-unknown-linux " .
+                "--target={$this->config->arch}-unknown-linux " .
                 '--prefix= ' . //use prefix=/
                 '--libdir=/lib && ' .
+                "make clean && " .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret
         );
+        if (is_dir('lib64')){
+            copy('lib64/libffi.a', 'lib/libffi.a');
+        }
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }

@@ -93,4 +93,14 @@ trait CommonUtilTrait
             }
         }
     }
+
+    public static function parseArgs(array $argv) {
+        $ret = [];
+        array_shift($argv);
+        foreach ($argv as $arg) {
+            $kv = explode('=', $arg, 2);
+            $ret[ltrim($kv[0], '-')] = $kv[1] ?? true;
+        }
+        return $ret;
+    }
 }

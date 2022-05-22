@@ -23,14 +23,6 @@ final class Util
     use CommonUtilTrait;
     use UnixUtilTrait;
 
-    public static function getArchCFlags(string $arch):string {
-        return match ($arch) {
-            'x86_64' => '--target=x86_64-apple-darwin',
-            'arm64' => '--target=arm64-apple-darwin',
-            default => throw new Exception('unsupported arch: ' . $arch),
-        };
-    }
-
     public static function getCpuCount(): int
     {
         exec('sysctl -n hw.ncpu', $output, $ret);

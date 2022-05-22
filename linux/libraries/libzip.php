@@ -95,7 +95,7 @@ EOF,
                 'rm -rf build && ' .
                 'mkdir -p build && ' .
                 'cd build && ' .
-                "{$this->config->configureEnv} " . $this->config->libc->getCCEnv() . ' cmake ' .
+                "{$this->config->configureEnv} " . ' cmake ' .
                 // '--debug-find ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DENABLE_GNUTLS=OFF ' .
@@ -113,6 +113,7 @@ EOF,
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '.. && ' .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),

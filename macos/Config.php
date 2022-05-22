@@ -26,25 +26,50 @@ class Config extends CommonConfig
     public string $configureEnv = '';
     // TODO: comment
     //public string $noteSection = "Je pense, donc je suis\0";
-    public string $arch = 'x86_64';
+    public string $cc;
+    public string $cxx;
+    public string $arch;
+    public string $archCFlags;
+    public string $archCXXFlags;
     public string $cmakeToolchainFile;
+
     public const NEEDED_COMMANDS = ['gcc', 'make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
 
-    public function __construct()
+    public function __construct(
+        ?string $cc=null,
+        ?string $cxx=null,
+        ?string $arch=null,
+    )
     {
         $lackingCommands = Util::lackingCommands(static::NEEDED_COMMANDS);
         if ($lackingCommands) {
             throw new Exception("missing commands: " . implode(', ', $lackingCommands));
         }
+        Log::i("mkdir -p lib/pkgconfig");
         @mkdir('lib/pkgconfig', recursive: true);
-        $this->configureEnv = 'PKG_CONFIG_PATH=' . realpath('lib/pkgconfig');
+
+        $this->cc = $cc ?? 'clang';
+        Log::i('choose cc: ' . $this->cc);
+        $this->cxx = $cxx ?? 'clang++';
+        Log::i('choose cxx: ' . $this->cxx);
+        $this->arch = $arch ?? php_uname('m');
+        Log::i('choose arch: ' . $this->arch);
+    
         $this->concurrency = Util::getCpuCount();
-        $this->archCFlags = Util::getArchCFlags($this->arch);
+        $this->archCFlags = Util::getArchCFlags($this->cc, $this->arch);
+        $this->archCXXFlags = Util::getArchCFlags($this->cxx, $this->arch);
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(
             os: 'Darwin',
             targetArch: $this->arch,
             cflags:  Util::getArchCFlags($this->arch),
         );
+        
+        
+        $this->configureEnv = 
+            'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '" '.
+            "CC='{$this->cc}' ".
+            "CXX='{$this->cxx}' " .
+            "CFLAGS='{$this->config->archCFlags}'";
     }
 
     public function makeAutoconfArgs(string $name, array $libSpecs): string
@@ -81,5 +106,12 @@ class Config extends CommonConfig
         }
     
         return implode(' ', array_map(fn ($x) => $x->getStaticLibFiles(), $libs));
+    }
+
+    public function getCXXEnv():string {
+        if (str_ends_with($this->cxx, '++')) {
+            return $this->cxx;
+        }
+        return "{$this->cxx} -x c++";
     }
 }

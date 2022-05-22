@@ -74,22 +74,25 @@ EOF
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} " . $this->config->libc->getCCEnv() . ' ./configure ' .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--disable-rpath ' .
-                '--enable-hidden-symbols ' .
-                '--disable-examples-build ' .
-                '--disable-ossfuzzers ' .
-                '--with-crypto=openssl ' .
-                '--with-libssl-prefix=' . realpath('.') . ' ' .
-                $zlib . ' ' .
-                $libs . ' ' .
-                '--prefix= && ' . //use prefix=/
-                "make -j {$this->config->concurrency} && " .
-                'make install DESTDIR=' . realpath('.'),
+                'rm -rf build && ' .
+                'mkdir -p build && ' .
+                'cd build && ' .
+                "{$this->config->configureEnv} " . ' cmake ' .
+                // '--debug-find ' .
+                '-DCMAKE_BUILD_TYPE=Release ' .
+                '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DBUILD_EXAMPLES=OFF ' .
+                '-DBUILD_TESTING=OFF ' .
+                '-DCMAKE_INSTALL_PREFIX=/ ' .
+                '-DCMAKE_INSTALL_LIBDIR=/lib ' .
+                '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
+                "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
+                '.. && ' .
+                "cmake --build . -j {$this->config->concurrency} --target libssh2 && " .
+                'make install DESTDIR="' . realpath('.') . '"' ,
             $ret
         );
+
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }

@@ -59,9 +59,10 @@ EOF,
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} ". $this->config->libc->getCCEnv() . ' ./configure ' .
+                "{$this->config->configureEnv} " . ' ./configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                "--host={$this->config->arch}-unknown-linux " .
                 '--disable-xz ' .
                 '--disable-xzdec ' .
                 '--disable-lzmadec ' .
@@ -70,6 +71,7 @@ EOF,
                 '--disable-doc ' .
                 "$libiconv " .
                 '--prefix= && ' . //use prefix=/
+                "make clean && " .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret

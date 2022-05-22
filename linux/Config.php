@@ -23,29 +23,66 @@ class Config extends CommonConfig
     // TODO: workspace
     //public string $workspace = '.';
     public string $setX = 'set -x';
-    public string $configureEnv = '';
+    public string $configureEnv;
+    public string $pkgconfEnv;
     public string $noteSection = "Je pense, donc je suis\0";
     public CLib $libc;
+    public string $cc;
+    public string $cxx;
     public string $arch;
+    public string $archCFlags;
+    public string $archCXXFlags;
     public array $tuneCFlags;
+    public string $cmakeToolchainFile;
 
-    const TUNE_CFLAGS = [
-        '-march=corei7',
-        '-mtune=core-avx2',
-    ];
+    public string $crossCompilePrefix = '';
 
-    public function __construct()
+    public const NEEDED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
+
+    public function __construct(
+        ?string $cc=null,
+        ?string $cxx=null,
+        ?string $arch=null,
+    )
     {
-        $lackingCommands = Util::lackingCommands(Util::NEEDED_COMMANDS);
+        $lackingCommands = Util::lackingCommands(static::NEEDED_COMMANDS);
         if ($lackingCommands) {
             throw new Exception("missing commands: " . implode(', ', $lackingCommands));
         }
         @mkdir('lib/pkgconfig', recursive: true);
-        $this->configureEnv = 'PKG_CONFIG_PATH=' . realpath('lib/pkgconfig');
-        $this->libc = Util::chooseLibc();
+
+        $this->cc = $cc ?? Util::chooseCC();
+        Log::i('choose cc: ' . $this->cc);
+        $this->cxx = $cxx ?? Util::chooseCXX();
+        Log::i('choose cxx: ' . $this->cxx);
+        $this->arch = $arch ?? php_uname('m');
+        Log::i('choose arch: ' . $this->arch);
+
+        $this->libc = Util::chooseLibc($this->cc);
         $this->concurrency = Util::getCpuCount();
-        $this->arch = php_uname('m');
-        $this->tuneCFlags = Util::checkCCFlags(static::TUNE_CFLAGS);
+        $this->archCFlags = Util::getArchCFlags($this->cc, $this->arch);
+        $this->archCXXFlags = Util::getArchCFlags($this->cxx, $this->arch);
+        $this->tuneCFlags = Util::checkCCFlags(util::getTuneCFlags($this->arch), $this->cc);
+        $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(
+            os: 'Linux',
+            targetArch: $this->arch,
+            cflags: Util::getArchCFlags($this->cc, $this->arch),
+            cc: $this->cc,
+            cxx: $this->cxx,
+        );
+        
+        $this->pkgconfEnv = 
+            'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '"';
+        $this->configureEnv = 
+            $this->pkgconfEnv . ' ' .
+            "CC='{$this->cc}' ".
+            "CXX='{$this->cxx}' " .
+            "CFLAGS='{$this->archCFlags}'";
+        if (php_uname('m') !== $this->arch){
+            $this->crossCompilePrefix =Util::getCrossCompilePrefix($this->cc, $this->arch);
+            Log::i('using cross compile prefix '.$this->crossCompilePrefix);
+            $this->configureEnv .= " CROSS_COMPILE='{$this->crossCompilePrefix}'";
+        }
     }
 
     public function makeAutoconfArgs(string $name, array $libSpecs): string
@@ -91,5 +128,15 @@ class Config extends CommonConfig
             }
         }
         return array_map(fn ($x) => realpath("lib/$x"), $libFiles);
+    }
+
+    public function getCCEnv(bool $usedCXX = false): string
+    {
+        return match ($this->libc) {
+            static::GLIBC => '',
+            static::MUSL => '',
+            static::MUSL_WRAPPER => 
+                'CC='.$this->cc . ($usedCXX ? ' CXX="' . $this->cxx . '"' : ''),
+        };
     }
 }

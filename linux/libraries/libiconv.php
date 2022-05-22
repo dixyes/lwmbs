@@ -40,11 +40,12 @@ class Liblibiconv extends Library
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} " . $this->config->libc->getCCEnv() . ' ./configure ' .
+                "{$this->config->configureEnv} " . ' ./configure ' .
                 '--enable-static ' .
                 '--disable-shared ' .
+                "--host={$this->config->arch}-unknown-linux " .
                 '--prefix= && ' . //use prefix=/
-                "make -j{$this->config->concurrency} && " .
+                "make clean && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret
         );

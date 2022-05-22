@@ -82,13 +82,15 @@ EOF
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} " . $this->config->libc->getCCEnv() . ' ./configure ' .
+                "{$this->config->configureEnv} " . ' ./configure ' .
                 '--enable-static '.
                 '--disable-shared ' .
+                "--host={$this->config->arch}-unknown-linux " .
                 '--enable-lib-only ' .
                 '--with-boost=no ' .
                 $args . ' ' .
                 '--prefix= && ' . //use prefix=/
+                "make clean && " .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret

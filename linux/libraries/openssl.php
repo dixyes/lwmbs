@@ -75,25 +75,23 @@ EOF,
         Log::i("building {$this->name}");
         $ret = 0;
         $ex_lib = '-ldl -pthread';
-        $env = $this->config->configureEnv;
+        $env = $this->config->pkgconfEnv;
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
-                $env .= ' CC="' .
-                    $this->config->libc->getCC() . ' ' .
+                $env .= " CC='{$this->config->cc} " .
                     '-static ' .
                     '-idirafter ' . realpath('include') . ' ' .
-                    '-idirafter /usr/include/ ' .
-                    '-idirafter /usr/include/x86_64-linux-gnu/"';
+                    ($this->config->arch === php_uname('m') ? '-idirafter /usr/include/ ' : '') .
+                    "-idirafter /usr/include/{$this->config->arch}-linux-gnu/'";
                 break;
             case Clib::MUSL:
                 $ex_lib = '';
             case Clib::GLIBC:
-                $env .= ' CC="' .
-                    $this->config->libc->getCC() . ' ' .
+                $env .= " CC='{$this->config->cc} " .
                     '-static ' .
                     '-idirafter ' . realpath('include') . ' ' .
-                    '-idirafter /usr/include/" ';
+                    ($this->config->arch === php_uname('m') ? '-idirafter /usr/include/ ' : '') . "' ";
                 break;
             default:
                 throw new Exception("unsupported libc: {$this->config->libc->name}");
@@ -118,6 +116,7 @@ EOF,
                 '--static ' .
                 '-static ' .
                 " linux-{$this->config->arch} && " .
+                "make clean && " .
                 "make -j{$this->config->concurrency} CNF_EX_LIBS=\"$ex_lib\" && " .
                 'make install_sw DESTDIR=' . realpath('.'),
             $ret
