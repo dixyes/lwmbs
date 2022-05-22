@@ -91,12 +91,18 @@ EOF,
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '.. && ' .
-                "make -j{$this->config->concurrency} && " .
-                'make install DESTDIR=' . realpath('.'),
+                "cmake --build . -j{$this->config->concurrency} --target=brotlicommon-static && " .
+                "cmake --build . -j{$this->config->concurrency} --target=brotlidec-static && " .
+                "cmake --build . -j{$this->config->concurrency} --target=brotlienc-static && " .
+                'cp libbrotlidec-static.a '.realpath('./lib').' && ' .
+                'cp libbrotlienc-static.a '.realpath('./lib').' && ' .
+                'cp libbrotlicommon-static.a '.realpath('./lib').' && ' .
+                'cp -r ../c/include/brotli '.realpath('./include'),
             $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }
+        $this->makeFakePkgconfs();
     }
 }
