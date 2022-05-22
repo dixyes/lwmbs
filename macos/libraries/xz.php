@@ -47,16 +47,16 @@ class Libxz extends Library
                 "{$this->config->configureEnv} ./configure " .
                 '--enable-static ' .
                 '--disable-shared ' .
+                "--host={$this->config->arch}-apple-darwin " .
                 '--disable-xz ' .
                 '--disable-xzdec ' .
                 '--disable-lzmadec ' .
                 '--disable-lzmainfo ' .
                 '--disable-scripts ' .
                 '--disable-doc ' .
-                "--host={$this->config->arch}-apple-darwin " .
-                "CFLAGS='{$this->config->archCFlags}' " .
                 "$libiconv " .
                 '--prefix= && ' . //use prefix=/
+                "make clean && " .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret

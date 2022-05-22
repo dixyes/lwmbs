@@ -43,9 +43,9 @@ class Liblibffi extends Library
                 '--disable-shared ' .
                 "--host={$this->config->arch}-apple-darwin " .
                 "--target={$this->config->arch}-apple-darwin " .
-                "CFLAGS='{$this->config->archCFlags}' " .
                 '--prefix= ' . //use prefix=/
                 '--libdir=/lib && ' .
+                "make clean && " .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret

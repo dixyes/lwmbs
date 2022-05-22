@@ -72,11 +72,11 @@ class Libnghttp2 extends Library
                 '--enable-static '.
                 '--disable-shared ' .
                 "--host={$this->config->arch}-apple-darwin " .
-                "CFLAGS='{$this->config->archCFlags}' " .
                 '--enable-lib-only ' .
                 '--with-boost=no ' .
                 $args . ' ' .
                 '--prefix= && ' . //use prefix=/
+                "make clean && " .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret

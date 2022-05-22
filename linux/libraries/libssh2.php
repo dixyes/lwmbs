@@ -58,18 +58,8 @@ EOF
         if (!$libopenssl) {
             throw new Exception('libssh2 requires openssl');
         }
+
         $ret = 0;
-
-        $libs = 'LIBS="' . $libopenssl->getStaticLibFiles() . ' ';
-
-        $zlib = '';
-        $libzlib = $this->config->getLib('zlib');
-        if ($libzlib) {
-            $zlib = '--with-libz --with-libz-prefix=' . realpath('.');
-            $libs .= $libzlib->getStaticLibFiles() . ' ';
-        }
-
-        $libs = rtrim($libs) . ' -lpthread -ldl"';
 
         passthru(
             $this->config->setX . ' && ' .

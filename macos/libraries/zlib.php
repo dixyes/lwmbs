@@ -42,6 +42,7 @@ class Libzlib extends Library
                 "{$this->config->configureEnv} ' ./configure " .
                 '--static ' .
                 '--prefix= && ' . //use prefix=/
+                "make clean && " .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
             $ret

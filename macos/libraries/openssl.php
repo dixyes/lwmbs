@@ -57,6 +57,7 @@ class Libopenssl extends Library
                 '--prefix=/ ' . //use prefix=/
                 '--libdir=/lib ' .
                 " darwin64-{$this->config->arch} && " .
+                "make clean && " .
                 "make -j{$this->config->concurrency} CNF_EX_LIBS=\"$ex_lib\" && " .
                 'make install_sw DESTDIR=' . realpath('.'),
             $ret
