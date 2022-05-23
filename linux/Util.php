@@ -134,8 +134,14 @@ final class Util
     public static function fixPkgConfig(string $path)
     {
         Log::i("fixing pc $path");
+
+        $workspace = realpath('.');
+        if ($workspace === '/') {
+            $workspace = '';
+        }
+
         $content = file_get_contents($path);
-        $content = preg_replace('/^prefix=.+$/m', 'prefix=' . realpath('.'), $content);
+        $content = preg_replace('/^prefix=.+$/m', "prefix=$workspace", $content);
         $content = preg_replace('/^libdir=.+$/m', 'libdir=${prefix}/lib', $content);
         $content = preg_replace('/^includedir=.+$/m', 'includedir=${prefix}/include', $content);
         file_put_contents($path, $content);

@@ -89,8 +89,12 @@ trait LinuxLibraryTrait
     }
     protected function makeFakePkgconfs()
     {
+        $workspace = realpath('.');
+        if ($workspace === '/') {
+            $workspace = '';
+        }
         foreach ($this->pkgconfs as $name => $content) {
-            file_put_contents("lib/pkgconfig/$name", 'prefix=' . realpath('') . "\n" . $content);
+            file_put_contents("lib/pkgconfig/$name", "prefix=$workspace\n" . $content);
         }
     }
 }
