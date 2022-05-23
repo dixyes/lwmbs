@@ -3,6 +3,8 @@ name: linux test
 on:
   workflow_dispatch:
   push:
+  schedule:
+    - cron:  '33 4 * * *'
 
 jobs:
   libs:
@@ -13,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         php-version: ["8.1", "8.0"]
-        libc: ["musl", "glibc"]
+        libc: ["glibc", "musl"]
         arch: ["x86_64", "aarch64"]
       max-parallel: 8
     steps:
@@ -64,7 +66,7 @@ jobs:
           key: linux-fedora-arm64-v1
 
       - name: Cache failed
-        if: ((matrix.libc == 'glibc' && matrix.arch == 'aarch64') && !steps.cache_arm64.outcome) || ((matrix.libc == 'glibc' && matrix.arch == 'x86_64') && !steps.cache_php.outcome)
+        if: ((matrix.libc == 'glibc' && matrix.arch == 'aarch64') && steps.cache_arm64.outcome != 'success') || ((matrix.libc == 'glibc' && matrix.arch == 'x86_64') && steps.cache_php.outcome != 'success')
         run: |
           false
 
@@ -79,7 +81,7 @@ jobs:
             "glibc-aarch64") dnf install -yy php;;
           esac
           printf '::set-output name=hash::'
-          php fetch_source.php ./src.json "${{ matrix.php-version }}" --hash
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php ./src.json "${{ matrix.php-version }}" --hash
           echo
 
       - name: Cache libraries
@@ -145,7 +147,7 @@ jobs:
                 git libtool make patch patchutils cpp file \
                 glibc-headers glibc-devel kernel-headers less \
                 libstdc++-devel mpfr nettle zip unzip \
-                re2c perl \
+                re2c perl-IPC-Cmd \
                 vim \
                 glibc-static \
                 xz zstd bzip2 tar curl &&
@@ -155,7 +157,7 @@ jobs:
           esac
           echo "::set-output name=cc::$LWMBS_CC"
           echo "::set-output name=cxx::$LWMBS_CXX"
-          php ${GITHUB_WORKSPACE}/fetch_source.php ${GITHUB_WORKSPACE}/src.json ${{ matrix.php-version }} --shallow-clone
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ${GITHUB_WORKSPACE}/fetch_source.php ${GITHUB_WORKSPACE}/src.json ${{ matrix.php-version }} --shallow-clone
 
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'
@@ -177,7 +179,7 @@ jobs:
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_shared/
 
       - name: Upload artifact for micro
-        if: steps.micro_shared.outcome
+        if: steps.micro_shared.outcome == 'success'
         uses: actions/upload-artifact@v3
         with:
           name: micro_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
@@ -196,7 +198,7 @@ jobs:
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_static/
 
       - name: Upload artifact for micro static
-        if: steps.micro_static.outcome
+        if: steps.micro_static.outcome == 'success'
         uses: actions/upload-artifact@v3
         with:
           name: micro_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
@@ -215,7 +217,7 @@ jobs:
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_shared/
 
       - name: Upload artifact for cli
-        if: steps.cli_shared.outcome
+        if: steps.cli_shared.outcome == 'success'
         uses: actions/upload-artifact@v3
         with:
           name: cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
@@ -234,7 +236,7 @@ jobs:
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_static/
 
       - name: Upload artifact for cli static
-        if: steps.cli_static.outcome
+        if: steps.cli_static.outcome == 'success'
         uses: actions/upload-artifact@v3
         with:
           name: cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
@@ -242,7 +244,7 @@ jobs:
             cli_static
 
       - name: Fail if anything failed
-        if: ${{ !(steps.micro_shared.outcome && (steps.micro_static.outcome || matrix.libc == 'glibc') && steps.cli_shared.outcome && (steps.cli_static.outcome || matrix.libc == 'glibc')) }}
+        if: steps.micro_shared.outcome != 'success' || steps.cli_shared.outcome != 'success' || (steps.micro_static.outcome != 'success' && matrix.libc != 'glibc') || (steps.cli_static.outcome != 'success' && matrix.libc != 'glibc')
         run: |
           false
 

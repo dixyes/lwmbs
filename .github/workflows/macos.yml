@@ -1,0 +1,104 @@
+name: macos test
+
+on:
+  workflow_dispatch:
+  push:
+  schedule:
+    - cron:  '33 4 * * *'
+
+jobs:
+  macos:
+    name: PHP ${{ matrix.php-version }} ${{ matrix.arch }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.1", "8.0"]
+        arch: ["x86_64", "arm64"]
+      max-parallel: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Calc sources hash
+        id: src_hash
+        run: |
+          set -xeo pipefail
+          printf '::set-output name=hash::'
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php src.json "${{ matrix.php-version }}" --hash
+          echo
+
+      - name: Cache libraries
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            build/src
+            build/downloads
+            build/lib
+            build/include
+          key: macos-${{ matrix.arch }}-v1-${{ steps.src_hash.outputs.hash }}
+
+      - name: Prepare tools and sources
+        run: |
+          set -xeo pipefail
+          brew install bison re2c automake autoconf
+          brew link automake
+          mkdir -p build
+          cd build
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ../fetch_source.php ../src.json ${{ matrix.php-version }} --shallow-clone
+
+      - name: Prepare libraries
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: build
+        run: |
+          set -xeo pipefail
+          export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
+          php ../build_libs.php --arch=${{ matrix.arch }}
+
+      - name: Build micro
+        id: micro
+        working-directory: build
+        continue-on-error: true
+        run: |
+          set -xeo pipefail
+          export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
+          php ${GITHUB_WORKSPACE}/build_micro.php --arch=${{ matrix.arch }}
+          mkdir -p ${GITHUB_WORKSPACE}/micro
+          cp src/php-src/sapi/micro/micro.sfx ${GITHUB_WORKSPACE}/micro/
+
+      - name: Upload artifact for micro
+        if: steps.micro.outcome == 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: micro_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          path: |
+            micro
+
+      - name: Build cli
+        id: cli
+        working-directory: build
+        continue-on-error: true
+        run: |
+          set -xeo pipefail
+          export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
+          php ${GITHUB_WORKSPACE}/build_cli.php --arch=${{ matrix.arch }}
+          mkdir -p ${GITHUB_WORKSPACE}/cli
+          cp src/php-src/sapi/cli/php ${GITHUB_WORKSPACE}/cli/
+
+      - name: Upload artifact for cli
+        if: steps.cli.outcome == 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: cli_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          path: |
+            cli
+
+      - name: Fail if anything failed
+        if: ${{ steps.micro.outcome != 'success' || steps.cli.outcome != 'success' }}
+        run: |
+          false
+
+      - name: Remove php src to avoid cache
+        run: |
+          rm -rf /src/php-src
