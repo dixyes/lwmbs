@@ -65,8 +65,15 @@ function extractSource(string $name, string $filename): void
 function download(string $url, array $headers = [], bool $useGithubToken = false): string
 {
     if ($useGithubToken && getenv('GITHUB_TOKEN')) {
-        $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
-        $headers[] = "Authorization: Basic $auth";
+        if (getenv('GITHUB_USER')) {
+            $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
+            $headers[] = "Authorization: Basic $auth";
+            Log::i("using basic github token for $url");
+        } else {
+            $auth = getenv('GITHUB_TOKEN');
+            $headers[] = "Authorization: Bearer $auth";
+            Log::i("using bearer github token for $url");
+        }
     }
 
     return fetch(url: $url, headers: $headers);
