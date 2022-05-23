@@ -61,6 +61,8 @@ function mian($argv): int
     ];
 
     $extNames = [
+        'iconv',
+        'bcmath',
         'pdo',
         'phar',
         'mysqli',
