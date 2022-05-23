@@ -48,7 +48,7 @@ class MicroBuild
                 throw new Exception('not implemented');
         }
 
-        $envs = "$envs CFLAGS='$cflags'";
+        $envs = "$envs CFLAGS='$cflags' LIBS='-ldl -lpthread'";
 
         passthru(
             $this->config->setX . ' && ' .
