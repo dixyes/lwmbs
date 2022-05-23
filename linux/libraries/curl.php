@@ -20,7 +20,9 @@ declare(strict_types=1);
 
 class Libcurl extends Library
 {
-    use LinuxLibraryTrait;
+    use LinuxLibraryTrait{
+        LinuxLibraryTrait::getStaticLibFiles as _getStaticLibFiles;
+    }
     protected string $name = 'curl';
     protected array $staticLibs = [
         'libcurl.a',
@@ -51,6 +53,15 @@ EOF
         'brotli' => true,
         'nghttp2' => true,
     ];
+
+    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
+    {
+        $libs = $this->_getStaticLibFiles($style, $recursive);
+        if ($this->config->getLib('openssl')) {
+            $libs.=' -ldl -lpthread';
+        }
+        return $libs;
+    }
 
     protected function build(): void
     {
