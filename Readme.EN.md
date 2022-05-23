@@ -59,4 +59,8 @@ cd build
 2. old version of glibc do not support all-static
 3. 
 
+# CI
+
+There will be a macro micro binary with some common extensions built in ci routines.
+
 # Nothin else
