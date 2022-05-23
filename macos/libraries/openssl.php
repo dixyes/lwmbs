@@ -56,7 +56,7 @@ class Libopenssl extends Library
                 "$env ./Configure no-shared $zlib " .
                 '--prefix=/ ' . //use prefix=/
                 '--libdir=/lib ' .
-                " darwin64-{$this->config->arch} && " .
+                " darwin64-{$this->config->arch}-cc && " .
                 "make clean && " .
                 "make -j{$this->config->concurrency} CNF_EX_LIBS=\"$ex_lib\" && " .
                 'make install_sw DESTDIR=' . realpath('.'),
