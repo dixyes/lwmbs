@@ -25,6 +25,12 @@ trait UnixExtensionTrait
     {
         $arg = $this->desc->getArg();
         switch ($this->name) {
+            case 'redis':
+                $arg = '--enable-redis';
+                if ($this->config->getLib('zstd')) {
+                    $arg .= ' --enable-redis-zstd --with-libzstd="' . realpath('.') . '" ';
+                }
+                break;
             case 'iconv':
                 $arg = '--with-iconv="' . realpath('.') . '" ';
                 break;

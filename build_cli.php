@@ -46,6 +46,7 @@ function mian($argv): int
     );
 
     $libNames = [
+        'zstd',
         'libssh2',
         'curl',
         'zlib',

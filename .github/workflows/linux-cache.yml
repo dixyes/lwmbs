@@ -85,7 +85,7 @@ jobs:
       - name: Prepare Fedora arm64 things
         run: |
           dnf install -yy php
-          exec php $0
+          exec php $0 || false
           <?php
           $mirror = 'https://mirror.facebook.net';
           passthru('yum install -yy cpio curl ');

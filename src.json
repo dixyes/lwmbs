@@ -30,6 +30,11 @@
             "url": "https://sourceware.org/pub/bzip2/",
             "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/"
         },
+        "zstd": {
+            "type": "ghrel",
+            "repo": "facebook/zstd",
+            "match": "zstd.+\\.tar\\.zst"
+        },
         "nghttp2": {
             "type": "ghrel",
             "repo": "nghttp2/nghttp2",

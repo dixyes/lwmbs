@@ -68,8 +68,9 @@ class Liblibzip extends Library
         $libzstd = $this->config->getLib('zstd');
         if ($libzstd) {
             // TODO: enable it
-            $zstd = '-DENABLE_ZSTD=ON ';
-            throw new Exception('zstd not supported yet');
+            $zstd = '-DENABLE_ZSTD=ON ' .
+                '-DZstd_LIBRARY="' . $libzstd->getStaticLibFiles(style: 'cmake') . '" ' .
+                '-DZstd_INCLUDE_DIR="' . realpath('include') . '" ';
         }
 
         passthru(

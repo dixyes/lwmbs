@@ -66,7 +66,7 @@ jobs:
           key: linux-fedora-arm64-v1
 
       - name: Cache failed
-        if: ((matrix.libc == 'glibc' && matrix.arch == 'aarch64') && steps.cache_arm64.outcome != 'success') || ((matrix.libc == 'glibc' && matrix.arch == 'x86_64') && steps.cache_php.outcome != 'success')
+        if: (matrix.libc == 'glibc' && matrix.arch == 'aarch64' && steps.cache_arm64.outcome != 'success') || (matrix.libc == 'glibc' && matrix.arch == 'x86_64' && steps.cache_php.outcome != 'success')
         run: |
           false
 

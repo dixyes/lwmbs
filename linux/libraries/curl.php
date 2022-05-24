@@ -52,6 +52,7 @@ EOF
         'libssh2' => true,
         'brotli' => true,
         'nghttp2' => true,
+        'zstd' => true,
     ];
 
     public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
@@ -106,6 +107,14 @@ EOF
             throw new Exception('LDAP support is not implemented yet');
         }
 
+        $zstd = '-DCURL_ZSTD=OFF ';
+        $libzstd = $this->config->getLib('zstd');
+        if ($libzstd) {
+            $zstd = '-DCURL_ZSTD=ON ' .
+                '-DZstd_LIBRARY="' . $libzstd->getStaticLibFiles(style: 'cmake') . '" ' .
+                '-DZstd_INCLUDE_DIR="' . realpath('include') . '" ';
+        }
+
         $ret = 0;
         passthru(
             $this->config->setX . ' && ' .
@@ -122,6 +131,7 @@ EOF
                 $brotli .
                 $nghttp2 .
                 $ldap .
+                $zstd .
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
