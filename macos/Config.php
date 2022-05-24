@@ -50,6 +50,8 @@ class Config extends CommonConfig
 
         Log::i("mkdir -p lib/pkgconfig");
         @mkdir('lib/pkgconfig', recursive: true);
+        Log::i("mkdir -p include");
+        @mkdir('include', recursive: true);
 
         $this->cc = $cc ?? 'clang';
         Log::i('choose cc: ' . $this->cc);
