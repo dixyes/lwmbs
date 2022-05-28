@@ -248,14 +248,14 @@ final class Util
                 // bad checks
                 static::replaceConfigHeaderLine('#define HAVE_STRLCPY 1');
                 static::replaceConfigHeaderLine('#define HAVE_STRLCAT 1');
+            case CLib::MUSL:
+                static::replaceConfigHeaderLine('#define HAVE_FUNC_ATTRIBUTE_IFUNC 1');
                 break;
             case CLib::GLIBC:
                 // avoid lcrypt dependency
                 static::replaceConfigHeaderLine('#define HAVE_CRYPT 1');
                 static::replaceConfigHeaderLine('#define HAVE_CRYPT_R 1');
                 static::replaceConfigHeaderLine('#define HAVE_CRYPT_H 1');
-                break;
-            case CLib::MUSL:
                 break;
             default:
                 throw new Exception('not implemented');
