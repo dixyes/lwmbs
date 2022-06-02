@@ -216,17 +216,50 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
     }
 }
 
-function patch(string $majMin)
+function patch(string $majDotMin)
 {
     Log::i('patching php');
-    $majMin = implode('', explode('.', $majMin));
+    $majMin = implode('', explode('.', $majDotMin));
     $ret = 0;
     passthru(
         'cd src/php-src && ' .
-            'git checkout HEAD . && ' .
-            'git apply sapi/micro/patches/disable_huge_page.patch && ' .
-            "git apply sapi/micro/patches/cli_checks_{$majMin}.patch",
-            $ret
+            'git checkout HEAD .',
+        $ret
+    );
+    if ($ret != 0) {
+        throw new Exception("failed to reset php");
+    }
+
+    $patches = [];
+    $serial = ['80', '81', '82'];
+    foreach ([
+        'static_opcache',
+        'cli_checks',
+        'disable_huge_page',
+        'vcruntime140',
+        'win32',
+        'zend_stream',
+    ] as $patchName) {
+        if (file_exists("src/php-src/sapi/micro/patches/{$patchName}.patch")) {
+            $patches[]="sapi/micro/patches/{$patchName}.patch";
+            continue;
+        }
+        for ($i = array_search($majMin, $serial, true); $i >= 0; $i--) {
+            $tryMajMin = $serial[$i];
+            if (!file_exists("src/php-src/sapi/micro/patches/{$patchName}_{$tryMajMin}.patch")) {
+                continue;
+            }
+            $patches[] = "sapi/micro/patches/{$patchName}_{$tryMajMin}.patch";
+            continue 2;
+        }
+        throw new Exception("failed finding {$patchName}");
+    }
+
+    $ret = 0;
+    passthru(
+        'cd src/php-src && ' .
+            'git apply ' . implode(' ', $patches),
+        $ret
     );
     if ($ret != 0) {
         throw new Exception("failed to patch php");
