@@ -37,7 +37,7 @@ jobs:
             build/downloads
             build/lib
             build/include
-          key: macos-${{ matrix.arch }}-v1-${{ steps.src_hash.outputs.hash }}
+          key: macos-${{ matrix.arch }}-v2-${{ steps.src_hash.outputs.hash }}
 
       - name: Prepare tools and sources
         run: |
@@ -101,4 +101,4 @@ jobs:
 
       - name: Remove php src to avoid cache
         run: |
-          rm -rf /src/php-src
+          rm -rf src/php-src

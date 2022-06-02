@@ -25,6 +25,7 @@ jobs:
       - name: Setup Fedora mirror
         if: matrix.libc == 'glibc' && matrix.arch == 'aarch64'
         run: |
+          set -xeo pipefail
           FEDORA_MIRROR='mirror.facebook.net/fedora/linux/'
           find /etc/yum.repos.d -name "*cisco*.repo" -exec rm {} \;
           sed -i 's/^metalink=/#metalink=/g' /etc/yum.repos.d/*.repo
@@ -34,15 +35,18 @@ jobs:
       - name: Setup CentOS and EPEL mirror
         if: matrix.libc == 'glibc' && matrix.arch == 'x86_64'
         run: |
+          set -xeo pipefail
           CENTOS_MIRROR='mirror.facebook.net/centos/'
           sed -i 's/^metalink=/#metalink=/g' /etc/yum.repos.d/*.repo
           sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/*.repo
-          sed -i 's|^#baseurl=http://mirror\.centos\.org/centos/|baseurl=https://'$CENTOS_MIRROR'|g' /etc/yum.repos.d/*.repo
-          yum install -yy epel-release
+          sed -i 's|^#\s*baseurl=http://mirror\.centos\.org/centos/|baseurl=https://'$CENTOS_MIRROR'|g' /etc/yum.repos.d/*.repo
+          yum install -yy epel-release centos-release-scl
           EPEL_MIRROR='mirror.facebook.net/fedora/epel/'
+          SCLO_MIRROR='mirror.facebook.net/centos/7/sclo/'
           sed -i 's/^metalink=/#metalink=/g' /etc/yum.repos.d/*.repo
           sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/*.repo
-          sed -i 's|^#baseurl=http://download.fedoraproject.org/pub/epel/|baseurl=https://'$EPEL_MIRROR'|g' /etc/yum.repos.d/*.repo
+          sed -i 's|^#\s*baseurl=http://mirror.centos.org/centos/7/sclo/|baseurl=https://'$SCLO_MIRROR'|g' /etc/yum.repos.d/*.repo
+          sed -i 's|^#\s*baseurl=http://download.fedoraproject.org/pub/epel/|baseurl=https://'$EPEL_MIRROR'|g' /etc/yum.repos.d/*.repo
 
       - name: Cache PHP 8.1 for CentOS
         uses: actions/cache@v3
@@ -119,7 +123,7 @@ jobs:
               export LWMBS_CXX==aarch64-linux-musl-g++
               ;;
             "musl-x86_64") apk add --no-cache \
-                alpine-sdk automake autoconf bison flex re2c cmake clang linux-headers \
+                alpine-sdk automake autoconf bison flex re2c cmake clang lld linux-headers \
                 vim \
                 zlib-static zlib-dev \
                 bzip2 bzip2-static bzip2-dev \
@@ -134,7 +138,6 @@ jobs:
                 procps-ng unzip util-linux zip diffutils \
                 re2c perl bison flex autoconf automake cmake \
                 vim \
-                glibc-static \
                 xz zstd bzip2 tar curl \
                 binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu gcc-c++-aarch64-linux-gnu &&
               export LWMBS_CC=aarch64-linux-gnu-gcc &&
@@ -143,11 +146,13 @@ jobs:
             "glibc-x86_64") 
               yum install -yy \
                 perl m4 autoconf automake bison byacc cscope ctags \
-                diffstat elfutils flex gcc gcc-c++ gettext \
+                diffstat elfutils flex gettext \
                 git libtool make patch patchutils cpp file \
                 glibc-headers glibc-devel kernel-headers less \
-                libstdc++-devel mpfr nettle zip unzip \
-                re2c perl-IPC-Cmd \
+                mpfr nettle zip unzip \
+                re2c perl-IPC-Cmd devtoolset-11-binutils \
+                devtoolset-11-gcc devtoolset-11-libstdc++-devel \
+                devtoolset-11-gcc-c++ devtoolset-11-make \
                 vim \
                 glibc-static \
                 xz zstd bzip2 tar curl &&
@@ -172,7 +177,7 @@ jobs:
         continue-on-error: true
         run: |
           set -xeo pipefail
-          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
           php ${GITHUB_WORKSPACE}/build_micro.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
           mkdir -p ${GITHUB_WORKSPACE}/micro_shared
@@ -191,7 +196,7 @@ jobs:
         continue-on-error: true
         run: |
           set -xeo pipefail
-          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
           php ${GITHUB_WORKSPACE}/build_micro.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }} --all-static
           mkdir -p ${GITHUB_WORKSPACE}/micro_static
@@ -210,7 +215,7 @@ jobs:
         continue-on-error: true
         run: |
           set -xeo pipefail
-          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
           php ${GITHUB_WORKSPACE}/build_cli.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
           mkdir -p ${GITHUB_WORKSPACE}/cli_shared
@@ -229,7 +234,7 @@ jobs:
         continue-on-error: true
         run: |
           set -xeo pipefail
-          export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
+          export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
           php ${GITHUB_WORKSPACE}/build_cli.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }} --all-static
           mkdir -p ${GITHUB_WORKSPACE}/cli_static
