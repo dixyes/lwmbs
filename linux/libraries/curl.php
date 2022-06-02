@@ -53,6 +53,7 @@ EOF
         'brotli' => true,
         'nghttp2' => true,
         'zstd' => true,
+        'openssl' => true,
     ];
 
     public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
