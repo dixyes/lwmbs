@@ -87,6 +87,22 @@ CMAKE;
             $configure = preg_replace('/-lbz2/', $bzip2->getStaticLibFiles(), $configure);
             file_put_contents('src/php-src/configure', $configure);
         }
+        if (php_uname('m') !== $config->arch) {
+            // cross-compiling
+            switch ($config->arch) {
+                case 'aarch64':
+                case 'arm64':
+                    // almost all bsd/linux supports this
+                    Log::i('patching configure for shm mmap checks');
+                    $configure = file_get_contents('src/php-src/configure');
+                    $configure = preg_replace('/have_shm_mmap_anon=no/', 'have_shm_mmap_anon=yes', $configure);
+                    $configure = preg_replace('/have_shm_mmap_posix=no/', 'have_shm_mmap_posix=yes', $configure);
+                    file_put_contents('src/php-src/configure', $configure);
+                    break;
+                default:
+                    throw new Exception("unsupported arch: " . $config->arch);
+            }
+        }
     }
     public static function getCCType(string $cc):string {
         switch(true) {
