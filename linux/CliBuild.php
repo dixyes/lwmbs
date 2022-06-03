@@ -36,6 +36,7 @@ class CliBuild
             "CC='{$this->config->cc}' ".
             "CXX='{$this->config->cxx}' ";
         $cflags = $this->config->archCFlags;
+        $use_lld = '';
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
@@ -43,6 +44,9 @@ class CliBuild
                 $cflags .= ' -static-libgcc -I"' . realpath('include') . '"';
                 break;
             case CLib::MUSL:
+                if (str_ends_with($this->config->cc, 'clang') && Util::findCommand('lld')) {
+                    $use_lld = '-fuse-ld=lld';
+                }
                 break;
             default:
                 throw new Exception('not implemented');
@@ -94,7 +98,7 @@ class CliBuild
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
                 "make -j{$this->config->concurrency} "  .
-                'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . '" ' .
+                'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . " $use_lld\" " .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 ($allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ' : '') .
                 'cli && ' .
