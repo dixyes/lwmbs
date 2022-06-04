@@ -53,7 +53,7 @@ class CliBuild
                 '--with-valgrind=no ' .
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
-                "--host={$this->config->arch}-apple-darwin " .
+                "--host={$this->config->gnuArch}-apple-darwin " .
                 "CFLAGS='{$this->config->archCFlags} -Werror=unknown-warning-option' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
