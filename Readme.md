@@ -57,7 +57,7 @@ cd build
 
 1. musl wrapper可能用不了
 2. glibc旧版本不兹磁全静态编译
-3. 
+3. opcache静态编译需要一些奇怪的环境（较新的gcc+gnuld+binutils/clang+lld）
 
 # CI
 
