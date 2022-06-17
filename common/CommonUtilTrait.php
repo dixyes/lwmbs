@@ -24,10 +24,22 @@ trait CommonUtilTrait
     {
     }
 
-    public static function findCommand(string $name): ?string
+    public static function findCommand(string $name, array $paths = []): ?string
     {
-        $paths = getenv('PATH');
-        foreach (explode(PATH_SEPARATOR, $paths) as $path) {
+        if (!$paths) {
+            $paths = explode(PATH_SEPARATOR, getenv('PATH'));
+        }
+        if (PHP_OS_FAMILY === 'Windows') {
+            foreach ($paths as $path) {
+                foreach (['.exe', '.bat', '.cmd'] as $suffix) {
+                    if (file_exists($path . DIRECTORY_SEPARATOR . $name . $suffix)) {
+                        return $path . DIRECTORY_SEPARATOR . $name. $suffix;
+                    }
+                }
+            }
+            return null;
+        }
+        foreach ($paths as $path) {
             if (file_exists($path . DIRECTORY_SEPARATOR . $name)) {
                 return $path . DIRECTORY_SEPARATOR . $name;
             }

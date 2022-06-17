@@ -29,79 +29,152 @@ class Util
 function extractSource(string $name, string $filename): void
 {
     Log::i("extracting $name source");
-    @mkdir("src/$name", recursive: true);
     $ret = 0;
-    switch (Util::extname($filename)) {
-        case 'xz':
-        case 'txz':
-            passthru('cat ' . $filename . ' | xz -d | tar -x -C src/' . $name . ' --strip-components 1',  $ret);
-            break;
-        case 'gz':
-        case 'tgz':
-            passthru('tar -xzf ' . $filename . ' -C src/' . $name . ' --strip-components 1',  $ret);
-            break;
-        case 'bz2':
-            passthru('tar -xjf ' . $filename . ' -C src/' . $name . ' --strip-components 1', $ret);
-            break;
-        case 'zip':
-            passthru('unzip ' . $filename . ' -d src/' . $name, $ret);
-            break;
-        case 'zstd':
-        case 'zst':
-            passthru('cat ' . $filename . ' | zstd -d | tar -x -C src/' . $name . ' --strip-components 1', $ret);
-            break;
-        case 'tar':
-            passthru('tar -xf ' . $filename . ' -C src/' . $name . ' --strip-components 1', $ret);
-            break;
-        default:
-            throw new Exception("unknown archive format: " . $filename);
+    if (PHP_OS_FAMILY !== 'Windows') {
+        @mkdir(directory: "src/$name", recursive: true);
+        switch (Util::extname($filename)) {
+            case 'xz':
+            case 'txz':
+                passthru("cat $filename | xz -d | tar -x -C src/$name --strip-components 1",  $ret);
+                break;
+            case 'gz':
+            case 'tgz':
+                passthru("tar -xzf $filename -C src/$name --strip-components 1", $ret);
+                break;
+            case 'bz2':
+                passthru("tar -xjf $filename -C src/$name --strip-components 1", $ret);
+                break;
+            case 'zip':
+                passthru("unzip $filename -d src/$name", $ret);
+                break;
+            // case 'zstd':
+            // case 'zst':
+            //     passthru('cat ' . $filename . ' | zstd -d | tar -x -C src/' . $name . ' --strip-components 1', $ret);
+            //     break;
+            case 'tar':
+                passthru("tar -xf $filename -C src/$name --strip-components 1", $ret);
+                break;
+            default:
+                throw new Exception("unknown archive format: " . $filename);
+        }
+    } else {
+        // find 7z
+        $_7zExe = Util::findCommand('7z', [
+            'C:\Program Files\7-Zip-Zstandard',
+            'C:\Program Files (x86)\7-Zip-Zstandard',
+            'C:\Program Files\7-Zip',
+            'C:\Program Files (x86)\7-Zip',
+        ]);
+        if (!$_7zExe) {
+            throw new Exception('windows needs 7z to unpack');
+        }
+        @mkdir("src/$name", recursive: true);
+        switch (Util::extname($filename)) {
+            case 'zstd':
+            case 'zst':
+                if (!str_contains($_7zExe, 'Zstandard')) {
+                    throw new Exception("zstd is not supported: $filename");
+                }
+            case 'xz':
+            case 'txz':
+            case 'gz':
+            case 'tgz':
+            case 'bz2':
+                passthru("\"$_7zExe\" x -so $filename | tar -f - -x -C src/$name --strip-components 1", $ret);
+                break;
+            case 'tar':
+                passthru("tar -xf $filename -C src/$name --strip-components 1", $ret);
+                break;
+            case 'zip':
+                passthru("\"$_7zExe\" x $filename -o src/$name", $ret);
+                break;
+            default:
+                throw new Exception("unknown archive format: $filename");
+        }
     }
     if ($ret !== 0) {
-        passthru("rm -r src/$name");
+        if (PHP_OS_FAMILY === 'Windows') {
+            passthru("rmdir /s /q src/$name");
+        } else {
+            passthru("rm -r src/$name");
+        }
         throw new Exception("failed to extract $name source");
     }
 }
 
-function download(string $url, array $headers = [], bool $useGithubToken = false): string
+function setupGithubToken(string &$method, string &$url, array &$headers): void
 {
-    if ($useGithubToken && getenv('GITHUB_TOKEN')) {
-        if (getenv('GITHUB_USER')) {
-            $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
-            $headers[] = "Authorization: Basic $auth";
-            Log::i("using basic github token for $url");
-        } else {
-            $auth = getenv('GITHUB_TOKEN');
-            $headers[] = "Authorization: Bearer $auth";
-            Log::i("using bearer github token for $url");
-        }
+    if (!getenv('GITHUB_TOKEN')) {
+        return;
     }
-
-    return fetch(url: $url, headers: $headers);
+    if (getenv('GITHUB_USER')) {
+        $auth = base64_encode(getenv('GITHUB_USER') . ':' . getenv('GITHUB_TOKEN'));
+        $headers[] = "Authorization: Basic $auth";
+        Log::i("using basic github token for $method $url");
+    } else {
+        $auth = getenv('GITHUB_TOKEN');
+        $headers[] = "Authorization: Bearer $auth";
+        Log::i("using bearer github token for $method $url");
+    }
 }
 
-function fetch(string $url, string $method = 'GET', array $headers = []): string
+function download(string $url, string $path, string $method = 'GET', array $headers = [], array $hooks = []): void
 {
+    foreach ($hooks as $hook) {
+        $hook($method, $url, $headers);
+    }
+
     $methodArg = match ($method) {
         'GET' => '',
         'HEAD' => '-I',
-        default => "-X $method",
+        default => "-X \"$method\"",
     };
-    $headerArg = implode(' ', array_map(fn ($v) => "-H'$v'", $headers));
-    return `curl -sfSL $methodArg $headerArg '$url'`;
+    $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
+
+    $cmd = "curl -sfSL -o \"$path\" $methodArg $headerArg \"$url\"";
+    passthru($cmd, $ret);
+    if (0 !== $ret) {
+        throw new Exception('failed http download');
+    }
+}
+
+function fetch(string $url, string $method = 'GET', array $headers = [], array $hooks = []): ?string
+{
+    foreach ($hooks as $hook) {
+        $hook($method, $url, $headers);
+    }
+
+    $methodArg = match ($method) {
+        'GET' => '',
+        'HEAD' => '-I',
+        default => "-X \"$method\"",
+    };
+    $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
+
+    $cmd = "curl -sfSL $methodArg $headerArg \"$url\"";
+    exec($cmd, $output, $ret);
+    if (0 !== $ret) {
+        throw new Exception('failed http fetch');
+    }
+    return implode("\n", $output);
 }
 
 function getLatestGithubTarball(string $name, array $source): array
 {
     Log::i("finding $name source from github releases tarball");
-    $data = json_decode(download(
-        "https://api.github.com/repos/{$source['repo']}/releases",
-        useGithubToken: true,
+    $data = json_decode(fetch(
+        url:"https://api.github.com/repos/{$source['repo']}/releases",
+        hooks: [ 'setupGithubToken' ],
     ), true);
     $url = $data[0]['tarball_url'];
     if (!$url) {
         throw new Exception("failed to find $name source");
     }
-    $headers = fetch($url, method: 'HEAD');
+    $headers = fetch(
+        url: $url,
+        method: 'HEAD',
+        hooks: [ 'setupGithubToken' ],
+    );
     preg_match('/^content-disposition:\s+attachment;\s*filename=("{0,1})(?<filename>.+\.tar\.gz)\1/im', $headers, $matches);
     if ($matches) {
         $filename = $matches['filename'];
@@ -115,9 +188,9 @@ function getLatestGithubTarball(string $name, array $source): array
 function getLatestGithubRelease(string $name, array $source): array
 {
     Log::i("finding $name source from github releases assests");
-    $data = json_decode(download(
-        "https://api.github.com/repos/{$source['repo']}/releases",
-        useGithubToken: true,
+    $data = json_decode(fetch(
+        url: "https://api.github.com/repos/{$source['repo']}/releases",
+        hooks: [ 'setupGithubToken' ],
     ), true);
     $url = null;
     foreach ($data[0]['assets'] as $asset) {
@@ -137,7 +210,7 @@ function getLatestGithubRelease(string $name, array $source): array
 function getFromFileList(string $name, array $source): array
 {
     Log::i("finding $name source from file list");
-    $page = download($source['url']);
+    $page = fetch($source['url']);
     preg_match_all($source['regex'], $page, $matches);
     if (!$matches) {
         throw new Exception("Failed to get $name version");
@@ -190,7 +263,7 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
                 download:
                 if (!file_exists("downloads/$filename")) {
                     Log::i("downloading $name source from $url");
-                    file_put_contents("downloads/$filename", download($url));
+                    download(url: $url, path: "downloads/$filename");
                 } else {
                     Log::i("$name source already exists");
                 }
@@ -203,7 +276,7 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
                 }
                 Log::i("cloning $name source");
                 passthru(
-                    "git clone --branch '{$source['rev']}' " . ($shallowClone ? '--depth 1 --single-branch' : '') . " --recursive '{$source['url']}' 'src/{$source['path']}'",
+                    "git clone --branch \"{$source['rev']}\" " . ($shallowClone ? '--depth 1 --single-branch' : '') . " --recursive \"{$source['url']}\" \"src/{$source['path']}\"",
                     $ret
                 );
                 if ($ret !== 0) {
@@ -270,18 +343,26 @@ function linkSwow()
 {
     Log::i('linking swow');
     $ret = 0;
-    passthru(
-        'cd src/php-src/ext && ' .
-            'ln -s swow-src/ext swow ',
-        $ret
-    );
+    if (PHP_OS_FAMILY === 'Windows') {
+        passthru(
+            'cd src/php-src/ext && ' .
+                'mklink /D swow swow-src\ext',
+            $ret
+        );
+    } else {
+        passthru(
+            'cd src/php-src/ext && ' .
+                'ln -s swow-src/ext swow ',
+            $ret
+        );
+    }
     if ($ret != 0) {
-        throw new Exception("failed to patch php");
+        throw new Exception("failed to link swow");
     }
 }
 
 function latestPHP(string $majMin){
-    $info = json_decode(download("https://www.php.net/releases/index.php?json&version=$majMin"), true);
+    $info = json_decode(fetch(url: "https://www.php.net/releases/index.php?json&version=$majMin"), true);
     $version = $info['version'];
 
     return [
@@ -364,7 +445,9 @@ function mian($argv): int
     // download all sources
     fetchSources($data, fn ($x) => true, $shallowClone);
     patch($argv[2]);
-    linkSwow();
+    if (!file_exists('src/php-src/ext/swow')) {
+        linkSwow();
+    }
     Log::i('done');
 
     return 0;
