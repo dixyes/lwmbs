@@ -47,11 +47,11 @@ trait UnixUtilTrait {
         $root = realpath('.');
         $ccLine = '';
         if($cc) {
-            $ccLine = 'set(CMAKE_C_COMPILER ' . Util::findCommand($cc) .')';
+            $ccLine = 'SET(CMAKE_C_COMPILER ' . Util::findCommand($cc) .')';
         }
         $cxxLine = '';
         if($cxx) {
-            $cxxLine = 'set(CMAKE_CXX_COMPILER ' . Util::findCommand($cxx) .')';
+            $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . Util::findCommand($cxx) .')';
         }
         $toolchain = <<<CMAKE
 SET(CMAKE_SYSTEM_NAME $os)

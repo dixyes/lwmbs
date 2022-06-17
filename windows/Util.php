@@ -18,10 +18,11 @@
 
 declare(strict_types=1);
 
-interface ExtensionDesc
+final class Util
 {
-    public function getArg(bool $enabled = true): string;
-    public function getLibDeps(): array;
-    public function getExtDeps(): array;
-    public function getCustomExtDir(): ?string;
+    use CommonUtilTrait;
+    public static function getCpuCount(): int
+    {
+        return (int)shell_exec('echo %NUMBER_OF_PROCESSORS%');
+    }
 }

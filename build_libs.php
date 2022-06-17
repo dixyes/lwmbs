@@ -29,33 +29,55 @@ function mian($argv): int
             'cc',
             'cxx',
             'arch',
+            'phpBinarySDKDir',
+            'vsVer',
         ], true)) {
             Log::e("Unknown argument: $k");
-            Log::w("Usage: {$argv[0]} [--cc=<compiler>] [--cxx=<compiler>] [--arch=<arch>]");
+            if (PHP_OS_FAMILY === 'Windows') {
+                Log::w("Usage: {$argv[0]} --phpBinarySDKDir=<path to sdk> --vsVer=<vs version> [--arch=<arch>]");
+            } else {
+                Log::w("Usage: {$argv[0]} [--cc=<compiler>] [--cxx=<compiler>] [--arch=<arch>]");
+            }
             exit(1);
         }
     }
 
+    $unsupportedArgs = [];
+    switch (PHP_OS_FAMILY) {
+        case 'Windows':
+            $unsupportedArgs = ['cc', 'cxx'];
+            break;
+        case 'Darwin':
+        case 'Linux':
+            $unsupportedArgs = ['phpBinarySDKDir'];
+            break;
+    }
+    foreach ($unsupportedArgs as $unsupportedArg) {
+    $cmdArgs = Util::parseArgs($argv);
+        if (array_key_exists($unsupportedArg, $cmdArgs)) {
+            log::w("unsupported $unsupportedArg arg for " . PHP_OS_FAMILY);
+            unset($cmdArgs[$unsupportedArg]);
+        }
+    }
+
     $config = new Config(
-        cc: $cmdArgs['cc'] ?? null,
-        cxx: $cmdArgs['cxx'] ?? null,
-        arch: $cmdArgs['arch'] ?? null,
+        ...$cmdArgs,
     );
 
     $libNames = [
-        'zstd',
-        'libssh2',
-        'curl',
+        // 'zstd',
+        // 'libssh2',
+        // 'curl',
         'zlib',
-        'brotli',
-        'libiconv',
-        'libffi',
-        'openssl',
-        'libzip',
-        'bzip2',
-        'nghttp2',
-        'onig',
-        'xz',
+        // 'brotli',
+        // 'libiconv',
+        // 'libffi',
+        // 'openssl',
+        // 'libzip',
+        // 'bzip2',
+        // 'nghttp2',
+        // 'onig',
+        // 'xz',
     ];
     foreach ($libNames as $name) {
         $lib = new ("Lib$name")($config);

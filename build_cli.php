@@ -30,64 +30,94 @@ function mian($argv): int
             'cc',
             'cxx',
             'arch',
+            'phpBinarySDKDir',
+            'vsVer',
         ], true)) {
             Log::e("Unknown argument: $k");
-            Log::w("Usage: {$argv[0]} [--all-static] [--cc=<compiler>] [--cxx=<compiler>] [--arch=<arch>]");
+            switch (PHP_OS_FAMILY) {
+                case 'Windows':
+                    Log::w("Usage: {$argv[0]} --phpBinarySDKDir=<path to sdk> --vsVer=<vs version> [--arch=<arch>]");
+                    break;
+                case 'Darwin':
+                    Log::w("Usage: {$argv[0]} [--cc=<compiler>] [--cxx=<compiler>] [--arch=<arch>]");
+                    break;
+                case 'Linux':
+                    Log::w("Usage: {$argv[0]} [--all-static] [--cc=<compiler>] [--cxx=<compiler>] [--arch=<arch>]");
+                    break;
+            }
             exit(1);
         }
     }
 
-    $allStatic = (bool)($cmdArgs['all-static'] ?? false);
+    $unsupportedArgs = [];
+    switch (PHP_OS_FAMILY) {
+        case 'Windows':
+            $unsupportedArgs = ['cc', 'cxx', 'all-static'];
+            break;
+        case 'Darwin':
+            $unsupportedArgs = ['phpBinarySDKDir', 'vsVer', 'all-static'];
+            break;
+        case 'Linux':
+            $unsupportedArgs = ['phpBinarySDKDir', 'vsVer'];
+            break;
+    }
+    foreach ($unsupportedArgs as $unsupportedArg) {
+    $cmdArgs = Util::parseArgs($argv);
+        if (array_key_exists($unsupportedArg, $cmdArgs)) {
+            log::w("unsupported $unsupportedArg arg for " . PHP_OS_FAMILY);
+            unset($cmdArgs[$unsupportedArg]);
+        }
+    }
 
     $config = new Config(
-        cc: $cmdArgs['cc'] ?? null,
-        cxx: $cmdArgs['cxx'] ?? null,
-        arch: $cmdArgs['arch'] ?? null,
+        ...$cmdArgs,
     );
 
+    $allStatic = (bool)($cmdArgs['all-static'] ?? false);
+
     $libNames = [
-        'zstd',
-        'libssh2',
-        'curl',
+        // 'zstd',
+        // 'libssh2',
+        // 'curl',
         'zlib',
-        'brotli',
-        'libiconv',
-        'libffi',
-        'openssl',
-        'libzip',
-        'bzip2',
-        'nghttp2',
-        'onig',
-        'xz',
+        // 'brotli',
+        // 'libiconv',
+        // 'libffi',
+        // 'openssl',
+        // 'libzip',
+        // 'bzip2',
+        // 'nghttp2',
+        // 'onig',
+        // 'xz',
     ];
 
     $extNames = [
         'opcache',
-        'iconv',
-        'bcmath',
-        'pdo',
-        'phar',
-        'mysqli',
-        'pdo',
-        'pdo_mysql',
-        'mbstring',
-        'mbregex',
-        'session',
-        'pcntl',
-        'posix',
-        'ctype',
-        'fileinfo',
-        'filter',
-        'tokenizer',
-        'curl',
-        'ffi',
-        'swow',
-        'redis',
-        'parallel',
-        'sockets',
-        'openssl',
+        // 'iconv',
+        // 'bcmath',
+        // 'pdo',
+        // 'phar',
+        // 'mysqli',
+        // 'pdo',
+        // 'pdo_mysql',
+        // 'mbstring',
+        // 'mbregex',
+        // 'session',
+        // 'pcntl',
+        // 'posix',
+        // 'ctype',
+        // 'fileinfo',
+        // 'filter',
+        // 'tokenizer',
+        // 'curl',
+        // 'ffi',
+        // 'swow',
+        // 'redis',
+        // 'parallel',
+        // 'sockets',
+        // 'openssl',
         'zlib',
-        'bz2',
+        // 'bz2',
     ];
 
     if ($allStatic) {

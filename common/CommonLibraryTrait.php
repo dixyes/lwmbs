@@ -27,7 +27,7 @@ trait CommonLibraryTrait
         ?string $sourceDir = null,
         private array $dependencies = [],
     ) {
-        $this->sourceDir = $sourceDir ?? ('src' . '/' . $this->name);
+        $this->sourceDir = $sourceDir ?? ('src' .DIRECTORY_SEPARATOR . $this->name);
     }
 
     public function getName(): string
@@ -77,5 +77,13 @@ trait CommonLibraryTrait
         } else {
             $this->dependencies[] = $depLib;
         }
+    }
+    public function getStaticLibs(): array
+    {
+        return $this->staticLibs;
+    }
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 }

@@ -20,7 +20,6 @@ declare(strict_types=1);
 
 class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
 {
-    private string $arg;
     public const BUILTIN_EXTENSIONS = [
         'opcache' => [],
         'phar' => [
@@ -34,8 +33,12 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
             'libDeps' => ['onig' => false],
         ],
         'session' => [],
-        'pcntl' => [],
-        'posix' => [],
+        'pcntl' => [
+            'unixOnly' => true,
+        ],
+        'posix' => [
+            'unixOnly' => true,
+        ],
         'ctype' => [],
         'fileinfo' => [],
         'filter' => [],
@@ -47,6 +50,7 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         ],
         'zlib' => [
             'argType' => 'with',
+            'argTypeWin' => 'enable',
             'libDeps' => ['zlib' => false],
         ],
         'calendar' => [],
@@ -55,8 +59,11 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
             'argType' => 'with',
             'libDeps' => ['curl' => false],
         ],
-        'dba' => [],
+        'dba' => [
+            'argTypeWin' => 'with',
+        ],
         'dom' => [
+            'argTypeWin' => 'with',
             'libDeps' => ['libxml' => false],
         ],
         'enchant' => [
@@ -72,6 +79,7 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
             'libDeps' => ['openssl' => true],
         ],
         'gd' => [
+            'argTypeWin' => 'with',
             'libDeps' => [
                 'gd' => true,
                 'zlib' => true,
@@ -109,10 +117,10 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
             'argType' => 'with',
             'libDeps' => ['ldap' => false],
         ],
-        'oci8' => [
-            'argType' => 'with',
-            'libDeps' => ['oci8' => false],
-        ],
+        // 'oci8' => [
+        //     'argType' => 'with',
+        //     'libDeps' => ['oci8' => false],
+        // ],
         // todo: support this
         // 'odbc'=>[
         //     'libDeps'=>[
@@ -170,14 +178,23 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
             'argType' => 'with',
             'libDeps' => ['sqlite' => false],
         ],
-        'sysvmsg' => [],
-        'sysvsem' => [],
+        'sysvmsg' => [
+            'unixOnly' => true,
+        ],
+        'sysvsem' => [
+            'unixOnly' => true,
+        ],
         'sysvshm' => [],
         'tidy' => [
             'argType' => 'with',
             'libDeps' => ['tidy' => false],
         ],
         'xml' => [
+            'argTypeWin' => 'with',
+            'libDeps' => ['libxml' => false],
+        ],
+        'simplexml' => [
+            'argTypeWin' => 'with',
             'libDeps' => ['libxml' => false],
         ],
         'xmlreader' => [
@@ -192,9 +209,12 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         ],
         'zip' => [
             'argType' => 'with',
+            'argTypeWin' => 'enable',
             'libDeps' => ['libzip' => false],
         ],
     ];
+    private string $arg;
+    private string $disabledArg;
     private function __construct(
         public string $name,
         private array $libDeps = [],
@@ -206,18 +226,39 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
             'enable' => '--enable-' . $_name,
             'with' => '--with-' . $_name,
         };
+        $this->disabledArg = match ($argType) {
+            'enable' => '--disable-' . $_name,
+            'with' => '--without-' . $_name,
+        };
     }
     public static function getAll(): array
     {
         $ret = [];
-        foreach (static::BUILTIN_EXTENSIONS as $name => $args) {
-            $ret[$name] = new static($name, ...$args);
+        if (PHP_OS_FAMILY === 'Windows') {
+            foreach (static::BUILTIN_EXTENSIONS as $name => $args) {
+                if ($args['unixOnly'] ?? false) {
+                    continue;
+                }
+                if (isset($args['argTypeWin'])) {
+                    $args['argType'] = $args['argTypeWin'];
+                    unset($args['argTypeWin']);
+                }
+                $ret[$name] = new static($name, ...$args);
+            }
+        } else {
+            foreach (static::BUILTIN_EXTENSIONS as $name => $args) {
+                $ret[$name] = new static($name, ...$args);
+            }
         }
         return $ret;
     }
-    public function getArg(): string
+    public function getArg(bool $enabled = true): string
     {
-        return $this->arg;
+        if ($enabled) {
+            return $this->arg;
+        } else {
+            return $this->disabledArg;
+        }
     }
     public function getExtDeps(): array
     {

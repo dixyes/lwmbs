@@ -18,10 +18,7 @@
 
 declare(strict_types=1);
 
-interface ExtensionDesc
+class Library
 {
-    public function getArg(bool $enabled = true): string;
-    public function getLibDeps(): array;
-    public function getExtDeps(): array;
-    public function getCustomExtDir(): ?string;
+    use WindowsLibraryTrait;
 }

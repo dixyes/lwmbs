@@ -52,12 +52,4 @@ trait UnixLibraryTrait {
         }
         return implode($sep, $ret);
     }
-    public function getStaticLibs(): array
-    {
-        return $this->staticLibs;
-    }
-    public function getHeaders(): array
-    {
-        return $this->headers;
-    }
 }
