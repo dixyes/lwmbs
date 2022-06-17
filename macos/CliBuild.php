@@ -40,7 +40,7 @@ class CliBuild
             $ret
         );
         if ($ret !== 0) {
-            throw new Exception("failed to configure cli");
+            throw new Exception("failed to buildconf for cli");
         }
     
         Util::patchPHPConfigure($this->config);

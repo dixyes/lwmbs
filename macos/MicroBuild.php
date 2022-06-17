@@ -40,7 +40,7 @@ class MicroBuild
             $ret
         );
         if ($ret !== 0) {
-            throw new Exception("failed to configure micro");
+            throw new Exception("failed to buildconf for micro");
         }
     
         Util::patchPHPConfigure($this->config);
