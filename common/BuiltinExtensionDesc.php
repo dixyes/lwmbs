@@ -243,10 +243,16 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
                     $args['argType'] = $args['argTypeWin'];
                     unset($args['argTypeWin']);
                 }
+                unset($args['winOnly']);
                 $ret[$name] = new static($name, ...$args);
             }
         } else {
             foreach (static::BUILTIN_EXTENSIONS as $name => $args) {
+                if ($args['winOnly'] ?? false) {
+                    continue;
+                }
+                unset($args['unixOnly']);
+                unset($args['argTypeWin ']);
                 $ret[$name] = new static($name, ...$args);
             }
         }
