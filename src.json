@@ -33,7 +33,7 @@
         "zstd": {
             "type": "ghrel",
             "repo": "facebook/zstd",
-            "match": "zstd.+\\.tar\\.zst"
+            "match": "zstd.+\\.tar\\.gz"
         },
         "nghttp2": {
             "type": "ghrel",
