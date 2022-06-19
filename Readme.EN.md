@@ -36,7 +36,11 @@ brew install bison re2c
 export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/re2c/bin:$PATH"
 # you need also a working php 8.1 cli (brew install it
 # windows
-false "not implemented"
+# you need VS (better v16 2019+)
+# you need perl for openssl (grab a strawberry perl)
+# you may want nasm for openssl
+# you need a working PHP 8.1 distrubtion (just download it)
+# you need php binary sdk from php
 ```
 
 ```bash
@@ -49,8 +53,10 @@ mkdir build
 cd build
 # prepare sources
 ../update_source.php ../src.json 8.1
-# build micro
+# build micro (unix)
 ../build_micro.php
+# build micro (win)
+../build_micro.php --phpBinarySDKDir=<path to sdk> --vsVer=<version like 17> --arch=<arch x64/arm64>
 ```
 
 # Pits
@@ -58,6 +64,7 @@ cd build
 1. musl wrapper may not work
 2. old version of glibc do not support all-static
 3. statically compiling opcache needs special environment (new gcc+gnuld+binutils/clang+lld)
+4. statically compiling cli at Windows needs patch
 
 # CI
 
