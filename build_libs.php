@@ -65,19 +65,18 @@ function mian($argv): int
     );
 
     $libNames = [
-        // 'zstd',
-        // 'libssh2',
-        // 'curl',
+        'zstd',
+        'libssh2',
+        'curl',
         'zlib',
-        // 'brotli',
-        // 'libiconv',
-        // 'libffi',
-        // 'openssl',
-        // 'libzip',
-        // 'bzip2',
-        // 'nghttp2',
-        // 'onig',
-        // 'xz',
+        'brotli',
+        'libffi',
+        'openssl',
+        'libzip',
+        'bzip2',
+        'nghttp2',
+        'onig',
+        'xz',
     ];
     foreach ($libNames as $name) {
         $lib = new ("Lib$name")($config);

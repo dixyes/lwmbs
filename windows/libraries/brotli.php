@@ -18,17 +18,17 @@
 
 declare(strict_types=1);
 
-class Libzlib extends Library
+class Libbrotli extends Library
 {
     use WindowsLibraryTrait;
-    protected string $name = 'zlib';
+    protected string $name = 'brotli';
     protected array $staticLibs = [
-        'zlib.lib',
-        'zlib_a.lib',
+        'brotlicommon-static.lib',
+        'brotlienc-static.lib',
+        'brotlidec-static.lib',
     ];
     protected array $headers = [
-        'zlib.h',
-        'zconf.h',
+        'brotli',
     ];
     protected array $depNames = [
     ];
@@ -38,32 +38,37 @@ class Libzlib extends Library
         Log::i("building {$this->name}");
         
         $ret = 0;
-        if (is_dir("{$this->sourceDir}\\build")) {
-            exec("rmdir /s /q \"{$this->sourceDir}\\build\"", result_code: $ret);
+        if (is_dir("{$this->sourceDir}\\builddir")) {
+            exec("rmdir /s /q \"{$this->sourceDir}\\builddir\"", result_code: $ret);
             if ($ret !== 0) {
                 throw new Exception("failed to clean up {$this->name}");
             }
         }
         passthru(
             "cd {$this->sourceDir} && " .
-                'cmake -B build ' .
+                'cmake -B builddir ' .
                     "-A \"{$this->config->cmakeArch}\" " .
                     "-G \"{$this->config->cmakeGeneratorName}\" " .
+                    '-DCMAKE_BUILD_TYPE=Release ' .
                     '-DBUILD_SHARED_LIBS=OFF ' .
-                    '-DSKIP_INSTALL_FILES=ON ' .
+                    '-DBROTLI_DISABLE_TESTS=ON ' .
                     //'-DCMAKE_C_FLAGS_MINSIZEREL="/MT /O1 /Ob1 /DNDEBUG" ' .
-                    '-DCMAKE_INSTALL_PREFIX="'. realpath('deps'). '" ' .
+                    '-DCMAKE_INSTALL_PREFIX="'. realpath('deps'). '" ' . 
                     "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '&& '.
-                "cmake --build build --config RelWithDebInfo --target install -j {$this->config->concurrency}",
+                "cmake --build builddir --config RelWithDebInfo --target install -j {$this->config->concurrency}",
             $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }
 
-        copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib.lib');
-        copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib_a.lib');
-
+        unlink('deps/lib/brotlicommon.lib');
+        unlink('deps/lib/brotlidec.lib');
+        unlink('deps/lib/brotlienc.lib');
+        unlink('deps/bin/brotli.exe');
+        unlink('deps/bin/brotlicommon.dll');
+        unlink('deps/bin/brotlidec.dll');
+        unlink('deps/bin/brotlienc.dll');
     }
 }

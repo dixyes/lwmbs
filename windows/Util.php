@@ -25,4 +25,22 @@ final class Util
     {
         return (int)shell_exec('echo %NUMBER_OF_PROCESSORS%');
     }
+    public static function makeCmakeToolchainFile(
+        string $targetArch,
+        string $cflags = '/MT /O1 /Ob1 /DNDEBUG /D_ACRTIMP= /D_CRTIMP=',
+        string $ldflags = '/nodefaultlib:msvcrt /nodefaultlib:msvcrtd',
+    ):string {
+        Log::i("making cmake tool chain file for $targetArch with CFLAGS='$cflags'");
+        $root = str_replace('\\', '\\\\', realpath('deps'));
+        $toolchain = <<<CMAKE
+SET(CMAKE_SYSTEM_PROCESSOR $targetArch)
+SET(CMAKE_C_FLAGS "$cflags")
+SET(CMAKE_CXX_FLAGS "$cflags")
+SET(CMAKE_EXE_LINKER_FLAGS "$ldflags")
+SET(CMAKE_FIND_ROOT_PATH "$root")
+SET(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
+CMAKE;
+        file_put_contents('./toolchain.cmake', $toolchain);
+        return realpath('./toolchain.cmake');
+    }
 }

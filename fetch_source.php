@@ -86,7 +86,7 @@ function extractSource(string $name, string $filename): void
                 passthru("tar -xf $filename -C src/$name --strip-components 1", $ret);
                 break;
             case 'zip':
-                passthru("\"$_7zExe\" x $filename -o src/$name", $ret);
+                passthru("\"$_7zExe\" x $filename -osrc/$name", $ret);
                 break;
             default:
                 throw new Exception("unknown archive format: $filename");

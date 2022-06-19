@@ -34,6 +34,7 @@ class Liblibzip extends Library
         'bzip2' => true,
         'xz' => true,
         'zstd' => true,
+        'openssl' => true,
     ];
 
     protected function build(): void

@@ -18,52 +18,62 @@
 
 declare(strict_types=1);
 
-class Libzlib extends Library
+class Libnghttp2 extends Library
 {
     use WindowsLibraryTrait;
-    protected string $name = 'zlib';
+    protected string $name = 'nghttp2';
     protected array $staticLibs = [
-        'zlib.lib',
-        'zlib_a.lib',
+        'nghttp2.lib',
     ];
     protected array $headers = [
-        'zlib.h',
-        'zconf.h',
+        'nghttp2',
     ];
     protected array $depNames = [
+        'zlib' => false,
+        'openssl' => false,
+        'libxml2' => true,
+        'libev' => true,
+        'libcares' => true,
+        'libngtcp2' => true,
+        'libnghttp3' => true,
+        'libbpf' => true,
+        'libevent-openssl' => true,
+        'jansson' => true,
+        'jemalloc' => true,
+        'systemd' => true,
+        'cunit' => true,
     ];
+
 
     protected function build(): void
     {
         Log::i("building {$this->name}");
-        
+
         $ret = 0;
-        if (is_dir("{$this->sourceDir}\\build")) {
-            exec("rmdir /s /q \"{$this->sourceDir}\\build\"", result_code: $ret);
-            if ($ret !== 0) {
-                throw new Exception("failed to clean up {$this->name}");
-            }
-        }
         passthru(
             "cd {$this->sourceDir} && " .
-                'cmake -B build ' .
+                'cmake -B builddir ' .
                     "-A \"{$this->config->cmakeArch}\" " .
                     "-G \"{$this->config->cmakeGeneratorName}\" " .
+                    '-DCMAKE_BUILD_TYPE=Release ' .
                     '-DBUILD_SHARED_LIBS=OFF ' .
-                    '-DSKIP_INSTALL_FILES=ON ' .
+                    '-DENABLE_STATIC_LIB=ON ' .
+                    '-DENABLE_SHARED_LIB=OFF ' .
+                    '-DENABLE_STATIC_CRT=ON ' .
+                    ((0 && 0/* TODO: zstd+openssl+libev support */) ? '-DENABLE_APP=ON -DENABLE_LIB_ONLY=OFF ' : '-DENABLE_LIB_ONLY=ON ') .
                     //'-DCMAKE_C_FLAGS_MINSIZEREL="/MT /O1 /Ob1 /DNDEBUG" ' .
-                    '-DCMAKE_INSTALL_PREFIX="'. realpath('deps'). '" ' .
+                    '-DCMAKE_INSTALL_PREFIX="'. realpath('deps'). '" ' . 
                     "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '&& '.
-                "cmake --build build --config RelWithDebInfo --target install -j {$this->config->concurrency}",
+                "cmake --build builddir --config RelWithDebInfo --target install -j {$this->config->concurrency}",
             $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }
-
-        copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib.lib');
-        copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib_a.lib');
-
+        // patch header for missing NGHTTP2_STATICLIB
+        $nghttp2_h = file_get_contents('deps/include/nghttp2/nghttp2.h');
+        $nghttp2_h = str_replace('#ifdef NGHTTP2_STATICLIB', '#if 1', $nghttp2_h);
+        file_put_contents('deps/include/nghttp2/nghttp2.h', $nghttp2_h);
     }
 }

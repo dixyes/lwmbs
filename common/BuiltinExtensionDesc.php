@@ -25,8 +25,12 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         'phar' => [
             'libDeps' => ['zlib' => true],
         ],
+        'mysqlnd' => [
+            'argType' => 'with',
+        ],
         'mysqli' => [
             'argType' => 'with',
+            'extDeps' => ['mysqlnd'],
         ],
         'mbstring' => [],
         'mbregex' => [
@@ -141,7 +145,7 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         ],
         'pdo_mysql' => [
             'argType' => 'with',
-            'extDeps' => ['pdo'],
+            'extDeps' => ['pdo', 'mysqlnd'],
         ],
         'pdo_pgsql' => [
             'argType' => 'with',

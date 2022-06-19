@@ -38,9 +38,16 @@ class Liblibssh2 extends Library
     protected function build(): void
     {
         Log::i("building {$this->name}");
+
         $libopenssl = $this->config->getLib('openssl');
         if (!$libopenssl) {
             throw new Exception('libssh2 requires openssl');
+        }
+
+        $enable_zlib = 'OFF';
+        $zlib = $this->config->getLib('zlib');
+        if ($zlib) {
+            $enable_zlib = 'ON';
         }
     
         $ret = 0;
@@ -57,6 +64,7 @@ class Liblibssh2 extends Library
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DBUILD_EXAMPLES=OFF ' .
                 '-DBUILD_TESTING=OFF ' .
+                "-DENABLE_ZLIB_COMPRESSION=$enable_zlib " .
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .

@@ -26,10 +26,10 @@ class Extension extends CommonExtension
         $arg = $this->desc->getArg();
         switch ($this->name) {
             case 'redis':
-                $arg = '--enable-redis';
-                if ($this->config->getLib('zstd')) {
-                    $arg .= ' --enable-redis-zstd --with-libzstd ';
-                }
+                // $arg = '--enable-redis';
+                // if ($this->config->getLib('zstd')) {
+                //     $arg .= ' --enable-redis-zstd --with-libzstd ';
+                // }
                 break;
         }
         return $arg;

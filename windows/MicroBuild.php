@@ -23,7 +23,7 @@ class CliBuild
 {
     const CLI_TARGET = [
         '$(BUILD_DIR)\php.exe: $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest',
-        '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286',
+        '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI)',
         '-@$(_VC_MANIFEST_EMBED_EXE)',
     ];
 
@@ -36,9 +36,17 @@ class CliBuild
     {
         Log::i("building cli");
 
+        $crt = match ($this->config->vsVer) {
+            '14' => 'vc14',
+            '15' => 'vc15',
+            '16' => 'vs16',
+            '17' => 'vs17',
+        };
+        $env = "\"{$this->config->phpBinarySDKDir}\\phpsdk-starter.bat\" -c {$crt} -a {$this->config->arch} ";
+
         $ret = 0;
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
+            "cd src\php-src && $env -t buildconf.bat",
             $ret
         );
         if ($ret !== 0) {
@@ -46,11 +54,11 @@ class CliBuild
         }
 
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
+            "cd src\php-src && $env" .
                 '-t configure.bat ' .
                 '--task-args "' .
                 '--with-prefix=C:\php ' .
-                '--with-php-build=..\..\deps ' .
+                '--with-php-build=..\deps ' .
                 '--disable-debug ' .
                 '--enable-debug-pack ' .
                 '--disable-all ' .
@@ -65,33 +73,22 @@ class CliBuild
             throw new Exception("failed to configure cli");
         }
 
-        if ($this->config->arch === 'arm64') {
-            // workaround for InterlockedExchange8 missing (seems to be a MSVC bug)
-            $zend_atomic = file_get_contents('src\php-src\Zend\zend_atomic.h');
-            $zend_atomic = preg_replace('/\bInterlockedExchange8\b/', '_InterlockedExchange8', $zend_atomic);
-            file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
-        }
+        // workaround for bInterlockedExchange8 missing (seems to be a MSVC bug)
+        $zend_atomic = file_get_contents('src\php-src\Zend\zend_atomic.h');
+        $zend_atomic = preg_replace('/\bInterlockedExchange8\b/', '_InterlockedExchange8', $zend_atomic);
+        file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
 
         // workaround for static cli build (needs cli_static.patch from micro also)
         $makefile = file_get_contents('src\php-src\Makefile');
         $makefile = preg_replace('/\$\(BUILD_DIR\)\\\php\.exe:\s[^\r\n]+/m', implode("\r\n\t", self::CLI_TARGET) . "\r\n\r\nnotused:", $makefile);
         file_put_contents('src\php-src\Makefile', $makefile);
 
-        // add indirect libs
-        $extra_libs = '';
-        if ($this->config->getLib('zstd')) {
-            $extra_libs .= ' zstd.lib';
-        }
-        if ($this->config->getLib('brotli')) {
-            $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
-        }
-
-        file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_CLI="ws2_32.lib ' . $extra_libs . ' shell32.lib" %*');
+        file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake %*');
 
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
+            "cd src\php-src && $env" .
                 '-t nmake_wrapper.bat ' .
-                '--task-args clean',
+                '--task-args "/nologo clean"',
             $ret
         );
         if ($ret !== 0) {
@@ -99,9 +96,9 @@ class CliBuild
         }
 
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
+            "cd src\php-src && $env" .
                 '-t nmake_wrapper.bat ' . 
-                '--task-args php.exe',
+                '--task-args "/nologo php.exe"',
             $ret
         );
         if ($ret !== 0) {

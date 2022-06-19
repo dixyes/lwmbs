@@ -26,6 +26,8 @@ class Config extends CommonConfig
     public string $cmakeGeneratorName;
     public string $configureEnv;
     public string $pkgconfEnv;
+    public string $phpBinarySDKCmd;
+    public string $cmakeToolchainFile;
     public int $concurrency;
 
     public function __construct(
@@ -39,16 +41,21 @@ class Config extends CommonConfig
         }
         Log::i("build with VS $vsVer for $arch, SDK $phpBinarySDKDir");
 
+        Log::i('mkdir deps');
+        @mkdir('deps');
+
         $this->arch = match ($arch) {
             'x64', 'x86_64'  => 'x64',
             'arm64', 'aarch64' => 'arm64',
             //'x86', 'i386' => 'x86',
+            default => throw new Exception("not supported arch {$arch}, supported: x64/arm64"),
         };
 
         $this->cmakeArch = match ($this->arch) {
             'x64' => 'x64',
             'arm64' => 'ARM64',
             //'x86' => 'Win32',
+            default => throw new Exception("?????"),
         };
         
         $this->cmakeGeneratorName = match ($vsVer) {
@@ -56,9 +63,21 @@ class Config extends CommonConfig
             '15' => "Visual Studio 15 2017",
             '16' => "Visual Studio 16 2019",
             '17' => "Visual Studio 17 2022",
+            default => throw new Exception("not supported vs version {$vsVer} supported: 14,15,16,17"),
         };
 
+        $this->cmakeToolchainFile = Util::makeCmakeToolchainFile($this->cmakeArch);
+
         $this->phpBinarySDKDir = rtrim($phpBinarySDKDir, '\\/');
+
+        $crt = match ($vsVer) {
+            '14' => 'vc14',
+            '15' => 'vc15',
+            '16' => 'vs16',
+            '17' => 'vs17',
+            default => throw new Exception("?????"),
+        };
+        $this->phpBinarySDKCmd = "\"{$this->phpBinarySDKDir}\\phpsdk-starter.bat\" -c {$crt} -a {$this->arch} ";
 
         Log::i("mkdir -p deps/include");
         @mkdir('deps/include', recursive: true);
