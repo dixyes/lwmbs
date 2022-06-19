@@ -307,6 +307,7 @@ function patch(string $majDotMin)
     $serial = ['80', '81', '82'];
     foreach ([
         'static_opcache',
+        'static_extensions_win32',
         'cli_checks',
         'disable_huge_page',
         'vcruntime140',
@@ -331,7 +332,7 @@ function patch(string $majDotMin)
     $ret = 0;
     passthru(
         'cd src/php-src && ' .
-            'git apply ' . implode(' ', $patches),
+            'cat ' . implode(' ', $patches) . ' | patch -p1',
         $ret
     );
     if ($ret != 0) {
