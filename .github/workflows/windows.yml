@@ -118,7 +118,7 @@ jobs:
         if: steps.cli.outcome == 'success'
         uses: actions/upload-artifact@v3
         with:
-          name: cli_shared_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          name: cli_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
           path: |
             php.exe
 
