@@ -70,6 +70,7 @@ function mian($argv): int
         'curl',
         'zlib',
         'brotli',
+        //'libiconv',
         'libffi',
         'openssl',
         'libzip',

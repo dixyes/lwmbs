@@ -19,13 +19,8 @@
 
 declare(strict_types=1);
 
-class CliBuild
+class MicroBuild
 {
-    const CLI_TARGET = [
-        '$(BUILD_DIR)\php.exe: $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest',
-        '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI)',
-        '-@$(_VC_MANIFEST_EMBED_EXE)',
-    ];
 
     public function __construct(
         private Config $config
@@ -34,75 +29,66 @@ class CliBuild
 
     public function build(bool $allStatic = false): void
     {
-        Log::i("building cli");
+        Log::i("building micro");
 
-        $crt = match ($this->config->vsVer) {
-            '14' => 'vc14',
-            '15' => 'vc15',
-            '16' => 'vs16',
-            '17' => 'vs17',
-        };
-        $env = "\"{$this->config->phpBinarySDKDir}\\phpsdk-starter.bat\" -c {$crt} -a {$this->config->arch} ";
+        Util::patchConfigW32();
 
         $ret = 0;
         passthru(
-            "cd src\php-src && $env -t buildconf.bat",
+            "cd src\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
             $ret
         );
         if ($ret !== 0) {
-            throw new Exception("failed to buildconf for cli");
+            throw new Exception("failed to buildconf for micro");
         }
 
         passthru(
-            "cd src\php-src && $env" .
+            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
                 '-t configure.bat ' .
                 '--task-args "' .
                 '--with-prefix=C:\php ' .
-                '--with-php-build=..\deps ' .
+                '--with-php-build=..\..\deps ' .
                 '--disable-debug ' .
                 '--enable-debug-pack ' .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
-                '--enable-cli ' .
+                '--disable-cli ' .
+                '--enable-micro ' .
                 ($this->config->zts ? '--enable-zts' : '') . ' ' .
                 Extension::makeExtensionArgs($this->config) . '"',
             $ret
         );
         if ($ret !== 0) {
-            throw new Exception("failed to configure cli");
+            throw new Exception("failed to configure micro");
         }
 
-        // workaround for bInterlockedExchange8 missing (seems to be a MSVC bug)
-        $zend_atomic = file_get_contents('src\php-src\Zend\zend_atomic.h');
-        $zend_atomic = preg_replace('/\bInterlockedExchange8\b/', '_InterlockedExchange8', $zend_atomic);
-        file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
-
-        // workaround for static cli build (needs cli_static.patch from micro also)
-        $makefile = file_get_contents('src\php-src\Makefile');
-        $makefile = preg_replace('/\$\(BUILD_DIR\)\\\php\.exe:\s[^\r\n]+/m', implode("\r\n\t", self::CLI_TARGET) . "\r\n\r\nnotused:", $makefile);
-        file_put_contents('src\php-src\Makefile', $makefile);
-
-        file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake %*');
-
-        passthru(
-            "cd src\php-src && $env" .
-                '-t nmake_wrapper.bat ' .
-                '--task-args "/nologo clean"',
-            $ret
-        );
-        if ($ret !== 0) {
-            throw new Exception("failed to make clean for cli");
+        if ($this->config->arch === 'arm64') {
+            // workaround for InterlockedExchange8 missing (seems to be a MSVC bug)
+            $zend_atomic = file_get_contents('src\php-src\Zend\zend_atomic.h');
+            $zend_atomic = preg_replace('/\bInterlockedExchange8\b/', '_InterlockedExchange8', $zend_atomic);
+            file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
         }
 
+        // add indirect libs
+        $extra_libs = '';
+        if ($this->config->getLib('zstd')) {
+            $extra_libs .= ' zstd.lib';
+        }
+        if ($this->config->getLib('brotli')) {
+            $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
+        }
+
+        file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_MICRO="' . $extra_libs . ' ws2_32.lib shell32.lib" %*');
+
         passthru(
-            "cd src\php-src && $env" .
+            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
                 '-t nmake_wrapper.bat ' . 
-                '--task-args "/nologo php.exe"',
+                '--task-args micro',
             $ret
         );
         if ($ret !== 0) {
-            throw new Exception("failed to make cli");
+            throw new Exception("failed to make micro");
         }
     }
 }

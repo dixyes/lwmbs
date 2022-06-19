@@ -36,6 +36,8 @@ class CliBuild
     {
         Log::i("building cli");
 
+        Util::patchConfigW32();
+
         $ret = 0;
         passthru(
             "cd src\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
@@ -86,17 +88,7 @@ class CliBuild
             $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
         }
 
-        file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_CLI="ws2_32.lib ' . $extra_libs . ' shell32.lib" %*');
-
-        passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
-                '-t nmake_wrapper.bat ' .
-                '--task-args clean',
-            $ret
-        );
-        if ($ret !== 0) {
-            throw new Exception("failed to make clean for cli");
-        }
+        file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_CLI="' . $extra_libs . ' ws2_32.lib shell32.lib" %*');
 
         passthru(
             "cd src\php-src && {$this->config->phpBinarySDKCmd} " .

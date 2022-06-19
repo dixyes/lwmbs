@@ -25,6 +25,7 @@ final class Util
     {
         return (int)shell_exec('echo %NUMBER_OF_PROCESSORS%');
     }
+
     public static function makeCmakeToolchainFile(
         string $targetArch,
         string $cflags = '/MT /O1 /Ob1 /DNDEBUG /D_ACRTIMP= /D_CRTIMP=',
@@ -42,5 +43,10 @@ SET(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
 CMAKE;
         file_put_contents('./toolchain.cmake', $toolchain);
         return realpath('./toolchain.cmake');
+    }
+
+    public static function patchConfigW32() {
+        Log::i('patching config.w32 for static library building');
+        Log::w('not implemented yet');
     }
 }

@@ -81,6 +81,7 @@ function mian($argv): int
         'curl',
         'zlib',
         'brotli',
+        //'libiconv',
         'libffi',
         'openssl',
         'libzip',
@@ -92,6 +93,7 @@ function mian($argv): int
 
     $extNames = [
         'opcache',
+        //'iconv',
         'bcmath',
         'pdo',
         'phar',
