@@ -22,7 +22,7 @@ declare(strict_types=1);
 class CliBuild
 {
     const CLI_TARGET = [
-        '$(BUILD_DIR)\php.exe: $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest',
+        '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest',
         '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286',
         '-@$(_VC_MANIFEST_EMBED_EXE)',
     ];
@@ -75,6 +75,9 @@ class CliBuild
         // workaround for static cli build (needs cli_static.patch from micro also)
         $makefile = file_get_contents('src\php-src\Makefile');
         $makefile = preg_replace('/\$\(BUILD_DIR\)\\\php\.exe:\s[^\r\n]+/m', implode("\r\n\t", self::CLI_TARGET) . "\r\n\r\nnotused:", $makefile);
+        if ($this->config->arch !== 'arm64') {
+            $makefile .= "\r\n" . '$(BUILD_DIR)\php.exe: $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj' . "\r\n\r\n";
+        }
         file_put_contents('src\php-src\Makefile', $makefile);
 
         // add indirect libs
