@@ -35,7 +35,9 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc
                 'curl' => false,
             ],
         ],
-        'parallel' =>[],
+        'parallel' =>[
+            'argTypeWin' => 'with',
+        ],
         'redis' => [],
         // todo:mongo
         //'mongodb' => [],
@@ -80,7 +82,7 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc
                     continue;
                 }
                 unset($args['unixOnly']);
-                unset($args['argTypeWin ']);
+                unset($args['argTypeWin']);
                 $ret[$name] = new static($name, ...$args);
             }
         }
