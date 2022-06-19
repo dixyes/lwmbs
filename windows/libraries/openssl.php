@@ -37,11 +37,31 @@ class Libopenssl extends Library
     {
         Log::i("building {$this->name}");
         
-        $confArch = match($this->config->arch) {
-            'x64' => 'VC-WIN64A',
-            'arm64' => 'VC-WIN64-ARM',
+        $addPath = '';
+        $confArch = '';
+        switch ($this->config->arch) {
+            case 'x64':
+                $confArch = 'VC-WIN64A';
+                
+                $nasm = Util::findCommand('nasm', [
+                    'C:\Program Files\NASM',
+                    'C:\Program Files (x86)\NASM',
+                    getenv('LOCALAPPDATA') . '\bin\NASM',
+                ]);
+                if (!$nasm) {
+                    Log::w('nasm not founf, noasm used');
+                    $confArch .= ' noasm';
+                } else {
+                    $nasmPath = dirname($nasm);
+                    $addPath = "set \"PATH=%PATH%;$nasmPath\" && ";
+                }
+                break;
+            case 'arm64':
+                $confArch = 'VC-WIN64-ARM';
+                break;
             //'ia64' => 'VC-WIN64I', really?
-            default => throw new Exception("not supported arch {$this->config->arch}"),
+            default:
+                throw new Exception("not supported arch {$this->config->arch}");
         };
     
         $zlib = '';
@@ -58,6 +78,7 @@ class Libopenssl extends Library
         $ret = 0;
         passthru(
             "cd {$this->sourceDir} && " .
+                $addPath .
                 "perl Configure $zlib $confArch " .
                     "disable-shared " .
                     '--prefix="' . realpath('deps') . '" ' .
@@ -72,5 +93,8 @@ class Libopenssl extends Library
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }
+
+        // make empty applink
+        file_put_contents('deps\include\openssl\applink.c', '');
     }
 }

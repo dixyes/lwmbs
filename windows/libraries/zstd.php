@@ -49,8 +49,9 @@ class Libzstd extends Library
                 'cmake build/cmake -B builddir ' .
                     "-A \"{$this->config->cmakeArch}\" " .
                     "-G \"{$this->config->cmakeGeneratorName}\" " .
+                    '-DCMAKE_BUILD_TYPE=RelWithDebInfo ' .
                     '-DBUILD_TESTING=OFF ' .
-                    '-DZSTD_BUILD_PROGRAMS=OFF ' .
+                    (0 ? '-DZSTD_BUILD_PROGRAMS=ON ' : '-DZSTD_BUILD_PROGRAMS=OFF ') .
                     '-DZSTD_BUILD_STATIC=ON ' .
                     '-DZSTD_BUILD_SHARED=OFF ' .
                     '-DZSTD_USE_STATIC_RUNTIME=ON ' .

@@ -23,7 +23,7 @@ class Libzlib extends Library
     use WindowsLibraryTrait;
     protected string $name = 'zlib';
     protected array $staticLibs = [
-        'zlib.lib',
+        //'zlib.lib',
         'zlib_a.lib',
     ];
     protected array $headers = [
@@ -38,15 +38,15 @@ class Libzlib extends Library
         Log::i("building {$this->name}");
         
         $ret = 0;
-        if (is_dir("{$this->sourceDir}\\build")) {
-            exec("rmdir /s /q \"{$this->sourceDir}\\build\"", result_code: $ret);
+        if (is_dir("{$this->sourceDir}\\builddir")) {
+            exec("rmdir /s /q \"{$this->sourceDir}\\builddir\"", result_code: $ret);
             if ($ret !== 0) {
                 throw new Exception("failed to clean up {$this->name}");
             }
         }
         passthru(
             "cd {$this->sourceDir} && " .
-                'cmake -B build ' .
+                'cmake -B builddir ' .
                     "-A \"{$this->config->cmakeArch}\" " .
                     "-G \"{$this->config->cmakeGeneratorName}\" " .
                     '-DBUILD_SHARED_LIBS=OFF ' .
@@ -55,15 +55,16 @@ class Libzlib extends Library
                     '-DCMAKE_INSTALL_PREFIX="'. realpath('deps'). '" ' .
                     "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '&& '.
-                "cmake --build build --config RelWithDebInfo --target install -j {$this->config->concurrency}",
+                "cmake --build builddir --config RelWithDebInfo --target install -j {$this->config->concurrency}",
             $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }
 
-        copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib.lib');
+        //copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib.lib');
         copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib_a.lib');
-
+        unlink('deps/bin/zlib.dll');
+        unlink('deps/lib/zlib.lib');
     }
 }

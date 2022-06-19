@@ -36,8 +36,6 @@ class CliBuild
     {
         Log::i("building cli");
 
-        Util::patchConfigW32();
-
         $ret = 0;
         passthru(
             "cd src\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",

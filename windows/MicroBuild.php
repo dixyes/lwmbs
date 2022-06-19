@@ -31,8 +31,6 @@ class MicroBuild
     {
         Log::i("building micro");
 
-        Util::patchConfigW32();
-
         $ret = 0;
         passthru(
             "cd src\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
