@@ -43,14 +43,14 @@ class Libopenssl extends Library
             case 'x64':
                 $confArch = 'VC-WIN64A';
                 
-                $nasm = Util::findCommand('nasm', [
+                $nasm = Util::findCommand('nasm') ?? Util::findCommand('nasm', [
                     'C:\Program Files\NASM',
                     'C:\Program Files (x86)\NASM',
                     getenv('LOCALAPPDATA') . '\bin\NASM',
                 ]);
                 if (!$nasm) {
-                    Log::w('nasm not founf, noasm used');
-                    $confArch .= ' noasm';
+                    Log::w('nasm not found, no-asm used');
+                    $confArch .= ' no-asm';
                 } else {
                     $nasmPath = dirname($nasm);
                     $addPath = "set \"PATH=%PATH%;$nasmPath\" && ";
