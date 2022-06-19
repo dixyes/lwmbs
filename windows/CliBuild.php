@@ -75,7 +75,7 @@ class CliBuild
         // workaround for static cli build (needs cli_static.patch from micro also)
         $makefile = file_get_contents('src\php-src\Makefile');
         $makefile = preg_replace('/\$\(BUILD_DIR\)\\\php\.exe:\s[^\r\n]+/m', implode("\r\n\t", self::CLI_TARGET) . "\r\n\r\nnotused:", $makefile);
-        if ($this->config->arch !== 'arm64') {
+        if ($this->config->arch !== 'arm64' && str_contains($makefile, 'FIBER_ASM_ARCH')) {
             $makefile .= "\r\n" . '$(BUILD_DIR)\php.exe: $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj' . "\r\n\r\n";
         }
         file_put_contents('src\php-src\Makefile', $makefile);
