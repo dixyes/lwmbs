@@ -69,11 +69,12 @@ function mian($argv): int
         }
     }
 
+    $allStatic = (bool)($cmdArgs['all-static'] ?? false);
+    unset($cmdArgs['all-static']);
+
     $config = new Config(
         ...$cmdArgs,
     );
-
-    $allStatic = (bool)($cmdArgs['all-static'] ?? false);
 
     $libNames = [
         'zstd',
