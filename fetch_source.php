@@ -329,10 +329,12 @@ function patch(string $majDotMin)
         throw new Exception("failed finding {$patchName}");
     }
 
+    $patchesStr = str_replace('/', '\\', implode(' ', $patches));
+
     $ret = 0;
     passthru(
         'cd src/php-src && ' .
-            'cat ' . implode(' ', $patches) . ' | patch -p1',
+            (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' ' . $patchesStr . ' | patch -p1',
         $ret
     );
     if ($ret != 0) {
