@@ -85,7 +85,7 @@ class Liblibffi extends Library
         $vcxproj = preg_replace('|<PlatformToolset>v141</PlatformToolset>|m', '<PlatformToolset>v142</PlatformToolset>', $vcxproj);
         // 3.4 feature
         if (!str_contains($vcxproj, 'tramp.c')) {
-            $vcxproj = preg_replace('|<ClCompile Include="..\..\src\closures.c" />|m', '<ClCompile Include="..\..\src\tramp.c" /><ClCompile Include="..\..\src\closures.c" />', $vcxproj);
+            $vcxproj = str_replace('<ClCompile Include="..\..\src\closures.c" />', '<ClCompile Include="..\..\src\tramp.c" /><ClCompile Include="..\..\src\closures.c" />', $vcxproj);
         }
         file_put_contents('src\libffi\msvc_build\aarch64\Ffi_staticLib.vcxproj', $vcxproj);
 
