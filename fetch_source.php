@@ -329,7 +329,7 @@ function patch(string $majDotMin)
         throw new Exception("failed finding {$patchName}");
     }
 
-    $patchesStr = str_replace('/', '\\', implode(' ', $patches));
+    $patchesStr = str_replace('/', DIRECTORY_SEPARATOR, implode(' ', $patches));
 
     $ret = 0;
     passthru(
