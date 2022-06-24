@@ -150,7 +150,13 @@ EOF;
         copy("src\\xz\\windows\\vs2019\\ReleaseMT\\{$this->config->arch}\\liblzma\\liblzma.pdb", 'deps\lib\liblzma.pdb');
         copy("src\\xz\\windows\\vs2019\\ReleaseMT\\{$this->config->arch}\\liblzma\\liblzma.lib", 'deps\lib\liblzma.lib');
         copy("src\\xz\\windows\\vs2019\\ReleaseMT\\{$this->config->arch}\\liblzma\\liblzma.lib", 'deps\lib\liblzma_a.lib');
+    
         copy('src\xz\src\liblzma\api\lzma.h', 'deps\include\lzma.h');
+        // patch lzma.h
+        $lzma_h = file_get_contents('deps\include\lzma.h');
+        $lzma_h = preg_replace('/defined\s*\(\s*LZMA_API_STATIC\s*\)/', '1', $lzma_h);
+        file_put_contents('deps\include\lzma.h', $lzma_h);
+
         Util::copyDir('src\xz\src\liblzma\api\lzma', 'deps\include\lzma');
     }
 }
