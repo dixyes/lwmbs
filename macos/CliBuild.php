@@ -74,8 +74,10 @@ class CliBuild
                 "make -j{$this->config->concurrency} "  .
                 'EXTRA_CFLAGS="-g -Os -fno-ident" ' .
                 "EXTRA_LIBS=\"$extra_libs -lresolv\" " .
-                // TODO: comment/debug things
-                'cli',
+                // TODO: comment things
+                'cli &&' .
+                'dsymutil -f sapi/cli/php'
+            ,
             $ret
         );
         if ($ret !== 0) {

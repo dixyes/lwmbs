@@ -74,7 +74,8 @@ class MicroBuild
                 "make -j{$this->config->concurrency} "  .
                 'EXTRA_CFLAGS="-g -Os -fno-ident" ' .
                 "EXTRA_LIBS=\"$extra_libs -lresolv\" " .
-                // TODO: comment/debug things
+                "STRIP=\"dsymutil -f \" " .
+                // TODO: comment things
                 'micro',
             $ret
         );

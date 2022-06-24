@@ -65,7 +65,7 @@ jobs:
           export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
           php ${GITHUB_WORKSPACE}/build_micro.php --arch=${{ matrix.arch }}
           mkdir -p ${GITHUB_WORKSPACE}/micro
-          cp src/php-src/sapi/micro/micro.sfx ${GITHUB_WORKSPACE}/micro/
+          cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.dwarf ${GITHUB_WORKSPACE}/micro/
 
       - name: Upload artifact for micro
         if: steps.micro.outcome == 'success'
@@ -84,9 +84,8 @@ jobs:
           export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
           php ${GITHUB_WORKSPACE}/build_cli.php --arch=${{ matrix.arch }}
           mkdir -p ${GITHUB_WORKSPACE}/cli
-          cp src/php-src/sapi/cli/php ${GITHUB_WORKSPACE}/cli/
+          cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.dwarf ${GITHUB_WORKSPACE}/cli/
 
-  
       - name: Upload artifact for cli
         if: steps.cli.outcome == 'success'
         uses: actions/upload-artifact@v3
