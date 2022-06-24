@@ -116,6 +116,7 @@ function mian($argv): int
         'parallel',
         'sockets',
         'openssl',
+        'zip',
         'zlib',
         'bz2',
     ];

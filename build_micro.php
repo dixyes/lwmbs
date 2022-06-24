@@ -117,6 +117,7 @@ function mian($argv): int
         'sockets',
         'openssl',
         'zlib',
+        'zip',
         'bz2',
     ];
     if (PHP_OS_FAMILY !== 'Windows') {
