@@ -3,101 +3,177 @@
         "zlib": {
             "type": "filelist",
             "url": "https://zlib.net/",
-            "regex": "/href=\"(?<file>zlib-(?<version>[^\"]+)\\.tar\\.gz)\"/i"
+            "regex": "/href=\"(?<file>zlib-(?<version>[^\"]+)\\.tar\\.gz)\"/i",
+            "license": {
+                "type": "text",
+                "text": "(C) 1995-2022 Jean-loup Gailly and Mark Adler\n\nThis software is provided 'as-is', without any express or implied\nwarranty.  In no event will the authors be held liable for any damages\narising from the use of this software.\n\nPermission is granted to anyone to use this software for any purpose,\nincluding commercial applications, and to alter it and redistribute it\nfreely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not\n claim that you wrote the original software. If you use this software\n in a product, an acknowledgment in the product documentation would be\n appreciated but is not required.\n2. Altered source versions must be plainly marked as such, and must not be\n misrepresented as being the original software.\n3. This notice may not be removed or altered from any source distribution.\n\nJean-loup Gailly        Mark Adler\njloup@gzip.org          madler@alumni.caltech.edu"
+            }
         },
         "openssl": {
             "type": "filelist",
             "url": "https://www.openssl.org/source/",
-            "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+            "regex": "/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+            "license": {
+                "type": "file",
+                "path": "LICENSE.txt"
+            }
         },
         "libressl": {
             "type": "filelist",
             "url": "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/",
-            "regex": "/href=\"(?<file>libressl-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+            "regex": "/href=\"(?<file>libressl-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
         },
         "libiconv": {
             "type": "filelist",
             "url": "https://ftp.gnu.org/pub/gnu/libiconv/",
-            "regex": "/href=\"(?<file>libiconv-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+            "regex": "/href=\"(?<file>libiconv-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
         },
         "xz": {
             "type": "filelist",
             "url": "https://tukaani.org/xz/",
-            "regex": "/href=\"(?<file>xz-(?<version>[^\"]+)\\.tar\\.xz)\"/"
+            "regex": "/href=\"(?<file>xz-(?<version>[^\"]+)\\.tar\\.xz)\"/",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
         },
         "bzip2": {
             "type": "filelist",
             "url": "https://sourceware.org/pub/bzip2/",
-            "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/"
+            "regex": "/href=\"(?<file>bzip2-(?<version>[^\"]+)\\.tar\\.gz)\"/",
+            "license": {
+                "type": "text",
+                "text": "This program, \"bzip2\", the associated library \"libbzip2\", and all documentation, are copyright (C) 1996-2010 Julian R Seward. All rights reserved.\n\nRedistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n    2. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.\n    3. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.\n    4. The name of the author may not be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\nJulian Seward, jseward@bzip.org bzip2\/libbzip2 version 1.0.6 of 6 September 2010\n\nPATENTS: To the best of my knowledge, bzip2 and libbzip2 do not use any patented algorithms. However, I do not have the resources to carry out a patent search. Therefore I cannot give any guarantee of the above statement."
+            }
         },
         "zstd": {
             "type": "ghrel",
             "repo": "facebook/zstd",
-            "match": "zstd.+\\.tar\\.gz"
+            "match": "zstd.+\\.tar\\.gz",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
         },
         "nghttp2": {
             "type": "ghrel",
             "repo": "nghttp2/nghttp2",
-            "match": "nghttp2.+\\.tar\\.xz"
+            "match": "nghttp2.+\\.tar\\.xz",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
         },
         "onig": {
             "type": "ghrel",
             "repo": "kkos/oniguruma",
-            "match": "onig-.+\\.tar\\.gz"
+            "match": "onig-.+\\.tar\\.gz",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
         },
         "libssh2": {
             "type": "ghrel",
             "repo": "libssh2/libssh2",
-            "match": "libssh2.+\\.tar\\.gz"
+            "match": "libssh2.+\\.tar\\.gz",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
         },
         "libffi": {
             "type": "ghrel",
             "repo": "libffi/libffi",
-            "match": "libffi.+\\.tar\\.gz"
+            "match": "libffi.+\\.tar\\.gz",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
         },
         "libzip": {
             "type": "ghrel",
             "repo": "nih-at/libzip",
-            "match": "libzip.+\\.tar\\.xz"
+            "match": "libzip.+\\.tar\\.xz",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
         },
         "curl": {
             "type": "ghrel",
             "repo": "curl/curl",
-            "match": "curl.+\\.tar\\.xz"
+            "match": "curl.+\\.tar\\.xz",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
         },
         "brotli": {
             "type": "ghtar",
-            "repo": "google/brotli"
+            "repo": "google/brotli",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
         },
         "swoole": {
             "type": "git",
             "path": "php-src/ext/swoole",
             "rev": "master",
-            "url": "https://github.com/swoole/swoole-src"
+            "url": "https://github.com/swoole/swoole-src",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
         },
         "swow": {
             "type": "git",
             "path": "php-src/ext/swow-src",
             "rev": "ci",
-            "url": "https://github.com/swow/swow"
+            "url": "https://github.com/swow/swow",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
         },
         "parallel": {
             "type": "git",
             "path": "php-src/ext/parallel",
             "rev": "dixyes-dev",
-            "url": "https://github.com/dixyes/parallel"
+            "url": "https://github.com/dixyes/parallel",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
         },
         "redis": {
             "type": "git",
             "path": "php-src/ext/redis",
             "rev": "5.3.7",
-            "url": "https://github.com/phpredis/phpredis"
+            "url": "https://github.com/phpredis/phpredis",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
         },
         "micro": {
             "type": "git",
             "path": "php-src/sapi/micro",
             "rev": "master",
-            "url": "https://github.com/dixyes/phpmicro"
+            "url": "https://github.com/dixyes/phpmicro",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
         }
     }
 }
