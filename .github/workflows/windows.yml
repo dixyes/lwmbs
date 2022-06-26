@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   schedule:
-    - cron:  '33 4 * * *'
+    - cron: "33 4 * * *"
 
 jobs:
   build:
@@ -15,11 +15,11 @@ jobs:
       matrix:
         include:
           - php-version: "8.1"
-            arch: 'x64'
+            arch: "x64"
           - php-version: "8.0"
-            arch: 'x64'
+            arch: "x64"
           - php-version: "8.1" # but 8.2 dev
-            arch: 'arm64'
+            arch: "arm64"
       max-parallel: 3
     steps:
       - name: Checkout
@@ -62,6 +62,7 @@ jobs:
           git clone --depth 1 --single-branch --branch master https://github.com/php/php-sdk-binary-tools C:\tools\php-sdk-binary-tools
           # fetch source
           php ${env:GITHUB_WORKSPACE}/fetch_source.php ${env:GITHUB_WORKSPACE}/src.json ${{ matrix.php-version }} --shallow-clone
+          php ${env:GITHUB_WORKSPACE}/dump_licenses.php ${env:GITHUB_WORKSPACE}/src.json ${env:GITHUB_WORKSPACE}\licenses
           Set-Location src\php-src
           if ("${{ matrix.arch }}" -Eq "arm64") {
             git checkout HEAD .
@@ -102,6 +103,7 @@ jobs:
         with:
           name: micro_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
           path: |
+            licenses
             micro.sfx
 
       - name: Build cli
@@ -120,6 +122,7 @@ jobs:
         with:
           name: cli_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
           path: |
+            licenses
             php.exe
 
       - name: Fail if anything failed

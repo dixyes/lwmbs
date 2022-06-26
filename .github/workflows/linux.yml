@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   schedule:
-    - cron:  '33 4 * * *'
+    - cron: "33 4 * * *"
 
 jobs:
   libs:
@@ -163,6 +163,11 @@ jobs:
           echo "::set-output name=cc::$LWMBS_CC"
           echo "::set-output name=cxx::$LWMBS_CXX"
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ${GITHUB_WORKSPACE}/fetch_source.php ${GITHUB_WORKSPACE}/src.json ${{ matrix.php-version }} --shallow-clone
+          mkdir -p ${GITHUB_WORKSPACE}/micro_shared ${GITHUB_WORKSPACE}/micro_static ${GITHUB_WORKSPACE}/cli_shared ${GITHUB_WORKSPACE}/cli_static
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/micro_shared/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/micro_static/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/cli_shared/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/cli_static/licenses
 
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'
@@ -180,7 +185,6 @@ jobs:
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
           php ${GITHUB_WORKSPACE}/build_micro.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
-          mkdir -p ${GITHUB_WORKSPACE}/micro_shared
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_shared/
 
       - name: Upload artifact for micro
@@ -199,7 +203,6 @@ jobs:
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
           php ${GITHUB_WORKSPACE}/build_micro.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }} --all-static
-          mkdir -p ${GITHUB_WORKSPACE}/micro_static
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_static/
 
       - name: Upload artifact for micro static
@@ -218,7 +221,6 @@ jobs:
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
           php ${GITHUB_WORKSPACE}/build_cli.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
-          mkdir -p ${GITHUB_WORKSPACE}/cli_shared
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_shared/
 
       - name: Upload artifact for cli
@@ -237,7 +239,6 @@ jobs:
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
           php ${GITHUB_WORKSPACE}/build_cli.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }} --all-static
-          mkdir -p ${GITHUB_WORKSPACE}/cli_static
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_static/
 
       - name: Upload artifact for cli static

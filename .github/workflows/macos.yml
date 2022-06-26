@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   schedule:
-    - cron:  '33 4 * * *'
+    - cron: "33 4 * * *"
 
 jobs:
   macos:
@@ -47,6 +47,9 @@ jobs:
           mkdir -p build
           cd build
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ../fetch_source.php ../src.json ${{ matrix.php-version }} --shallow-clone
+          mkdir -p ${GITHUB_WORKSPACE}/micro ${GITHUB_WORKSPACE}/cli
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/micro/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/cli/licenses
 
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'
