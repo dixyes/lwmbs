@@ -62,7 +62,7 @@ cd build
 # 坑
 
 1. musl wrapper可能用不了
-2. glibc旧版本不兹磁全静态编译
+2. glibc旧版本不兹磁全静态编译，全静态编译出来的东西也肯能有玄学bug
 3. opcache静态编译需要一些奇怪的环境（较新的gcc+gnuld+binutils/clang+lld）
 4. Windows下静态编译cli需要patch
 

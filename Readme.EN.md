@@ -62,7 +62,7 @@ cd build
 # Pits
 
 1. musl wrapper may not work
-2. old version of glibc do not support all-static
+2. old version of glibc do not support all-static, the built binary may have strange bugs
 3. statically compiling opcache needs special environment (new gcc+gnuld+binutils/clang+lld)
 4. statically compiling cli at Windows needs patch
 
