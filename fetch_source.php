@@ -383,17 +383,19 @@ function mian($argv): int
     $cmdArgs = Util::parseArgs(
         argv: $argv,
         positionalNames: [
-            'srcFile' => ['SRCFILE', true, null, 'src.json path'],
-            'minMaj' => ['VERSION', true, null, 'php version in major.minor format like 8.1'],
+            'libraries' => ['LIBRARIES', false, '', 'libraries used, comma spearated'],
+            'extensions' => ['EXTENSIONS', false, '', 'extensions used, comma spearated'],
         ],
         namedKeys: [
             'hash' => ['BOOL', false, false, 'hash only'],
             'shallowClone' => ['BOOL', false, false, 'use shallow clone'],
             'openssl11' => ['BOOL', false, false, 'use openssl 1.1'],
+            'srcFile' => ['SRCFILE', false, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
+            'phpVer' => ['VERSION', false, '8.1', 'php version in major.minor format like 8.1'],
         ],
     );
 
-    $majMin = $cmdArgs['positional']['minMaj'];
+    $majMin = $cmdArgs['named']['phpVer'];
 
     preg_match('/^\d+\.\d+$/', $majMin, $matches);
     if (!$matches) {
@@ -407,15 +409,40 @@ function mian($argv): int
 
     $openssl11 = (bool)$cmdArgs['named']['openssl11'];
 
-    $data = json_decode(file_get_contents($cmdArgs['positional']['srcFile']), true);
+    $data = json_decode(file_get_contents($cmdArgs['named']['srcFile']), true);
     if ($openssl11) {
         Log::i('using openssl 1.1');
         $data['src']['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
     }
 
+    $chosen = [
+        'php',
+        'micro',
+    ];
+    $libraries = array_map('trim', array_filter(explode(',', $cmdArgs['positional']['libraries'])));
+    if ($libraries) {
+        foreach ($libraries as $lib) {
+            $srcName = $data['lib'][$lib];
+            $chosen[] = $srcName;
+        }
+    } else {
+        $chosen = [...$chosen, ...array_values($data['lib'])];
+    }
+    $extensions = array_map('trim', array_filter(explode(',', $cmdArgs['positional']['extensions'])));
+    if ($extensions) {
+        foreach ($extensions as $lib) {
+            $srcName = $data['ext'][$lib];
+            $chosen[] = $srcName;
+        }
+    } else {
+        $chosen = [...$chosen, ...array_values($data['ext'])];
+    }
+    $chosen = array_unique($chosen);
+    $filter = fn($_, $name) => in_array($name, $chosen, true);
+
     if ($cmdArgs['named']['hash']) {
         $files = [];
-        foreach ($data['src'] as $name => $source) {
+        foreach (array_filter($data['src'], $filter, ARRAY_FILTER_USE_BOTH) as $name => $source) {
             switch ($source['type']) {
                 case 'git':
                     continue 2;
@@ -451,15 +478,16 @@ function mian($argv): int
         ]
     ], fn ($x) => true, $shallowClone);
     // download all sources
-    fetchSources($data, fn ($x) => true, $shallowClone);
+    fetchSources($data, $filter, $shallowClone);
     
+    patch($majMin);
+
     if (!$openssl11 && $majMin === '8.0') {
+        Log::i('patching php for openssl 3');
         $openssl_c = file_get_contents('src/php-src/ext/openssl/openssl.c');
         $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
         file_put_contents('src/php-src/ext/openssl/openssl.c', $openssl_c);
     }
-
-    patch($majMin);
     if (!file_exists('src/php-src/ext/swow')) {
         linkSwow();
     }
