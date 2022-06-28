@@ -393,9 +393,11 @@ function mian($argv): int
         ],
     );
 
-    preg_match('/^\d+\.\d+$/', $cmdArgs['positional']['minMaj'], $matches);
+    $majMin = $cmdArgs['positional']['minMaj'];
+
+    preg_match('/^\d+\.\d+$/', $majMin, $matches);
     if (!$matches) {
-        Log::e("bad version arg: {$cmdArgs['positional']['minMaj']}\n");
+        Log::e("bad version arg: {$majMin}\n");
         return 1;
     }
 
@@ -410,6 +412,7 @@ function mian($argv): int
         Log::i('using openssl 1.1');
         $data['src']['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
     }
+
     if ($cmdArgs['named']['hash']) {
         $files = [];
         foreach ($data['src'] as $name => $source) {
@@ -444,12 +447,19 @@ function mian($argv): int
     // download php first
     fetchSources([
         'src' => [
-            'php' => latestPHP($cmdArgs['positional']['minMaj']),
+            'php' => latestPHP($majMin),
         ]
     ], fn ($x) => true, $shallowClone);
     // download all sources
     fetchSources($data, fn ($x) => true, $shallowClone);
-    patch($cmdArgs['positional']['minMaj']);
+    
+    if (!$openssl11 && $majMin === '8.0') {
+        $openssl_c = file_get_contents('src/php-src/ext/openssl/openssl.c');
+        $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
+        file_put_contents('src/php-src/ext/openssl/openssl.c', $openssl_c);
+    }
+
+    patch($majMin);
     if (!file_exists('src/php-src/ext/swow')) {
         linkSwow();
     }
