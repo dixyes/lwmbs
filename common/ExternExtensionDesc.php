@@ -39,6 +39,17 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc
             'argTypeWin' => 'with',
         ],
         'redis' => [],
+        'yaml' => [
+            'argType' => 'with',
+            'libDeps' => [
+                'libyaml' => false,
+            ],
+        ],
+        'zstd' => [
+            'libDeps' => [
+                'zstd' => false,
+            ],
+        ],
         // todo:mongo
         //'mongodb' => [],
     ];

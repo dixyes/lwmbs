@@ -89,6 +89,7 @@ function mian($argv): int
         'bzip2',
         'nghttp2',
         'onig',
+        'libyaml',
         'xz',
     ];
 
@@ -119,6 +120,8 @@ function mian($argv): int
         'zip',
         'zlib',
         'bz2',
+        'yaml',
+        'zstd',
     ];
     if (PHP_OS_FAMILY !== 'Windows') {
         $extNames [] = 'pcntl';

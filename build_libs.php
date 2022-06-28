@@ -77,6 +77,7 @@ function mian($argv): int
         'bzip2',
         'nghttp2',
         'onig',
+        'libyaml',
         'xz',
     ];
     foreach ($libNames as $name) {

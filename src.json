@@ -81,6 +81,15 @@
                 "path": "COPYING"
             }
         },
+        "libyaml": {
+            "type": "ghrel",
+            "repo": "yaml/libyaml",
+            "match": "yaml-.+\\.tar\\.gz",
+            "license": {
+                "type": "file",
+                "path": "License"
+            }
+        },
         "libssh2": {
             "type": "ghrel",
             "repo": "libssh2/libssh2",
@@ -163,6 +172,26 @@
             "license": {
                 "type": "file",
                 "path": "COPYING"
+            }
+        },
+        "yaml": {
+            "type": "git",
+            "path": "php-src/ext/yaml",
+            "rev": "php7",
+            "url": "https://github.com/php/pecl-file_formats-yaml",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
+        },
+        "ext-zstd": {
+            "type": "git",
+            "path": "php-src/ext/zstd",
+            "rev": "master",
+            "url": "https://github.com/kjdev/php-ext-zstd",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
             }
         },
         "micro": {
