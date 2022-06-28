@@ -31,6 +31,9 @@ trait UnixExtensionTrait
                     $arg .= ' --enable-redis-zstd --with-libzstd="' . realpath('.') . '" ';
                 }
                 break;
+            case 'yaml':
+                $arg .= ' --with-yaml="' . realpath('.') . '" ';
+                break;
             case 'zstd':
                 $arg .= ' --with-libzstd';
                 break;
