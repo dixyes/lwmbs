@@ -204,5 +204,35 @@
                 "path": "LICENSE"
             }
         }
+    },
+    "ext": {
+        "swoole": "swoole",
+        "swow": "swow",
+        "parallel": "parallel",
+        "redis": "redis",
+        "yaml": "yaml",
+        "zstd": "ext-zstd"
+    },
+    "lib": {
+        "brotli": "brotli",
+        "bzip2": "bzip2",
+        "bz2": "bzip2",
+        "curl": "curl",
+        "libffi": "libffi",
+        "ffi": "libffi",
+        "iconv": "libiconv",
+        "libressl": "libressl",
+        "libssh2": "libssh2",
+        "libyaml": "libyaml",
+        "yaml": "libyaml",
+        "libzip": "libzip",
+        "zip": "libzip",
+        "micro": "micro",
+        "nghttp2": "nghttp2",
+        "onig": "onig",
+        "openssl": "openssl",
+        "xz": "xz",
+        "zlib": "zlib",
+        "zstd": "zstd"
     }
 }

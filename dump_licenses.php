@@ -33,11 +33,12 @@ function mian($argv): int
     $cmdArgs = Util::parseArgs(
         argv: $argv,
         positionalNames: [
-            'srcFile' => ['SRCFILE', true, null, 'src.json path'],
             'destDir' => ['DESTDIR', true, null, 'destination path'],
+        ],
+        namedKeys: [
+            'srcFile' => ['SRCFILE', false, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
             'libraries' => ['LIBRARIES', false, null, 'libraries to generate, comma separated'],
         ],
-        namedKeys: [],
     );
 
     $destDir = $cmdArgs['positional']['destDir'];
@@ -47,8 +48,8 @@ function mian($argv): int
     }
 
     $filter = fn ($k) => true;
-    if ($cmdArgs['positional']['libraries']) {
-        $names = explode(',', $cmdArgs['positional']['libraries']);
+    if ($cmdArgs['named']['libraries']) {
+        $names = array_map('trim', array_filter(explode(',', $cmdArgs['named']['libraries'])));
         $filter = function ($k) use ($names) {
             if (in_array($k, $names)) {
                 return true;
@@ -57,7 +58,7 @@ function mian($argv): int
         };
     }
 
-    $data = json_decode(file_get_contents($cmdArgs['positional']['srcFile']), true);
+    $data = json_decode(file_get_contents($cmdArgs['named']['srcFile']), true);
 
     foreach (array_filter($data['src'], $filter, ARRAY_FILTER_USE_KEY) as $name => $info) {
         $license = $info['license'];
@@ -68,6 +69,10 @@ function mian($argv): int
                 break;
             case 'file':
                 $srcPath = $info['path'] ?? $name;
+                if (!is_file("src/{$srcPath}/{$license['path']}")) {
+                    Log::w("license file not found: src/{$srcPath}/{$license['path']}");
+                    continue;
+                }
                 copy("src/{$srcPath}/{$license['path']}", "{$destDir}/LICENSE.$name");
                 break;
             default:
