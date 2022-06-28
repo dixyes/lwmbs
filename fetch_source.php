@@ -378,34 +378,39 @@ function latestPHP(string $majMin){
 
 function mian($argv): int
 {
-    if (count($argv) < 3) {
-        Log::e("usage: php {$argv[0]} <src-file> <maj.min> [--hash] [--shallow-clone] [--openssl11]\n");
+    Util::setErrorHandler();
+
+    $cmdArgs = Util::parseArgs(
+        argv: $argv,
+        positionalNames: [
+            'srcFile' => ['SRCFILE', true, null, 'src.json path'],
+            'minMaj' => ['VERSION', true, null, 'php version in major.minor format like 8.1'],
+        ],
+        namedKeys: [
+            'hash' => ['BOOL', false, false, 'hash only'],
+            'shallowClone' => ['BOOL', false, false, 'use shallow clone'],
+            'openssl11' => ['BOOL', false, false, 'use openssl 1.1'],
+        ],
+    );
+
+    preg_match('/^\d+\.\d+$/', $cmdArgs['positional']['minMaj'], $matches);
+    if (!$matches) {
+        Log::e("bad version arg: {$cmdArgs['positional']['minMaj']}\n");
         return 1;
     }
-    preg_match('/^\d+\.\d+$/', $argv[2], $matches);
-    if (!$matches || !file_exists($argv[1])) {
-        Log::e("usage: php {$argv[0]} <src-file> <maj.min> [--hash] [--shallow-clone] [--openssl11]\n");
-        return 1;
-    }
-    if (in_array('--hash', $argv)) {
+
+    if ($cmdArgs['named']['hash']) {
         Log::$outFd = STDERR;
     }
 
-    $openssl11 = false;
-    if (in_array('--openssl11', $argv)) {
-        $openssl11 = true;
-    }
+    $openssl11 = (bool)$cmdArgs['named']['openssl11'];
 
-    if (version_compare($argv[2], '8.1', '<')) {
-        $openssl11 = true;
-    }
-
-    $data = json_decode(file_get_contents($argv[1]), true);
+    $data = json_decode(file_get_contents($cmdArgs['positional']['srcFile']), true);
     if ($openssl11) {
         Log::i('using openssl 1.1');
         $data['src']['openssl']['regex'] = '/href="(?<file>openssl-(?<version>1.[^"]+)\.tar\.gz)\"/';
     }
-    if (in_array('--hash', $argv)) {
+    if ($cmdArgs['named']['hash']) {
         $files = [];
         foreach ($data['src'] as $name => $source) {
             switch ($source['type']) {
@@ -432,22 +437,19 @@ function mian($argv): int
         echo hash('sha256', implode('|', $files)) . "\n";
         return 0;
     }
-    $shallowClone = false;
-    if (in_array('--shallow-clone', $argv, true)) {
-        $shallowClone = true;
-    }
+    $shallowClone = (bool)$cmdArgs['named']['shallowClone'];
     Util::setErrorHandler();
     @mkdir('downloads');
     // TODO:implement filter
     // download php first
     fetchSources([
         'src' => [
-            'php' => latestPHP($argv[2]),
+            'php' => latestPHP($cmdArgs['positional']['minMaj']),
         ]
     ], fn ($x) => true, $shallowClone);
     // download all sources
     fetchSources($data, fn ($x) => true, $shallowClone);
-    patch($argv[2]);
+    patch($cmdArgs['positional']['minMaj']);
     if (!file_exists('src/php-src/ext/swow')) {
         linkSwow();
     }

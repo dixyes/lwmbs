@@ -54,9 +54,9 @@ cd build
 # prepare sources
 ../update_source.php ../src.json 8.1
 # build micro (unix)
-../build_micro.php
+../build_micro.php "" ""
 # build micro (win)
-../build_micro.php --phpBinarySDKDir=<path to sdk> --vsVer=<version like 17> --arch=<arch x64/arm64>
+../build_micro.php "" "" --phpBinarySDKDir=<path to sdk> --vsVer=<version like 17> --arch=<arch x64/arm64>
 ```
 
 # Pits

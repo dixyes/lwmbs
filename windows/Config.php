@@ -30,9 +30,17 @@ class Config extends CommonConfig
     public string $cmakeToolchainFile;
     public int $concurrency;
 
+    public static function fromCmdArgs(array $cmdArgs): static {
+        return new static(
+            phpBinarySDKDir: $cmdArgs['named']['phpBinarySDKDir'],
+            vsVer: $cmdArgs['named']['vsVer'],
+            arch: $cmdArgs['named']['arch'] ?? 'x64',
+        );
+    }
+
     public function __construct(
-        public ?string $phpBinarySDKDir = null,
-        public ?string $vsVer = null,
+        public string $phpBinarySDKDir,
+        public string $vsVer,
         public string $arch = 'x64',
     )
     {

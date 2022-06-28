@@ -28,20 +28,27 @@ class Util
 
 function mian($argv): int
 {
-    if (count($argv) < 3) {
-        Log::e("usage: php {$argv[0]} <src-file> <destdir> [NAME[,NAME]]n");
-        return 1;
-    }
-    
-    $destDir = $argv[2];
+    Util::setErrorHandler();
+
+    $cmdArgs = Util::parseArgs(
+        argv: $argv,
+        positionalNames: [
+            'srcFile' => ['SRCFILE', true, null, 'src.json path'],
+            'destDir' => ['DESTDIR', true, null, 'destination path'],
+            'libraries' => ['LIBRARIES', false, null, 'libraries to generate, comma separated'],
+        ],
+        namedKeys: [],
+    );
+
+    $destDir = $cmdArgs['positional']['destDir'];
 
     if (!is_dir($destDir)) {
         mkdir($destDir);
     }
 
-    $names = explode(',', $argv[3] ?? '');
     $filter = fn ($k) => true;
-    if ($argv[3] ?? false) {
+    if ($cmdArgs['positional']['libraries']) {
+        $names = explode(',', $cmdArgs['positional']['libraries']);
         $filter = function ($k) use ($names) {
             if (in_array($k, $names)) {
                 return true;
@@ -50,7 +57,7 @@ function mian($argv): int
         };
     }
 
-    $data = json_decode(file_get_contents($argv[1]), true);
+    $data = json_decode(file_get_contents($cmdArgs['positional']['srcFile']), true);
 
     foreach (array_filter($data['src'], $filter, ARRAY_FILTER_USE_KEY) as $name => $info) {
         $license = $info['license'];
@@ -67,8 +74,10 @@ function mian($argv): int
                 throw new Exception("unsupported license type {$license['type']}");
         }
     }
-    Log::i("dump license for php");
-    copy("src/php-src/LICENSE", "{$destDir}/LICENSE.php");
+    if ($filter('php')) {
+        Log::i("dump license for php");
+        copy("src/php-src/LICENSE", "{$destDir}/LICENSE.php");
+    }
 
     Log::i('done');
 

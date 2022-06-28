@@ -106,13 +106,89 @@ trait CommonUtilTrait
         }
     }
 
-    public static function parseArgs(array $argv) {
-        $ret = [];
-        array_shift($argv);
+    public static function parseArgs(array $argv, array $positionalNames, array $namedKeys, ?string $example = null): array {
+        $positional = [];
+        $named = [];
+        $self = array_shift($argv);
+        $ret = 1;
         foreach ($argv as $arg) {
-            $kv = explode('=', $arg, 2);
-            $ret[ltrim($kv[0], '-')] = $kv[1] ?? true;
+            if ($arg === '--help' || $arg === '--usage' || $arg === '-h') {
+                goto help;
+            }
+            if (str_starts_with($arg, '-')) {
+                $kv = explode('=', ltrim($arg, '-'), 2);
+                if (array_key_exists($kv[0], $namedKeys)) {
+                    $named[$kv[0]] = $kv[1] ?? true;
+                } else {
+                    Log::e("Unknown named argument: $kv[0]");
+                    goto usage;
+                }
+            } else {
+                $index = count($positional);
+                if ($index >= count($positionalNames)) {
+                    Log::e("Too many positional arguments");
+                    goto usage;
+                }
+                $positional[array_keys($positionalNames)[$index]] = $arg;
+            }
         }
-        return $ret;
+
+        foreach ($positionalNames as $name => [$placeholder, $necessary]) {
+            if (!array_key_exists($name, $positional)) {
+                if ($necessary) {
+                    Log::e("Missing positional argument: $placeholder");
+                    goto usage;
+                } else {
+                    $positional[$name] = $positionalNames[$name][2];
+                }
+            }
+        }
+
+        foreach ($namedKeys as $key => [$placeholder, $necessary]) {
+            if (!array_key_exists($key, $named)) {
+                if ($necessary) {
+                    Log::e("Missing named argument: $key");
+                    goto usage;
+                } else {
+                    $named[$key] = $namedKeys[$key][2];
+                }
+            }
+        }
+
+        return [
+            'self' => $self,
+            'positional' => $positional,
+            'named' => $named,
+        ];
+        help:
+        $ret = 0;
+        usage:
+        $details = [];
+        $positionalHelp = [];
+        foreach ($positionalNames as $name => [$placeholder, $necessary]) {
+            $positionalHelp[] = $necessary ? "<$placeholder>" : "[$placeholder]";
+            if ($message = $positionalNames[$name][3] ?? false) {
+                $details[] = "    $placeholder: $message";
+            }
+        }
+        $positionalHelp =implode(' ', $positionalHelp);
+        $namedHelp = [];
+        foreach ($namedKeys as $key => [$placeholder, $necessary]) {
+            $namedHelp[] = $necessary ? "<-$key=<$placeholder>>" : "[-$key=<$placeholder>]";
+            if ($message = $namedKeys[$key][3] ?? false) {
+                $details[] = "    -$key=<$placeholder>: $message";
+            }
+        }
+        $namedHelp = implode(' ', $namedHelp);
+        Log::i("Usage: $self $positionalHelp $namedHelp");
+        Log::i('Arguments:');
+        foreach ($details as $message) {
+            Log::i($message);
+        }
+        if ($example) {
+            Log::i("Example:");
+            Log::i("    $example");
+        }
+        exit($ret);
     }
 }

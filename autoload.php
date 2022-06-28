@@ -33,6 +33,9 @@ spl_autoload_register(function ($class) {
     if (str_starts_with($class, 'Lib') && $class !== 'Library') {
         $libName = substr($class, 3);
         $file = __DIR__ . "/$osDir/libraries/$libName.php";
+        if (!is_file($file)) {
+            throw new Exception("Library $libName not implemented: ");
+        }
         require $file;
         return;
     }

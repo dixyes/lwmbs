@@ -23,48 +23,31 @@ function mian($argv): int
 {
     Util::setErrorHandler();
 
-    $cmdArgs = Util::parseArgs($argv);
-    foreach (array_keys($cmdArgs) as $k) {
-        if (!in_array($k, [
-            'cc',
-            'cxx',
-            'arch',
-            'phpBinarySDKDir',
-            'vsVer',
-        ], true)) {
-            Log::e("Unknown argument: $k");
-            if (PHP_OS_FAMILY === 'Windows') {
-                Log::w("Usage: {$argv[0]} --phpBinarySDKDir=<path to sdk> --vsVer=<vs version> [--arch=<arch>]");
-            } else {
-                Log::w("Usage: {$argv[0]} [--cc=<compiler>] [--cxx=<compiler>] [--arch=<arch>]");
-            }
-            exit(1);
-        }
-    }
+    $namedKeys = match(PHP_OS_FAMILY) {
+        'Windows', 'WINNT', 'Cygwin' => [
+            'phpBinarySDKDir' => ['path to sdk', true, null, 'path to binary sdk'],
+            'vsVer' => ['vs version', true, null, 'vs version, e.g. "17" for Visual Studio 2022'],
+            'arch' => [ 'arch', false, 'x64', 'architecture, "x64" or "arm64:' ], // TODO: use real host arch
+        ],
+        default => [
+            'cc' => ['compiler', false, null, 'C compiler'],
+            'cxx' => ['compiler', false, null, 'C++ compiler'],
+            'arch' => [ 'arch', false, php_uname('m'), 'architecture'],
+        ]
+    };
 
-    $unsupportedArgs = [];
-    switch (PHP_OS_FAMILY) {
-        case 'Windows':
-            $unsupportedArgs = ['cc', 'cxx'];
-            break;
-        case 'Darwin':
-        case 'Linux':
-            $unsupportedArgs = ['phpBinarySDKDir'];
-            break;
-    }
-    foreach ($unsupportedArgs as $unsupportedArg) {
-    $cmdArgs = Util::parseArgs($argv);
-        if (array_key_exists($unsupportedArg, $cmdArgs)) {
-            log::w("unsupported $unsupportedArg arg for " . PHP_OS_FAMILY);
-            unset($cmdArgs[$unsupportedArg]);
-        }
-    }
-
-    $config = new Config(
-        ...$cmdArgs,
+    $cmdArgs = Util::parseArgs(
+        argv: $argv,
+        positionalNames: [
+            'libraries' => ['LIBRARIES', true, null, 'select libraries, comma separated'],
+        ],
+        namedKeys: $namedKeys,
     );
 
-    $libNames = [
+    $config = Config::fromCmdArgs($cmdArgs);
+
+    $libNames = array_map('trim', explode(',', $cmdArgs['positional']['libraries']));
+    [
         'zstd',
         'libssh2',
         'curl',

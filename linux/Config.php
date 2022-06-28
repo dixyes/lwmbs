@@ -39,6 +39,14 @@ class Config extends CommonConfig
 
     public const NEEDED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
 
+    public static function fromCmdArgs(array $cmdArgs): static {
+        return new static(
+            cc: $cmdArgs['named']['cc'] ?? null,
+            cxx: $cmdArgs['named']['cxx'] ?? null,
+            arch: $cmdArgs['named']['arch'] ?? null,
+        );
+    }
+
     public function __construct(
         ?string $cc=null,
         ?string $cxx=null,
