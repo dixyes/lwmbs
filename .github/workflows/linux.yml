@@ -2,9 +2,26 @@ name: linux test
 
 on:
   workflow_dispatch:
+    inputs:
+      libraries:
+        description: "libraries"
+        required: false
+        default: "opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd"
+      extensions:
+        description: "extensions"
+        required: false
+        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz"
+      lib_only:
+        description: "build libraries only"
+        required: false
+        default: ""
   push:
   schedule:
     - cron: "33 4 * * *"
+
+env:
+  LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz
+  LWMBS_EXTENSIONS: opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd
 
 jobs:
   libs:
@@ -85,7 +102,11 @@ jobs:
             "glibc-aarch64") dnf install -yy php;;
           esac
           printf '::set-output name=hash::'
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php ./src.json "${{ matrix.php-version }}" --hash
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php  \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --phpVer=${{ matrix.php-version }} \
+            --hash
           echo
 
       - name: Cache libraries
@@ -162,12 +183,16 @@ jobs:
           esac
           echo "::set-output name=cc::$LWMBS_CC"
           echo "::set-output name=cxx::$LWMBS_CXX"
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ${GITHUB_WORKSPACE}/fetch_source.php ${GITHUB_WORKSPACE}/src.json ${{ matrix.php-version }} --shallow-clone
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ${GITHUB_WORKSPACE}/fetch_source.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --phpVer=${{ matrix.php-version }} \
+            --shallowClone
           mkdir -p ${GITHUB_WORKSPACE}/micro_shared ${GITHUB_WORKSPACE}/micro_static ${GITHUB_WORKSPACE}/cli_shared ${GITHUB_WORKSPACE}/cli_static
-          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/micro_shared/licenses
-          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/micro_static/licenses
-          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/cli_shared/licenses
-          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/cli_static/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro_shared/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro_static/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli_shared/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli_static/licenses
 
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'
@@ -175,16 +200,26 @@ jobs:
           set -xeo pipefail
           export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
-          php ${GITHUB_WORKSPACE}/build_libs.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
+          php ${GITHUB_WORKSPACE}/build_libs.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            --cc=${{ steps.prepare.outputs.cc }} \
+            --cxx=${{ steps.prepare.outputs.cxx }} \
+            --arch=${{ matrix.arch }}
 
       - name: Build micro
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: micro_shared
         continue-on-error: true
         run: |
           set -xeo pipefail
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
-          php ${GITHUB_WORKSPACE}/build_micro.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
+          php ${GITHUB_WORKSPACE}/build_micro.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --cc=${{ steps.prepare.outputs.cc }} \
+            --cxx=${{ steps.prepare.outputs.cxx }} \
+            --arch=${{ matrix.arch }}
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_shared/
 
       - name: Upload artifact for micro
@@ -196,13 +231,20 @@ jobs:
             micro_shared
 
       - name: Build micro static
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: micro_static
         continue-on-error: true
         run: |
           set -xeo pipefail
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
-          php ${GITHUB_WORKSPACE}/build_micro.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }} --all-static
+          php ${GITHUB_WORKSPACE}/build_micro.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --cc=${{ steps.prepare.outputs.cc }} \
+            --cxx=${{ steps.prepare.outputs.cxx }} \
+            --arch=${{ matrix.arch }} \
+            --allStatic
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_static/
 
       - name: Upload artifact for micro static
@@ -214,13 +256,19 @@ jobs:
             micro_static
 
       - name: Build cli
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: cli_shared
         continue-on-error: true
         run: |
           set -xeo pipefail
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
-          php ${GITHUB_WORKSPACE}/build_cli.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }}
+          php ${GITHUB_WORKSPACE}/build_cli.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --cc=${{ steps.prepare.outputs.cc }} \
+            --cxx=${{ steps.prepare.outputs.cxx }} \
+            --arch=${{ matrix.arch }}
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_shared/
 
       - name: Upload artifact for cli
@@ -232,13 +280,20 @@ jobs:
             cli_shared
 
       - name: Build cli static
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: cli_static
         continue-on-error: true
         run: |
           set -xeo pipefail
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
-          php ${GITHUB_WORKSPACE}/build_cli.php --cc=${{ steps.prepare.outputs.cc }} --cxx=${{ steps.prepare.outputs.cxx }} --arch=${{ matrix.arch }} --all-static
+          php ${GITHUB_WORKSPACE}/build_cli.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --cc=${{ steps.prepare.outputs.cc }} \
+            --cxx=${{ steps.prepare.outputs.cxx }} \
+            --arch=${{ matrix.arch }} \
+            --allStatic
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_static/
 
       - name: Upload artifact for cli static
@@ -250,7 +305,11 @@ jobs:
             cli_static
 
       - name: Fail if anything failed
-        if: steps.micro_shared.outcome != 'success' || steps.cli_shared.outcome != 'success' || (steps.micro_static.outcome != 'success' && matrix.libc != 'glibc') || (steps.cli_static.outcome != 'success' && matrix.libc != 'glibc')
+        if: |
+          steps.micro_shared.outcome == 'failure' ||
+          steps.cli_shared.outcome == 'failure' ||
+          (steps.micro_static.outcome == 'failure' && matrix.libc != 'glibc') ||
+          (steps.cli_static.outcome == 'failure' && matrix.libc != 'glibc')
         run: |
           false
 

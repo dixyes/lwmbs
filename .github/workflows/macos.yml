@@ -2,9 +2,26 @@ name: macos test
 
 on:
   workflow_dispatch:
+    inputs:
+      libraries:
+        description: "libraries"
+        required: false
+        default: "opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd"
+      extensions:
+        description: "extensions"
+        required: false
+        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz"
+      lib_only:
+        description: "build libraries only"
+        required: false
+        default: ""
   push:
   schedule:
     - cron: "33 4 * * *"
+
+env:
+  LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz
+  LWMBS_EXTENSIONS: opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd
 
 jobs:
   macos:
@@ -25,7 +42,11 @@ jobs:
         run: |
           set -xeo pipefail
           printf '::set-output name=hash::'
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php src.json "${{ matrix.php-version }}" --hash
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php  \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --phpVer=${{ matrix.php-version }} \
+            --hash
           echo
 
       - name: Cache libraries
@@ -46,10 +67,14 @@ jobs:
           brew link automake
           mkdir -p build
           cd build
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ../fetch_source.php ../src.json ${{ matrix.php-version }} --shallow-clone
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ../fetch_source.php  \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --phpVer=${{ matrix.php-version }} \
+            --shallowClone
           mkdir -p ${GITHUB_WORKSPACE}/micro ${GITHUB_WORKSPACE}/cli
-          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/micro/licenses
-          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/src.json ${GITHUB_WORKSPACE}/cli/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli/licenses
 
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'
@@ -57,16 +82,22 @@ jobs:
         run: |
           set -xeo pipefail
           export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
-          php ../build_libs.php --arch=${{ matrix.arch }}
+          php ../build_libs.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            --arch=${{ matrix.arch }}
 
       - name: Build micro
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: micro
         working-directory: build
         continue-on-error: true
         run: |
           set -xeo pipefail
           export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
-          php ${GITHUB_WORKSPACE}/build_micro.php --arch=${{ matrix.arch }}
+          php ${GITHUB_WORKSPACE}/build_micro.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --arch=${{ matrix.arch }}
           mkdir -p ${GITHUB_WORKSPACE}/micro
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.dwarf ${GITHUB_WORKSPACE}/micro/
 
@@ -79,13 +110,17 @@ jobs:
             micro
 
       - name: Build cli
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: cli
         working-directory: build
         continue-on-error: true
         run: |
           set -xeo pipefail
           export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
-          php ${GITHUB_WORKSPACE}/build_cli.php --arch=${{ matrix.arch }}
+          php ${GITHUB_WORKSPACE}/build_cli.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --arch=${{ matrix.arch }}
           mkdir -p ${GITHUB_WORKSPACE}/cli
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.dwarf ${GITHUB_WORKSPACE}/cli/
 
@@ -97,13 +132,10 @@ jobs:
           path: |
             cli
 
-      - name: Fail if micro build failed
-        if: steps.cli.outcome != 'success'
-        run: |
-          false
-
-      - name: Fail if cli build failed
-        if: steps.micro.outcome != 'success'
+      - name: Fail if anything failed
+        if: |
+          steps.cli.outcome == 'failure' ||
+          steps.micro.outcome == 'failure'
         run: |
           false
 

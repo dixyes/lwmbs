@@ -2,9 +2,26 @@ name: windows test
 
 on:
   workflow_dispatch:
+    inputs:
+      libraries:
+        description: "libraries"
+        required: false
+        default: "opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd"
+      extensions:
+        description: "extensions"
+        required: false
+        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz"
+      lib_only:
+        description: "build libraries only"
+        required: false
+        default: ""
   push:
   schedule:
     - cron: "33 4 * * *"
+
+env:
+  LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz
+  LWMBS_EXTENSIONS: opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd
 
 jobs:
   build:
@@ -31,7 +48,11 @@ jobs:
         run: |
           ${env:GITHUB_TOKEN} = "${{ secrets.GITHUB_TOKEN }}"
           Write-Host -NoNewline "::set-output name=hash::"
-          php fetch_source.php ./src.json "${{ matrix.php-version }}" --hash
+          php fetch_source.php `
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" `
+            --phpVer=${{ matrix.php-version }} `
+            --hash
           Write-Host ""
 
       - name: Cache libraries
@@ -61,8 +82,14 @@ jobs:
           # prepare binary sdk
           git clone --depth 1 --single-branch --branch master https://github.com/php/php-sdk-binary-tools C:\tools\php-sdk-binary-tools
           # fetch source
-          php ${env:GITHUB_WORKSPACE}/fetch_source.php ${env:GITHUB_WORKSPACE}/src.json ${{ matrix.php-version }} --shallow-clone
-          php ${env:GITHUB_WORKSPACE}/dump_licenses.php ${env:GITHUB_WORKSPACE}/src.json ${env:GITHUB_WORKSPACE}\licenses
+          php ${env:GITHUB_WORKSPACE}/fetch_source.php `
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" `
+            --phpVer=${{ matrix.php-version }} `
+            --shallowClone
+          php ${env:GITHUB_WORKSPACE}/dump_licenses.php `
+            ${env:GITHUB_WORKSPACE}\licenses
+          # TODO: filters
           Set-Location src\php-src
           if ("${{ matrix.arch }}" -Eq "arm64") {
             git checkout HEAD .
@@ -85,16 +112,26 @@ jobs:
         shell: pwsh
         run: |
           ${env:GITHUB_TOKEN} = "${{ secrets.GITHUB_TOKEN }}"
-          php ${env:GITHUB_WORKSPACE}/build_libs.php -phpBinarySDKDir=C:\tools\php-sdk-binary-tools --vsVer=17 --arch=${{ matrix.arch }}
+          php ${env:GITHUB_WORKSPACE}/build_libs.php `
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
+            -phpBinarySDKDir=C:\tools\php-sdk-binary-tools `
+            --vsVer=17 `
+            --arch=${{ matrix.arch }}
 
       - name: Build micro
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: micro
         shell: pwsh
         working-directory: build
         continue-on-error: true
         run: |
           ${env:GITHUB_TOKEN} = "${{ secrets.GITHUB_TOKEN }}"
-          php ${env:GITHUB_WORKSPACE}/build_micro.php -phpBinarySDKDir=C:\tools\php-sdk-binary-tools --vsVer=17 --arch=${{ matrix.arch }}
+          php ${env:GITHUB_WORKSPACE}/build_micro.php `
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" `
+            -phpBinarySDKDir=C:\tools\php-sdk-binary-tools `
+            --vsVer=17 `
+            --arch=${{ matrix.arch }}
           cp src/php-src/${{ matrix.arch }}/Release_TS/micro.sfx ..
 
       - name: Upload artifact for micro
@@ -107,13 +144,19 @@ jobs:
             micro.sfx
 
       - name: Build cli
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: cli
         shell: pwsh
         working-directory: build
         continue-on-error: true
         run: |
           ${env:GITHUB_TOKEN} = "${{ secrets.GITHUB_TOKEN }}"
-          php ${env:GITHUB_WORKSPACE}/build_cli.php -phpBinarySDKDir=C:\tools\php-sdk-binary-tools --vsVer=17 --arch=${{ matrix.arch }}
+          php ${env:GITHUB_WORKSPACE}/build_cli.php `
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" `
+            -phpBinarySDKDir=C:\tools\php-sdk-binary-tools `
+            --vsVer=17 `
+            --arch=${{ matrix.arch }}
           cp src/php-src/${{ matrix.arch }}/Release_TS/php.exe ..
 
       - name: Upload artifact for cli
@@ -126,7 +169,7 @@ jobs:
             php.exe
 
       - name: Fail if anything failed
-        if: steps.micro.outcome != 'success' || steps.cli.outcome != 'success'
+        if: steps.micro.outcome == 'failure' || steps.cli.outcome == 'failure'
         shell: cmd
         run: |
           exit /b 1
