@@ -39,7 +39,11 @@ class CommonExtension
         protected string $name,
         protected Config $config,
     ) {
-        $this->desc = static::getAllExtensionDescs()[$name];
+        $desc = static::getAllExtensionDescs()[$name] ?? null;
+        if (!$desc) {
+            throw new \Exception("Extension $name not implemented");
+        }
+        $this->desc = $desc;
         foreach ($this->desc->getLibDeps() as $name => $optional) {
             $this->addLibraryDependency($name, $optional);
         }

@@ -20,13 +20,14 @@ declare(strict_types=1);
 
 class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
 {
+    use ExtensionDescTrait;
     public const BUILTIN_EXTENSIONS = [
         'opcache' => [],
         'phar' => [
             'libDeps' => ['zlib' => true],
         ],
         'mysqlnd' => [
-            'argType' => 'with',
+            'argTypeWin' => 'with',
         ],
         'mysqli' => [
             'argType' => 'with',
@@ -219,67 +220,8 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
     ];
     private string $arg;
     private string $disabledArg;
-    private function __construct(
-        public string $name,
-        private array $libDeps = [],
-        private array $extDeps = [],
-        string $argType = 'enable',
-    ) {
-        $_name = str_replace('_', '-', $name);
-        $this->arg = match ($argType) {
-            'enable' => '--enable-' . $_name,
-            'with' => '--with-' . $_name,
-        };
-        $this->disabledArg = match ($argType) {
-            'enable' => '--disable-' . $_name,
-            'with' => '--without-' . $_name,
-        };
-    }
     public static function getAll(): array
     {
-        $ret = [];
-        if (PHP_OS_FAMILY === 'Windows') {
-            foreach (static::BUILTIN_EXTENSIONS as $name => $args) {
-                if ($args['unixOnly'] ?? false) {
-                    continue;
-                }
-                if (isset($args['argTypeWin'])) {
-                    $args['argType'] = $args['argTypeWin'];
-                    unset($args['argTypeWin']);
-                }
-                unset($args['winOnly']);
-                $ret[$name] = new static($name, ...$args);
-            }
-        } else {
-            foreach (static::BUILTIN_EXTENSIONS as $name => $args) {
-                if ($args['winOnly'] ?? false) {
-                    continue;
-                }
-                unset($args['unixOnly']);
-                unset($args['argTypeWin']);
-                $ret[$name] = new static($name, ...$args);
-            }
-        }
-        return $ret;
-    }
-    public function getArg(bool $enabled = true): string
-    {
-        if ($enabled) {
-            return $this->arg;
-        } else {
-            return $this->disabledArg;
-        }
-    }
-    public function getExtDeps(): array
-    {
-        return $this->extDeps;
-    }
-    public function getLibDeps(): array
-    {
-        return $this->libDeps;
-    }
-    public function getCustomExtDir(): ?string
-    {
-        return null;
+        return static::_getAll(static::BUILTIN_EXTENSIONS);
     }
 }
