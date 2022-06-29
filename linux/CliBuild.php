@@ -26,7 +26,7 @@ class CliBuild
     ) {
     }
 
-    public function build(bool $allStatic = false): void
+    public function build(): void
     {
         Log::i("building cli");
         $ret = 0;
@@ -101,7 +101,7 @@ class CliBuild
                 "make -j{$this->config->concurrency} "  .
                 'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . " $use_lld\" " .
                 "EXTRA_LIBS=\"$extra_libs\" " .
-                ($allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ' : '') .
+                ($this->config->allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ' : '') .
                 'cli && ' .
                 'cd sapi/cli && ' .
                 "{$this->config->crossCompilePrefix}objcopy --only-keep-debug php php.debug && " .

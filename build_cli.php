@@ -38,7 +38,7 @@ function mian($argv): int
             'cc' => ['compiler', false, null, 'C compiler'],
             'cxx' => ['compiler', false, null, 'C++ compiler'],
             'arch' => [ 'arch', false, php_uname('m'), 'architecture'],
-            'all-static' => [ 'static', false, false, 'use -all-static in php build'],
+            'allStatic' => [ 'BOOL', false, false, 'use -all-static in php build'],
         ]
     };
 
@@ -50,8 +50,6 @@ function mian($argv): int
         ],
         namedKeys: $namedKeys,
     );
-
-    $allStatic = (bool)($cmdArgs['named']['all-static']);
 
     $config = Config::fromCmdArgs($cmdArgs);
 
@@ -109,7 +107,7 @@ function mian($argv): int
         $extNames [] = 'posix';
     }
 
-    if ($allStatic) {
+    if ((bool)($cmdArgs['named']['allStatic'] ?? false)) {
         unset($libNames[array_search('libffi', $libNames, true)]);
         unset($extNames[array_search('ffi', $extNames, true)]);
     }
@@ -130,7 +128,7 @@ function mian($argv): int
     }
 
     $build = new CliBuild($config);
-    $build->build($allStatic);
+    $build->build();
 
     return 0;
 }

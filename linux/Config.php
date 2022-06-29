@@ -44,6 +44,7 @@ class Config extends CommonConfig
             cc: $cmdArgs['named']['cc'] ?? null,
             cxx: $cmdArgs['named']['cxx'] ?? null,
             arch: $cmdArgs['named']['arch'] ?? null,
+            allStatic: (bool)($cmdArgs['named']['allStatic'] ?? false),
         );
     }
 
@@ -51,6 +52,7 @@ class Config extends CommonConfig
         ?string $cc=null,
         ?string $cxx=null,
         ?string $arch=null,
+        public bool $allStatic=false,
     )
     {
         Log::i("check commands");
