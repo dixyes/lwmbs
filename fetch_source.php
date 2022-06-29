@@ -270,13 +270,18 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
                 extractSource($name, "downloads/$filename");
                 break;
             case 'git':
-                if (file_exists("src/{$source['path']}")) {
+                if ($source['path'] ?? null) {
+                    $path = "src/{$source['path']}";
+                } else {
+                    $path = "src/{$name}";
+                }
+                if (file_exists($path)) {
                     Log::i("$name source already exists");
                     break;
                 }
                 Log::i("cloning $name source");
                 passthru(
-                    "git clone --branch \"{$source['rev']}\" " . ($shallowClone ? '--depth 1 --single-branch' : '') . " --recursive \"{$source['url']}\" \"src/{$source['path']}\"",
+                    "git clone --branch \"{$source['rev']}\" " . ($shallowClone ? '--depth 1 --single-branch' : '') . " --recursive \"{$source['url']}\" \"{$path}\"",
                     $ret
                 );
                 if ($ret !== 0) {

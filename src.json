@@ -134,6 +134,15 @@
                 "path": "LICENSE"
             }
         },
+        "pthreads4w": {
+            "type": "git",
+            "rev": "master",
+            "url": "https://git.code.sf.net/p/pthreads4w/code",
+            "license": {
+                "type": "file",
+                "path": "LICENSE"
+            }
+        },
         "swoole": {
             "type": "git",
             "path": "php-src/ext/swoole",
@@ -285,6 +294,7 @@
         "nghttp2": "nghttp2",
         "onig": "onig",
         "openssl": "openssl",
+        "pthreads4w": "pthreads4w",
         "xz": "xz",
         "zlib": "zlib",
         "zstd": "zstd"
