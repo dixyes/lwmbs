@@ -6,11 +6,11 @@ on:
       libraries:
         description: "libraries"
         required: false
-        default: "opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd"
+        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,pthreads4w"
       extensions:
         description: "extensions"
         required: false
-        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz"
+        default: "opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd"
       lib_only:
         description: "build libraries only"
         required: false
@@ -20,7 +20,7 @@ on:
     - cron: "33 4 * * *"
 
 env:
-  LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz
+  LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,pthreads4w
   LWMBS_EXTENSIONS: opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd
 
 jobs:

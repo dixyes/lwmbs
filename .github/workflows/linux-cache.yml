@@ -26,17 +26,19 @@ jobs:
           sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/*.repo
           sed -i 's|^#baseurl=http://download.fedoraproject.org/pub/epel/|baseurl=https://'$EPEL_MIRROR'|g' /etc/yum.repos.d/*.repo
 
-      - name: Cache PHP and cmake 8.1 for CentOS
+      - name: Cache PHP 8.1 and cmake tar for CentOS
         uses: actions/cache@v3
         id: cache
         with:
           path: |
             /opt/cmake
             /opt/php
+            /usr/bin/tar
+            /usr/libexec/rmt
           # note: match this
-          key: linux-centos-v2
+          key: linux-centos-v3
 
-      - name: Prepare PHP and cmake 8.1 for CentOS
+      - name: Prepare PHP 8.1 and cmake tar for CentOS
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           yum groupinstall -yy 'Development Tools'
@@ -52,10 +54,20 @@ jobs:
               --enable-cli
             make -j $(nproc)
             make install
+          cd ..
 
           mkdir -p /opt/cmake
           curl -sLO https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-linux-x86_64.tar.gz
           tar -xf cmake-3.23.1-linux-x86_64.tar.gz --strip-components=1 -C /opt/cmake
+
+          curl -sLO https://ftp.gnu.org/gnu/tar/tar-latest.tar.xz
+          mkdir tar
+          tar -xf tar-latest.tar.xz --strip-components=1 -C tar
+          cd tar
+            FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr
+            make -j $(nproc)
+            make install
+          cd ..
 
   fedora:
     name: ${{ matrix.arch }}

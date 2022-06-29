@@ -6,11 +6,11 @@ on:
       libraries:
         description: "libraries"
         required: false
-        default: "opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd"
+        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz"
       extensions:
         description: "extensions"
         required: false
-        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz"
+        default: "opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd"
       lib_only:
         description: "build libraries only"
         required: false
@@ -73,8 +73,10 @@ jobs:
           path: |
             /opt/cmake
             /opt/php
+            /usr/bin/tar
+            /usr/libexec/rmt
           # note: match this
-          key: linux-centos-v2
+          key: linux-centos-v3
 
       - name: Cache fedora arm64 things
         uses: actions/cache@v3
@@ -87,7 +89,9 @@ jobs:
           key: linux-fedora-arm64-v1
 
       - name: Cache failed
-        if: (matrix.libc == 'glibc' && matrix.arch == 'aarch64' && steps.cache_arm64.outcome != 'success') || (matrix.libc == 'glibc' && matrix.arch == 'x86_64' && steps.cache_php.outcome != 'success')
+        if: |
+          (matrix.libc == 'glibc' && matrix.arch == 'aarch64' && steps.cache_arm64.outputs.cache-hit != 'true') ||
+          (matrix.libc == 'glibc' && matrix.arch == 'x86_64' && steps.cache_php.outputs.cache-hit != 'true')
         run: |
           false
 
