@@ -100,5 +100,21 @@ class CliBuild
         if ($ret !== 0) {
             throw new Exception("failed to make cli");
         }
+
+        if (match(php_uname('m')) {
+            'AMD64' => 'x64',
+            'ARM64' => 'arm64',
+        } === $this->config->arch) {
+            Log::i('running sanity check');
+            exec(
+                'cd src\php-src && ' .
+                "{$this->config->arch}\Release_TS\php.exe -r \"echo \\\"hello\\\";\"",
+                $output,
+                $ret
+            );
+            if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
+                throw new Exception("cli failed sanity check");
+            }
+        }
     }
 }

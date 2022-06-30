@@ -113,5 +113,18 @@ class CliBuild
         if ($ret !== 0) {
             throw new Exception("failed to build cli");
         }
+
+        if (php_uname('m') === $this->config->arch) {
+            Log::i('running sanity check');
+            exec(
+                $this->config->setX . ' && ' .
+                    'src/php-src/sapi/cli/php -r "echo \"hello\";"',
+                $output,
+                $ret
+            );
+            if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
+                throw new Exception("cli failed sanity check");
+            }
+        }
     }
 }

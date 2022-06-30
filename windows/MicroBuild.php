@@ -88,5 +88,24 @@ class MicroBuild
         if ($ret !== 0) {
             throw new Exception("failed to make micro");
         }
+
+        if (match(php_uname('m')) {
+            'AMD64' => 'x64',
+            'ARM64' => 'arm64',
+        } === $this->config->arch) {
+            Log::i('running sanity check');
+            file_put_contents(
+                'hello.exe',
+                file_get_contents("src\\php-src\\{$this->config->arch}\\Release_TS\\micro.sfx") . '<?php echo "hello";'
+            );
+            exec(
+                'hello.exe',
+                $output,
+                $ret
+            );
+            if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
+                throw new Exception("cli failed sanity check");
+            }
+        }
     }
 }
