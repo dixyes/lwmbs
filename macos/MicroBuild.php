@@ -26,7 +26,7 @@ class MicroBuild
     ) {
     }
 
-    public function build(bool $allStatic = false): void
+    public function build(bool $fresh = false): void
     {
         Log::i("building micro");
         $ret = 0;
@@ -58,14 +58,25 @@ class MicroBuild
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
-                '--enable-micro' . ($allStatic ? '=all-static' : '') . ' ' .
+                '--enable-micro' . ($this->config->allStatic ? '=all-static' : '') . ' ' .
                 ($this->config->zts ? '--enable-zts' : '') . ' ' .
-                Extension::makeExtensionArgs($this->config) . ' ' .
+                $this->config->makeExtensionArgs() . ' ' .
                 $this->config->configureEnv,
             $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to configure micro");
+        }
+
+        if ($fresh) {
+            Log::i('cleanning up');
+            passthru(
+                $this->config->setX . ' && ' .
+                    'cd src/php-src && ' .
+                    'make clean'
+                ,
+                $ret
+            );
         }
 
         passthru(

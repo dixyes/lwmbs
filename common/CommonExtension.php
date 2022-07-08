@@ -35,6 +35,7 @@ class CommonExtension
 
     protected ExtensionType $type;
     protected ExtensionDesc $desc;
+    protected array $dependencies = [];
     public function __construct(
         protected string $name,
         protected Config $config,
@@ -44,12 +45,15 @@ class CommonExtension
             throw new \Exception("Extension $name not implemented");
         }
         $this->desc = $desc;
+    }
+    public function checkDependency(): static {
         foreach ($this->desc->getLibDeps() as $name => $optional) {
             $this->addLibraryDependency($name, $optional);
         }
-        foreach ($this->desc->getExtDeps() as $name) {
-            $this->addExtensionDependency($name);
+        foreach ($this->desc->getExtDeps() as $name => $optional) {
+            $this->addExtensionDependency($name, $optional);
         }
+        return $this;
     }
     public function getType(): ExtensionType
     {
@@ -59,23 +63,32 @@ class CommonExtension
     {
         return $this->name;
     }
-    public function addExtensionDependency(string $name): void
+    protected function addExtensionDependency(string $name, bool $optional = false): static
     {
         $depExt = $this->config->getExt($name);
         if (!$depExt) {
-            throw new Exception("{$this->name} requires extension $name");
+            if (!$optional) {
+                throw new Exception("{$this->name} requires extension $name");
+            } else {
+                Log::i("enabling {$this->name} without extension $name");
+            }
         } else {
             $this->dependencies[] = $depExt;
         }
+        return $this;
     }
-    public function addLibraryDependency(string $name, bool $optional = false)
+    public function getExtensionDependency(): array
+    {
+        return array_filter($this->dependencies, fn ($x) => $x instanceof CommonExtension);
+    }
+    protected function addLibraryDependency(string $name, bool $optional = false)
     {
         $depLib = $this->config->getLib($name);
         if (!$depLib) {
             if (!$optional) {
                 throw new Exception("{$this->name} requires library $name");
             } else {
-                Log::i("enabling {$this->name} without $name");
+                Log::i("enabling {$this->name} without library $name");
             }
         } else {
             $this->dependencies[] = $depLib;

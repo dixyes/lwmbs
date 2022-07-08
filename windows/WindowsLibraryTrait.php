@@ -22,9 +22,26 @@ trait WindowsLibraryTrait
 {
     use CommonLibraryTrait;
 
-    public function prove(bool $forceBuild = false): void
+    public function prove(bool $forceBuild = false, bool $fresh = false): void
     {
+        if ($fresh) {
+            goto make;
+        }
         foreach ($this->staticLibs as $name) {
+            if (is_array($name)) {
+                // choosable libs
+                $lib = null;
+                foreach ($name as $file) {
+                    if (file_exists("lib/{$file}")) {
+                        $lib = $file;
+                        break;
+                    }
+                }
+                if (!$lib) {
+                    Log::i('missing ' . implode(' or ', array_map(fn ($x) => "deps/lib/{$x}", $name)));
+                    goto make;
+                }
+            }
             if (!file_exists("deps/lib/{$name}")) {
                 Log::i("missing deps/lib/{$name}");
                 goto make;

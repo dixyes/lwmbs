@@ -23,8 +23,7 @@ class Libbzip2 extends Library
     use WindowsLibraryTrait;
     protected string $name = 'bzip2';
     protected array $staticLibs = [
-        'libbz2.lib',
-        'libbz2_a.lib',
+        ['libbz2.lib', 'libbz2_a.lib'],
     ];
     protected array $headers = [
         'bzlib.h',

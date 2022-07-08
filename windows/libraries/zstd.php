@@ -23,8 +23,7 @@ class Libzstd extends Library
     use WindowsLibraryTrait;
     protected string $name = 'zstd';
     protected array $staticLibs = [
-        'zstd.lib',
-        'zstd_static.lib',
+        ['zstd.lib', 'zstd_static.lib'],
     ];
     protected array $headers = [
         'zstd.h',

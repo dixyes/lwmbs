@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -24,6 +25,10 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc
     public const EXTERN_EXTENSIONS = [
         'swoole' => [
             'unixOnly' => true,
+            'extDeps' => [
+                'openssl' => true,
+                'curl' => true,
+            ],
             'libDeps' => [
                 'openssl' => false,
                 'curl' => false,
@@ -31,12 +36,15 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc
         ],
         'swow' => [
             'extDir' => 'ext',
+            'extDeps' => [
+                'curl' => true,
+            ],
             'libDeps' => [
                 'openssl' => false,
                 'curl' => false,
             ],
         ],
-        'parallel' =>[
+        'parallel' => [
             'argTypeWin' => 'with',
             'libDepsWin' => [
                 'pthreads4w' => false,

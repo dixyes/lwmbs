@@ -49,12 +49,12 @@ EOF,
     protected array $depNames = [
     ];
 
-    public function prove(bool $forceBuild = false): void
+    public function prove(bool $forceBuild = false, bool $fresh = false): void
     {
         if ($this->config->libc===Clib::MUSL_WRAPPER) {
             $forceBuild = true;
         }
-        $this->_prove($forceBuild);
+        $this->_prove($forceBuild, $fresh);
     }
 
     protected function build(): void

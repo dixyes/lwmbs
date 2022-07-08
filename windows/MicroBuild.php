@@ -27,13 +27,14 @@ class MicroBuild
     ) {
     }
 
-    public function build(bool $allStatic = false): void
+    public function build(bool $fresh = false): void
     {
         Log::i("building micro");
 
         $ret = 0;
+
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
+            "cd src\\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
             $ret
         );
         if ($ret !== 0) {
@@ -41,7 +42,7 @@ class MicroBuild
         }
 
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
+            "cd src\\php-src && {$this->config->phpBinarySDKCmd} " .
                 '-t configure.bat ' .
                 '--task-args "' .
                 '--with-prefix=C:\php ' .
@@ -54,7 +55,7 @@ class MicroBuild
                 '--disable-cli ' .
                 '--enable-micro ' .
                 ($this->config->zts ? '--enable-zts' : '') . ' ' .
-                Extension::makeExtensionArgs($this->config) . '"',
+                $this->config->makeExtensionArgs() . '"',
             $ret
         );
         if ($ret !== 0) {
@@ -79,8 +80,19 @@ class MicroBuild
 
         file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_MICRO="' . $extra_libs . ' ws2_32.lib shell32.lib" %*');
 
+        if ($fresh) {
+            Log::i('cleanning up');
+            passthru(
+                "cd src\\php-src && {$this->config->phpBinarySDKCmd} " .
+                    '-t nmake_wrapper.bat ' . 
+                    '--task-args clean'
+                ,
+                $ret
+            );
+        }
+
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
+            "cd src\\php-src && {$this->config->phpBinarySDKCmd} " .
                 '-t nmake_wrapper.bat ' . 
                 '--task-args micro',
             $ret

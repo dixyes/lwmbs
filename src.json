@@ -215,88 +215,331 @@
         }
     },
     "ext": {
-        "swoole": "swoole",
-        "swow": "swow",
-        "parallel": "parallel",
-        "redis": "redis",
-        "yaml": "yaml",
-        "zstd": "ext-zstd",
-        "bcmath": "php",
-        "bz2": "php",
-        "calendar": "php",
-        "ctype": "php",
-        "curl": "php",
-        "dba": "php",
-        "dom": "php",
-        "enchant": "php",
-        "exif": "php",
-        "ffi": "php",
-        "fileinfo": "php",
-        "filter": "php",
-        "ftp": "php",
-        "gd": "php",
-        "gettext": "php",
-        "gmp": "php",
-        "iconv": "php",
-        "imap": "php",
-        "intl": "php",
-        "ldap": "php",
-        "mbregex": "php",
-        "mbstring": "php",
-        "mysqli": "php",
-        "mysqlnd": "php",
-        "opcache": "php",
-        "openssl": "php",
-        "pcntl": "php",
-        "pdo": "php",
-        "pdo_mysql": "php",
-        "pdo_pgsql": "php",
-        "pdo_sqlite": "php",
-        "phar": "php",
-        "posix": "php",
-        "pspell": "php",
-        "readline": "php",
-        "session": "php",
-        "shmop": "php",
-        "simplexml": "php",
-        "snmp": "php",
-        "soap": "php",
-        "sockets": "php",
-        "sodium": "php",
-        "sqlite3": "php",
-        "sysvmsg": "php",
-        "sysvsem": "php",
-        "sysvshm": "php",
-        "tidy": "php",
-        "tokenizer": "php",
-        "xml": "php",
-        "xmlreader": "php",
-        "xmlwriter": "php",
-        "xsl": "php",
-        "zip": "php",
-        "zlib": "php"
+        "swoole": {
+            "source": "swoole",
+            "libDeps": []
+        },
+        "swow": {
+            "source": "swow",
+            "libDeps": []
+        },
+        "parallel": {
+            "source": "parallel",
+            "libDeps": []
+        },
+        "redis": {
+            "source": "redis",
+            "libDeps": []
+        },
+        "yaml": {
+            "source": "yaml",
+            "libDeps": []
+        },
+        "zstd": {
+            "source": "ext-zstd",
+            "libDeps": []
+        },
+        "bcmath": {
+            "source": "php",
+            "libDeps": []
+        },
+        "bz2": {
+            "source": "php",
+            "libDeps": []
+        },
+        "calendar": {
+            "source": "php",
+            "libDeps": []
+        },
+        "ctype": {
+            "source": "php",
+            "libDeps": []
+        },
+        "curl": {
+            "source": "php",
+            "libDeps": []
+        },
+        "dba": {
+            "source": "php",
+            "libDeps": []
+        },
+        "dom": {
+            "source": "php",
+            "libDeps": []
+        },
+        "enchant": {
+            "source": "php",
+            "libDeps": []
+        },
+        "exif": {
+            "source": "php",
+            "libDeps": []
+        },
+        "ffi": {
+            "source": "php",
+            "libDeps": []
+        },
+        "fileinfo": {
+            "source": "php",
+            "libDeps": []
+        },
+        "filter": {
+            "source": "php",
+            "libDeps": []
+        },
+        "ftp": {
+            "source": "php",
+            "libDeps": []
+        },
+        "gd": {
+            "source": "php",
+            "libDeps": []
+        },
+        "gettext": {
+            "source": "php",
+            "libDeps": []
+        },
+        "gmp": {
+            "source": "php",
+            "libDeps": []
+        },
+        "iconv": {
+            "source": "php",
+            "libDeps": []
+        },
+        "imap": {
+            "source": "php",
+            "libDeps": []
+        },
+        "intl": {
+            "source": "php",
+            "libDeps": []
+        },
+        "ldap": {
+            "source": "php",
+            "libDeps": []
+        },
+        "mbregex": {
+            "source": "php",
+            "libDeps": []
+        },
+        "mbstring": {
+            "source": "php",
+            "libDeps": []
+        },
+        "mysqli": {
+            "source": "php",
+            "libDeps": []
+        },
+        "mysqlnd": {
+            "source": "php",
+            "libDeps": []
+        },
+        "opcache": {
+            "source": "php",
+            "libDeps": []
+        },
+        "openssl": {
+            "source": "php",
+            "libDeps": []
+        },
+        "pcntl": {
+            "source": "php",
+            "libDeps": []
+        },
+        "pdo": {
+            "source": "php",
+            "libDeps": []
+        },
+        "pdo_mysql": {
+            "source": "php",
+            "libDeps": []
+        },
+        "pdo_pgsql": {
+            "source": "php",
+            "libDeps": []
+        },
+        "pdo_sqlite": {
+            "source": "php",
+            "libDeps": []
+        },
+        "phar": {
+            "source": "php",
+            "libDeps": []
+        },
+        "posix": {
+            "source": "php",
+            "libDeps": []
+        },
+        "pspell": {
+            "source": "php",
+            "libDeps": []
+        },
+        "readline": {
+            "source": "php",
+            "libDeps": []
+        },
+        "session": {
+            "source": "php",
+            "libDeps": []
+        },
+        "shmop": {
+            "source": "php",
+            "libDeps": []
+        },
+        "simplexml": {
+            "source": "php",
+            "libDeps": []
+        },
+        "snmp": {
+            "source": "php",
+            "libDeps": []
+        },
+        "soap": {
+            "source": "php",
+            "libDeps": []
+        },
+        "sockets": {
+            "source": "php",
+            "libDeps": []
+        },
+        "sodium": {
+            "source": "php",
+            "libDeps": []
+        },
+        "sqlite3": {
+            "source": "php",
+            "libDeps": []
+        },
+        "sysvmsg": {
+            "source": "php",
+            "libDeps": []
+        },
+        "sysvsem": {
+            "source": "php",
+            "libDeps": []
+        },
+        "sysvshm": {
+            "source": "php",
+            "libDeps": []
+        },
+        "tidy": {
+            "source": "php",
+            "libDeps": []
+        },
+        "tokenizer": {
+            "source": "php",
+            "libDeps": []
+        },
+        "xml": {
+            "source": "php",
+            "libDeps": []
+        },
+        "xmlreader": {
+            "source": "php",
+            "libDeps": []
+        },
+        "xmlwriter": {
+            "source": "php",
+            "libDeps": []
+        },
+        "xsl": {
+            "source": "php",
+            "libDeps": []
+        },
+        "zip": {
+            "source": "php",
+            "libDeps": []
+        },
+        "zlib": {
+            "source": "php",
+            "libDeps": []
+        }
     },
     "lib": {
-        "brotli": "brotli",
-        "bzip2": "bzip2",
-        "bz2": "bzip2",
-        "curl": "curl",
-        "libffi": "libffi",
-        "ffi": "libffi",
-        "iconv": "libiconv",
-        "libressl": "libressl",
-        "libssh2": "libssh2",
-        "libyaml": "libyaml",
-        "yaml": "libyaml",
-        "libzip": "libzip",
-        "zip": "libzip",
-        "micro": "micro",
-        "nghttp2": "nghttp2",
-        "onig": "onig",
-        "openssl": "openssl",
-        "pthreads4w": "pthreads4w",
-        "xz": "xz",
-        "zlib": "zlib",
-        "zstd": "zstd"
+        "brotli": {
+            "source": "brotli",
+            "libDeps": []
+        },
+        "bzip2": {
+            "source": "bzip2",
+            "libDeps": []
+        },
+        "bz2": {
+            "source": "bzip2",
+            "libDeps": []
+        },
+        "curl": {
+            "source": "curl",
+            "libDeps": []
+        },
+        "libffi": {
+            "source": "libffi",
+            "libDeps": []
+        },
+        "ffi": {
+            "source": "libffi",
+            "libDeps": []
+        },
+        "iconv": {
+            "source": "libiconv",
+            "libDeps": []
+        },
+        "libressl": {
+            "source": "libressl",
+            "libDeps": []
+        },
+        "libssh2": {
+            "source": "libssh2",
+            "libDeps": []
+        },
+        "libyaml": {
+            "source": "libyaml",
+            "libDeps": []
+        },
+        "yaml": {
+            "source": "libyaml",
+            "libDeps": []
+        },
+        "libzip": {
+            "source": "libzip",
+            "libDeps": []
+        },
+        "zip": {
+            "source": "libzip",
+            "libDeps": []
+        },
+        "micro": {
+            "source": "micro",
+            "libDeps": []
+        },
+        "nghttp2": {
+            "source": "nghttp2",
+            "libDeps": []
+        },
+        "onig": {
+            "source": "onig",
+            "libDeps": []
+        },
+        "openssl": {
+            "source": "openssl",
+            "libDeps": []
+        },
+        "pthreads4w": {
+            "source": "pthreads4w",
+            "libDeps": []
+        },
+        "xz": {
+            "source": "xz",
+            "libDeps": []
+        },
+        "zlib": {
+            "source": "zlib",
+            "libDeps": []
+        },
+        "zstd": {
+            "source": "zstd",
+            "libDeps": []
+        }
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -154,7 +155,7 @@ final class Util
         }
     }
 
-    public static function chooseLibc(string $cc):Clib
+    public static function chooseLibc(string $cc): Clib
     {
         Log::i('checking libc');
         $self = file_get_contents('/proc/self/exe', length: 4096);
@@ -182,33 +183,34 @@ final class Util
         }
     }
 
-    public static function chooseCC():string
+    public static function chooseCC(): string
     {
         Log::i('checking cc');
         if (Util::findCommand('clang')) {
             Log::i("using clang");
             return 'clang';
-        } else if (Util::findCommand('gcc')){
+        } else if (Util::findCommand('gcc')) {
             Log::i("using gcc");
             return 'gcc';
         }
         throw new Exception("no supported cc found");
     }
 
-    public static function chooseCXX():string
+    public static function chooseCXX(): string
     {
         Log::i('checking cxx');
         if (Util::findCommand('clang++')) {
             Log::i("using clang++");
             return 'clang++';
-        } else if (Util::findCommand('g++')){
+        } else if (Util::findCommand('g++')) {
             Log::i("using g++");
             return 'g++';
         }
         return static::chooseCC();
     }
 
-    public static function patchConfigure(Config $config) {
+    public static function patchConfigure(Config $config): void
+    {
 
         passthru(
             $config->setX . ' && ' .
@@ -235,14 +237,16 @@ final class Util
             file_put_contents('src/php-src/configure', $configure);
         }
     }
-    
-    public static function replaceConfigHeaderLine(string $line, string $replace = '') {
+
+    public static function replaceConfigHeaderLine(string $line, string $replace = ''): void
+    {
         $header = file_get_contents('src/php-src/main/php_config.h');
-        $header = preg_replace('/^'.$line.'$/m', $replace, $header);
+        $header = preg_replace('/^' . $line . '$/m', $replace, $header);
         file_put_contents('src/php-src/main/php_config.h', $header);
     }
 
-    public static function patchConfigHeader(Config $config) {
+    public static function patchConfigHeader(Config $config): void
+    {
         switch ($config->libc) {
             case CLib::MUSL_WRAPPER:
                 // bad checks
@@ -262,7 +266,8 @@ final class Util
         }
     }
 
-    public static function genExtraLibs(Config $config) {
+    public static function genExtraLibs(Config $config): string
+    {
         if ($config->libc === CLib::GLIBC) {
             $glibcLibs = [
                 'rt',
@@ -291,40 +296,44 @@ final class Util
             }
             return ' ' . implode(' ', $_extra_libs);
         }
+        return '';
     }
 
-    public static function getTuneCFlags(string $arch):array{
-        return match($arch) {
+    public static function getTuneCFlags(string $arch): array
+    {
+        return match ($arch) {
             'x86_64' => [
                 '-march=corei7',
                 '-mtune=core-avx2',
             ],
-            'arm64','aarch64' => [],
+            'arm64', 'aarch64' => [],
             default => throw new Exception('unsupported arch: ' . $arch),
         };
     }
 
-    public static function getCrossCompilePrefix(string $cc, string $arch, ):string {
-        return match(static::getCCType($cc)) {
+    public static function getCrossCompilePrefix(string $cc, string $arch,): string
+    {
+        return match (static::getCCType($cc)) {
             // guessing clang toolchains
             'clang' => match ($arch) {
                 'x86_64' => 'x86_64-linux-gnu-',
-                'arm64','aarch64' => 'aarch64-linux-gnu-',
+                'arm64', 'aarch64' => 'aarch64-linux-gnu-',
                 default => throw new Exception('unsupported arch: ' . $arch),
             },
             // remove gcc postfix
-            'gcc' => str_replace('-cc', '',str_replace('-gcc', '', $cc)) . '-',
+            'gcc' => str_replace('-cc', '', str_replace('-gcc', '', $cc)) . '-',
         };
     }
 
-    public static function getArchCFlags(string $cc, string $arch):string {
+    public static function getArchCFlags(string $cc, string $arch): string
+    {
         if (php_uname('m') === $arch) {
             return '';
         }
-        return match(static::getCCType($cc)) {
+        return match (static::getCCType($cc)) {
             'clang' => match ($arch) {
                 'x86_64' => '--target=x86_64-unknown-linux',
-                'arm64','aarch64' => '--target=arm64-unknown-linux',
+                'arm64', 'aarch64' => '--target=arm64-unknown-linux',
                 default => throw new Exception('unsupported arch: ' . $arch),
             },
             'gcc' => '',

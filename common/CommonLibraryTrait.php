@@ -65,7 +65,7 @@ trait CommonLibraryTrait
         }
     }
 
-    private function addLibraryDependency(string $name, bool $optional = false)
+    protected function addLibraryDependency(string $name, bool $optional = false)
     {
         $depLib =$this->config->getLib($name);
         if (!$depLib) {

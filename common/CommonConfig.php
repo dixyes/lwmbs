@@ -22,10 +22,12 @@ class CommonConfig extends \stdClass
 {
     public int $concurrency = 1;
     protected array $libs = [];
+    protected array $exts = [];
     public bool $zts = true;
-    public function addLib(Library $lib): void
+    public function addLib(Library $lib): static
     {
         $this->libs[$lib->getName()] = $lib;
+        return $this;
     }
 
     public function getLib(string $name): ?Library
@@ -33,9 +35,10 @@ class CommonConfig extends \stdClass
         return $this->libs[$name] ?? null;
     }
 
-    public function addExt(Extension $ext): void
+    public function addExt(Extension $ext): static
     {
         $this->exts[$ext->getName()] = $ext;
+        return $this;
     }
 
     public function getExt(string $name): ?Extension
@@ -45,22 +48,51 @@ class CommonConfig extends \stdClass
 
     public function makeLibArray(): array
     {
-        $libNames = [];
         $ret = [];
         foreach ($this->libs as $libName => $lib) {
             $lib->calcDependency();
             $deps = $lib->getDependencies();
             foreach ($deps as $dep) {
-                if (!in_array($dep->getName(), $libNames, true)) {
-                    array_push($libNames, $dep->getName());
-                    array_push($ret, $dep);
+                if (!in_array($dep->getName(), array_keys($ret), true)) {
+                    $ret[$dep->getName()] = $dep;
                 }
             }
-            if (!in_array($lib->getName(), $libNames, true)) {
-                array_push($libNames, $lib->getName());
-                array_push($ret, $lib);
+            if (!in_array($libName, array_keys($ret), true)) {
+                $ret[$libName] = $lib;
             }
         }
         return $ret;
+    }
+
+    public function makeExtArray(): array
+    {
+        $ret = [];
+        foreach ($this->exts as $extName => $ext) {
+            $extDeps = $ext->checkDependency()->getExtensionDependency();
+            foreach ($extDeps as $dep) {
+                if (!in_array($dep->getName(), array_keys($ret), true)) {
+                    $ret[$dep->getName()] = $this->getExt($dep->getName());
+                }
+            }
+            if (!in_array($extName, array_keys($ret), true)) {
+                $ret[$extName] = $ext;
+            }
+        }
+        return $ret;
+    }
+
+    public function makeExtensionArgs(): string
+    {
+        $ret = [];
+        $descs = CommonExtension::getAllExtensionDescs();
+        foreach ($descs as $desc) {
+            $ext = $this->exts[$desc->name] ?? null;
+            if ($ext) {
+                $ret[] = $ext->getExtensionEnabledArg();
+            } else {
+                $ret[] = $desc->getArg(false);
+            }
+        }
+        return implode(' ', $ret);
     }
 }

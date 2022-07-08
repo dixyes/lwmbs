@@ -32,13 +32,14 @@ class CliBuild
     ) {
     }
 
-    public function build(bool $allStatic = false): void
+    public function build(bool $fresh = false, array $additionalLibs = []): void
     {
         Log::i("building cli");
 
         $ret = 0;
+    
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
+            "cd src\\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
             $ret
         );
         if ($ret !== 0) {
@@ -46,7 +47,7 @@ class CliBuild
         }
 
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
+            "cd src\\php-src && {$this->config->phpBinarySDKCmd} " .
                 '-t configure.bat ' .
                 '--task-args "' .
                 '--with-prefix=C:\php ' .
@@ -58,7 +59,7 @@ class CliBuild
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 ($this->config->zts ? '--enable-zts' : '') . ' ' .
-                Extension::makeExtensionArgs($this->config) . '"',
+                $this->config->makeExtensionArgs() . '"',
             $ret
         );
         if ($ret !== 0) {
@@ -89,10 +90,41 @@ class CliBuild
             $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
         }
 
+        foreach ($additionalLibs as $lib) {
+            /** @var Library $lib */
+            foreach ($lib->getStaticLibs() as $libName) {
+                if (is_array($libName)) {
+                    foreach ($libName as $name) {
+                        if (str_contains($makefile, $name) || str_contains($extra_libs, $name)){
+                            continue 3;
+                        }
+                    }
+                    Log::i("adding lib $name");
+                    $extra_libs[] = " $name";
+                }
+                if (str_contains($makefile, $libName) || str_contains($extra_libs, $libName)){
+                    continue 2;
+                }
+                Log::i("adding lib $libName");
+                $extra_libs[] = " $libName";
+            }
+        }
+
         file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_CLI="' . $extra_libs . ' ws2_32.lib shell32.lib" %*');
 
+        if ($fresh) {
+            Log::i('cleanning up');
+            passthru(
+                "cd src\\php-src && {$this->config->phpBinarySDKCmd} " .
+                    '-t nmake_wrapper.bat ' . 
+                    '--task-args clean'
+                ,
+                $ret
+            );
+        }
+    
         passthru(
-            "cd src\php-src && {$this->config->phpBinarySDKCmd} " .
+            "cd src\\php-src && {$this->config->phpBinarySDKCmd} " .
                 '-t nmake_wrapper.bat ' . 
                 '--task-args php.exe',
             $ret
@@ -108,7 +140,7 @@ class CliBuild
             Log::i('running sanity check');
             exec(
                 'cd src\php-src && ' .
-                "{$this->config->arch}\Release_TS\php.exe -r \"echo \\\"hello\\\";\"",
+                "{$this->config->arch}\\Release_TS\\php.exe -r \"echo \\\"hello\\\";\"",
                 $output,
                 $ret
             );

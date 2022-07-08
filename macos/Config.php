@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -36,7 +37,8 @@ class Config extends CommonConfig
 
     public const NEEDED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
 
-    public static function fromCmdArgs(array $cmdArgs): static {
+    public static function fromCmdArgs(array $cmdArgs): static
+    {
         return new static(
             cc: $cmdArgs['named']['cc'] ?? null,
             cxx: $cmdArgs['named']['cxx'] ?? null,
@@ -45,11 +47,10 @@ class Config extends CommonConfig
     }
 
     public function __construct(
-        ?string $cc=null,
-        ?string $cxx=null,
-        ?string $arch=null,
-    )
-    {
+        ?string $cc = null,
+        ?string $cxx = null,
+        ?string $arch = null,
+    ) {
         Log::i("check commands");
         $lackingCommands = Util::lackingCommands(static::NEEDED_COMMANDS);
         if ($lackingCommands) {
@@ -68,26 +69,20 @@ class Config extends CommonConfig
         $this->arch = $arch ?? php_uname('m');
         Log::i('choose arch: ' . $this->arch);
 
-        $this->gnuArch = match($this->arch) {
-            'arm64' => 'aarch64',
-            'armv7' => 'arm',
-            default => $this->arch,
-        };
+        $this->gnuArch = Util::gnuArch($this->arch);
 
-    
         $this->concurrency = Util::getCpuCount();
         $this->archCFlags = Util::getArchCFlags($this->arch);
         $this->archCXXFlags = Util::getArchCFlags($this->arch);
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(
             os: 'Darwin',
             targetArch: $this->arch,
-            cflags:  Util::getArchCFlags($this->arch),
+            cflags: Util::getArchCFlags($this->arch),
         );
-        
-        
-        $this->configureEnv = 
-            'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '" '.
-            "CC='{$this->cc}' ".
+
+        $this->configureEnv =
+            'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '" ' .
+            "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
             "CFLAGS='{$this->archCFlags}'";
     }
@@ -124,11 +119,12 @@ class Config extends CommonConfig
             }
             array_push($libs, $lib);
         }
-    
+
         return implode(' ', array_map(fn ($x) => $x->getStaticLibFiles(), $libs));
     }
 
-    public function getCXXEnv():string {
+    public function getCXXEnv(): string
+    {
         if (str_ends_with($this->cxx, '++')) {
             return $this->cxx;
         }

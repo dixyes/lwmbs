@@ -26,14 +26,19 @@ class CliBuild
     ) {
     }
 
-    public function build(): void
+    public function build(bool $fresh = false, bool $bloat = false): void
     {
         Log::i("building cli");
         $ret = 0;
 
-        $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
+        if (!$bloat) {
+            $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
+        } else {
+            $extra_libs = implode(' ', array_map(fn ($x) => "-Xcompiler $x", $this->config->getAllStaticLibFiles()));
+        }
+
         $envs = $this->config->pkgconfEnv . ' ' .
-            "CC='{$this->config->cc}' ".
+            "CC='{$this->config->cc}' " .
             "CXX='{$this->config->cxx}' ";
         $cflags = $this->config->archCFlags;
         $use_lld = '';
@@ -63,7 +68,7 @@ class CliBuild
         if ($ret !== 0) {
             throw new Exception("failed to buildconf for cli");
         }
-    
+
         Util::patchPHPConfigure($this->config);
 
         passthru(
@@ -80,19 +85,34 @@ class CliBuild
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
                 ($this->config->zts ? '--enable-zts' : '') . ' ' .
-                Extension::makeExtensionArgs($this->config) . ' ' .
+                $this->config->makeExtensionArgs() . ' ' .
                 $envs,
             $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to configure cli");
         }
-    
+
         $extra_libs .= Util::genExtraLibs($this->config);
 
         Util::patchConfigHeader($this->config);
 
         file_put_contents('/tmp/comment', $this->config->noteSection);
+
+        if ($fresh) {
+            Log::i('cleanning up');
+            passthru(
+                $this->config->setX . ' && ' .
+                    'cd src/php-src && ' .
+                    'make clean',
+                $ret
+            );
+        }
+
+        if ($bloat) {
+            Log::i('bloat linking');
+            $extra_libs = "-Wl,--whole-archive $extra_libs -Wl,--no-whole-archive";
+        }
 
         passthru(
             $this->config->setX . ' && ' .

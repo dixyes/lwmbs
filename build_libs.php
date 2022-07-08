@@ -19,61 +19,21 @@
 
 require __DIR__ . '/autoload.php';
 
-function mian($argv): int
-{
+function build_libs($argv): int {
     Util::setErrorHandler();
 
-    $namedKeys = match(PHP_OS_FAMILY) {
-        'Windows', 'WINNT', 'Cygwin' => [
-            'phpBinarySDKDir' => ['path to sdk', true, null, 'path to binary sdk'],
-            'vsVer' => ['vs version', true, null, 'vs version, e.g. "17" for Visual Studio 2022'],
-            'arch' => [ 'arch', false, 'x64', 'architecture, "x64" or "arm64:' ], // TODO: use real host arch
-        ],
-        default => [
-            'cc' => ['compiler', false, null, 'C compiler'],
-            'cxx' => ['compiler', false, null, 'C++ compiler'],
-            'arch' => [ 'arch', false, php_uname('m'), 'architecture'],
-        ]
-    };
+    [$cmdArgs, $config] = Util::makeConfig($argv, true);
 
-    $cmdArgs = Util::parseArgs(
-        argv: $argv,
-        positionalNames: [
-            'libraries' => ['LIBRARIES', true, null, 'select libraries, comma separated'],
-        ],
-        namedKeys: $namedKeys,
-    );
-
-    $config = Config::fromCmdArgs($cmdArgs);
-
-    $libNames = array_map('trim', explode(',', $cmdArgs['positional']['libraries']));
-    [
-        'zstd',
-        'libssh2',
-        'curl',
-        'zlib',
-        'brotli',
-        //'libiconv',
-        'libffi',
-        'openssl',
-        'libzip',
-        'bzip2',
-        'nghttp2',
-        'onig',
-        'libyaml',
-        'xz',
-    ];
-    foreach ($libNames as $name) {
-        $lib = new ("Lib$name")($config);
-        $config->addLib($lib);
-    }
-    //var_dump(array_map(fn($x)=>$x->getName(),$config->makeLibArray()));
-
-    foreach ($config->makeLibArray() as $lib) {
-        $lib->prove();
+    foreach ($config->makeLibArray() as $_ => $lib) {
+        $lib->prove(
+            forceBuild: $cmdArgs['named']['noSystem'] ?? false,
+            fresh: $cmdArgs['named']['fresh'] ?? false,
+        );
     }
 
     return 0;
 }
 
-exit(mian($argv));
+if (!isset($asLib)) {
+    exit(build_libs($argv));
+}

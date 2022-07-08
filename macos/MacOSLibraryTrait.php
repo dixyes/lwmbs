@@ -23,8 +23,12 @@ trait MacOSLibraryTrait
     use CommonLibraryTrait;
     use UnixLibraryTrait;
 
-    public function prove(bool $forceBuild = false): void
+    public function prove(bool $forceBuild = false, bool $fresh = false): void
     {
+        if ($fresh) {
+            goto make;
+        }
+
         foreach ($this->staticLibs as $name) {
             if (!file_exists("lib/{$name}")) {
                 goto make;

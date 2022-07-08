@@ -23,11 +23,14 @@ trait LinuxLibraryTrait
     use CommonLibraryTrait;
     use UnixLibraryTrait;
 
-    public function prove(bool $forceBuild = false): void
+    public function prove(bool $forceBuild = false, bool $fresh = false): void
     {
         //Log::i("checking cpp for {$this->name}");
         //passthru("find {$this->sourceDir} -type f -name '*.cpp'");
         //return;
+        if ($fresh) {
+            goto build;
+        }
         foreach ($this->staticLibs as $name) {
             if (!file_exists("lib/{$name}")) {
                 Log::i("{$this->name} lib $name not found, reproving");

@@ -40,4 +40,12 @@ enum CLib
         }
     }
 
+    public function literalName(): string
+    {
+        return match ($this) {
+            static::GLIBC => 'glibc',
+            static::MUSL => 'musl',
+            static::MUSL_WRAPPER => 'musl',
+        };
+    }
 }

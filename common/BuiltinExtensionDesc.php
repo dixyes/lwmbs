@@ -31,7 +31,9 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         ],
         'mysqli' => [
             'argType' => 'with',
-            'extDeps' => ['mysqlnd'],
+            'extDeps' => [
+                'mysqlnd' => false,
+            ],
         ],
         'mbstring' => [],
         'mbregex' => [
@@ -142,21 +144,32 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         'pdo_sqlite' => [
             'argType' => 'with',
             'libDeps' => ['sqlite' => false],
-            'extDeps' => ['pdo'],
+            'extDeps' => [
+                'pdo' => false,
+            ],
         ],
         'pdo_mysql' => [
             'argType' => 'with',
-            'extDeps' => ['pdo', 'mysqlnd'],
+            'extDeps' => [
+                'pdo' => false,
+                'mysqlnd' => false,
+            ],
         ],
         'pdo_pgsql' => [
             'argType' => 'with',
-            'libDeps' => ['pq' => false],
-            'extDeps' => ['pdo'],
+            'libDeps' => [
+                'pq' => false,
+            ],
+            'extDeps' => [
+                'pdo' => false,
+            ],
         ],
         // todo: pdo other things
         'pspell' => [
             'argType' => 'with',
-            'libDeps' => ['aspell' => false],
+            'libDeps' => [
+                'aspell' => false
+            ],
         ],
         'readline' => [
             'argType' => 'with',

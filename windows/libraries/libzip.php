@@ -23,8 +23,7 @@ class Liblibzip extends Library
     use WindowsLibraryTrait;
     protected string $name = 'libzip';
     protected array $staticLibs = [
-        'zip.lib',
-        'libzip_a.lib',
+        ['zip.lib', 'libzip_a.lib'],
     ];
     protected array $headers = [
         'zip.h',

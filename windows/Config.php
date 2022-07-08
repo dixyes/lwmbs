@@ -23,6 +23,7 @@ class Config extends CommonConfig
     // TODO: workspace
     //public string $workspace = '.';
     public string $cmakeArch;
+    public string $gnuArch;
     public string $cmakeGeneratorName;
     public string $configureEnv;
     public string $pkgconfEnv;
@@ -91,5 +92,7 @@ class Config extends CommonConfig
         @mkdir('deps/include', recursive: true);
 
         $this->concurrency = Util::getCpuCount();
+
+        $this->gnuArch = Util::gnuArch($this->arch);
     }
 }

@@ -30,6 +30,7 @@ class Config extends CommonConfig
     public string $cc;
     public string $cxx;
     public string $arch;
+    public string $gnuArch;
     public string $archCFlags;
     public string $archCXXFlags;
     public array $tuneCFlags;
@@ -86,6 +87,8 @@ class Config extends CommonConfig
             cxx: $this->cxx,
         );
         
+        $this->gnuArch = Util::gnuArch($this->arch);
+
         $this->pkgconfEnv = 
             'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '"';
         $this->configureEnv = 

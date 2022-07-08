@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -33,7 +34,7 @@ trait CommonUtilTrait
             foreach ($paths as $path) {
                 foreach (['.exe', '.bat', '.cmd'] as $suffix) {
                     if (file_exists($path . DIRECTORY_SEPARATOR . $name . $suffix)) {
-                        return $path . DIRECTORY_SEPARATOR . $name. $suffix;
+                        return $path . DIRECTORY_SEPARATOR . $name . $suffix;
                     }
                 }
             }
@@ -106,7 +107,8 @@ trait CommonUtilTrait
         }
     }
 
-    public static function parseArgs(array $argv, array $positionalNames, array $namedKeys, ?string $example = null): array {
+    public static function parseArgs(array $argv, array $positionalNames, array $namedKeys, ?string $example = null): array
+    {
         $positional = [];
         $named = [];
         $self = array_shift($argv);
@@ -171,7 +173,7 @@ trait CommonUtilTrait
                 $details[] = "    $placeholder: $message";
             }
         }
-        $positionalHelp =implode(' ', $positionalHelp);
+        $positionalHelp = implode(' ', $positionalHelp);
         $namedHelp = [];
         foreach ($namedKeys as $key => [$placeholder, $necessary]) {
             $namedHelp[] = $necessary ? "<-$key=<$placeholder>>" : "[-$key=<$placeholder>]";
@@ -189,6 +191,86 @@ trait CommonUtilTrait
             Log::i("Example:");
             Log::i("    $example");
         }
-        exit($ret);
+        throw new Exception('bad args');
+    }
+
+    public static function gnuArch(string $arch): string
+    {
+        $arch = strtolower($arch);
+        $ret = match ($arch) {
+            'x86_64', 'x64', 'amd64' => 'x86_64',
+            'arm64', 'aarch64' => 'aarch64',
+            //'armv7' => 'arm',
+        };
+        return $ret;
+    }
+
+    public static function makeConfig(array $argv, bool $libsOnly = false): array
+    {
+        $namedKeys = match (PHP_OS_FAMILY) {
+            'Windows', 'WINNT', 'Cygwin' => [
+                'phpBinarySDKDir' => ['path to sdk', true, null, 'path to binary sdk'],
+                'vsVer' => ['vs version', true, null, 'vs version, e.g. "17" for Visual Studio 2022'],
+                'arch' => ['arch', false, 'x64', 'architecture, "x64" or "arm64:'], // TODO: use real host arch
+            ],
+            'Darwin' => [
+                'cc' => ['compiler', false, null, 'C compiler'],
+                'cxx' => ['compiler', false, null, 'C++ compiler'],
+                'arch' => ['arch', false, php_uname('m'), 'architecture'],
+            ],
+            'Linux' => [
+                'cc' => ['compiler', false, null, 'C compiler'],
+                'cxx' => ['compiler', false, null, 'C++ compiler'],
+                'arch' => ['arch', false, php_uname('m'), 'architecture'],
+                'noSystem' => ['BOOL', false, false, 'donot use system static libraries'],
+            ]
+        };
+        $namedKeys['fresh'] = ['BOOL', false, false, 'fresh build'];
+        $namedKeys['bloat'] = ['BOOL', false, false, 'add all libraries into binary'];
+        if (!$libsOnly) {
+            $namedKeys['allStatic'] = ['static', false, false, 'use -all-static in php build'];
+        }
+
+        $positionalNames = [
+            'libraries' => ['LIBRARIES', true, null, 'select libraries, comma separated'],
+        ];
+        if (!$libsOnly) {
+            $positionalNames['extensions'] = ['EXTENSIONS', true, null, 'select extensions, comma separated'];
+        }
+
+        $cmdArgs = Util::parseArgs(
+            argv: $argv,
+            positionalNames: $positionalNames,
+            namedKeys: $namedKeys,
+        );
+
+        $config = Config::fromCmdArgs($cmdArgs);
+
+        $libNames = array_filter(array_map('trim', explode(',', $cmdArgs['positional']['libraries'])));
+
+        $extNames = array_filter(array_map('trim', explode(',', $cmdArgs['positional']['extensions'])));
+
+        $allStatic = (bool)($cmdArgs['named']['allStatic'] ?? false);
+
+        if ($allStatic) {
+            if (false !== array_search('libffi', $libNames, true)) {
+                unset($libNames[array_search('libffi', $libNames, true)]);
+            }
+            if (false !== array_search('libffi', $libNames, true)) {
+                unset($extNames[array_search('ffi', $extNames, true)]);
+            }
+        }
+
+        foreach ($libNames as $name) {
+            $lib = new ("Lib$name")($config);
+            $config->addLib($lib);
+        }
+
+        foreach ($extNames as $name) {
+            $ext = new Extension(name: $name, config: $config);
+            $config->addExt($ext);
+        }
+
+        return [$cmdArgs, $config];
     }
 }

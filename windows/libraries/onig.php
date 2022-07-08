@@ -23,8 +23,7 @@ class Libonig extends Library
     use WindowsLibraryTrait;
     protected string $name = 'onig';
     protected array $staticLibs = [
-        'onig.lib',
-        'onig_a.lib',
+        ['onig.lib', 'onig_a.lib'],
     ];
     protected array $headers = [
         'oniggnu.h',

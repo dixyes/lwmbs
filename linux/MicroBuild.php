@@ -26,14 +26,19 @@ class MicroBuild
     ) {
     }
 
-    public function build(): void
+    public function build(bool $fresh = false, bool $bloat = false): void
     {
         Log::i("building micro");
         $ret = 0;
 
-        $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
+        if (!$bloat) {
+            $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
+        } else {
+            $extra_libs = implode(' ', array_map(fn ($x) => "-Xcompiler $x", $this->config->getAllStaticLibFiles()));
+        }
+
         $envs = $this->config->pkgconfEnv . ' ' .
-            "CC='{$this->config->cc}' ".
+            "CC='{$this->config->cc}' " .
             "CXX='{$this->config->cxx}' ";
         $cflags = $this->config->archCFlags;
         $use_lld = '';
@@ -63,7 +68,7 @@ class MicroBuild
         if ($ret !== 0) {
             throw new Exception("failed to buildconf for micro");
         }
-    
+
         Util::patchPHPConfigure($this->config);
 
         passthru(
@@ -80,7 +85,7 @@ class MicroBuild
                 '--disable-phpdbg ' .
                 '--enable-micro' . ($this->config->allStatic ? '=all-static' : '') . ' ' .
                 ($this->config->zts ? '--enable-zts' : '') . ' ' .
-                Extension::makeExtensionArgs($this->config) . ' ' .
+                $this->config->makeExtensionArgs() . ' ' .
                 $envs,
             $ret
         );
@@ -94,6 +99,21 @@ class MicroBuild
 
         file_put_contents('/tmp/comment', $this->config->noteSection);
 
+        if ($fresh) {
+            Log::i('cleanning up');
+            passthru(
+                $this->config->setX . ' && ' .
+                    'cd src/php-src && ' .
+                    'make clean',
+                $ret
+            );
+        }
+
+        if ($bloat) {
+            Log::i('bloat linking');
+            $extra_libs = "-Wl,--whole-archive $extra_libs -Wl,--no-whole-archive";
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
@@ -102,11 +122,11 @@ class MicroBuild
                 'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . " $use_lld\" " .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 'POST_MICRO_BUILD_COMMANDS="sh -xc \'' .
-                    'cd sapi/micro && ' .
-                    "{$this->config->crossCompilePrefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug && " .
-                    'elfedit --output-osabi linux micro.sfx && ' .
-                    "{$this->config->crossCompilePrefix}strip --strip-all micro.sfx && " .
-                    "{$this->config->crossCompilePrefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx'" .
+                'cd sapi/micro && ' .
+                "{$this->config->crossCompilePrefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug && " .
+                'elfedit --output-osabi linux micro.sfx && ' .
+                "{$this->config->crossCompilePrefix}strip --strip-all micro.sfx && " .
+                "{$this->config->crossCompilePrefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx'" .
                 '" ' .
                 'micro',
             $ret
@@ -130,6 +150,7 @@ class MicroBuild
                 $ret
             );
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
+                var_dump($ret, $output);
                 throw new Exception("micro failed sanity check");
             }
         }

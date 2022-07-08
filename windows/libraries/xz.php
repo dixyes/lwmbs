@@ -95,8 +95,7 @@ diff -urN xz/windows/vs2019/liblzma.vcxproj xz.new/windows/vs2019/liblzma.vcxpro
        <AdditionalIncludeDirectories>./;../../src/liblzma/common;../../src/common;../../src/liblzma/api;../../src/liblzma/check;../../src/liblzma/delta;../../src/liblzma/lz;../../src/liblzma/lzma;../../src/liblzma/rangecoder;../../src/liblzma/simple</AdditionalIncludeDirectories>
 EOF;
     protected array $staticLibs = [
-        'liblzma.lib',
-        'liblzma_a.lib',
+        ['liblzma.lib', 'liblzma_a.lib'],
     ];
     protected array $headers = [
         'lzma',

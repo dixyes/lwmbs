@@ -40,18 +40,4 @@ class Extension extends CommonExtension
         $ret = array_map(fn ($x) => $x->getStaticLibFiles(), $this->getLibraryDependencies(recursive: true));
         return implode(' ', $ret);
     }
-
-    public static function makeExtensionArgs($config): string
-    {
-        $ret = [];
-        $desc = static::getAllExtensionDescs();
-        foreach ($desc as $ext) {
-            if (array_key_exists($ext->name, $config->exts)) {
-                $ret[] = $config->exts[$ext->name]->getExtensionEnabledArg();
-            } else {
-                $ret[] = $ext->getArg(false);;
-            }
-        }
-        return implode(' ', $ret);
-    }
 }
