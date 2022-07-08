@@ -214,18 +214,35 @@
             }
         }
     },
-    "ext": {
+    "exts": {
         "swoole": {
             "source": "swoole",
-            "libDeps": []
+            "libDeps": {
+                "openssl": false,
+                "curl": false
+            },
+            "extDeps": {
+                "openssl": true,
+                "curl": true
+            },
+            "unixOnly": true
         },
         "swow": {
             "source": "swow",
-            "libDeps": []
+            "libDeps": {
+                "openssl": false,
+                "curl": false
+            },
+            "extDeps": {
+                "curl": true
+            }
         },
         "parallel": {
             "source": "parallel",
-            "libDeps": []
+            "libDeps": [],
+            "libDepsWin": {
+                "pthreads4w": false
+            }
         },
         "redis": {
             "source": "redis",
@@ -233,11 +250,15 @@
         },
         "yaml": {
             "source": "yaml",
-            "libDeps": []
+            "libDeps": {
+                "libyaml": false
+            }
         },
         "zstd": {
             "source": "ext-zstd",
-            "libDeps": []
+            "libDeps": {
+                "zstd": false
+            }
         },
         "bcmath": {
             "source": "php",
@@ -245,7 +266,9 @@
         },
         "bz2": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "bzip2": false
+            }
         },
         "calendar": {
             "source": "php",
@@ -257,7 +280,9 @@
         },
         "curl": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "curl": false
+            }
         },
         "dba": {
             "source": "php",
@@ -265,11 +290,15 @@
         },
         "dom": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libxml": false
+            }
         },
         "enchant": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "enchant2": false
+            }
         },
         "exif": {
             "source": "php",
@@ -277,7 +306,9 @@
         },
         "ffi": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libffi": false
+            }
         },
         "fileinfo": {
             "source": "php",
@@ -289,39 +320,68 @@
         },
         "ftp": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "openssl": true
+            }
         },
         "gd": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "gd": true,
+                "zlib": true,
+                "libpng": true,
+                "libavif": true,
+                "libwebp": true,
+                "libjpeg": true,
+                "xpm": true,
+                "libfreetype": true
+            }
         },
         "gettext": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "gettext": false
+            }
         },
         "gmp": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "gmp": false
+            }
         },
         "iconv": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libiconv": true
+            },
+            "libDepsWin": {
+                "libiconv": false
+            }
         },
         "imap": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "imap": false,
+                "kerberos": true
+            }
         },
         "intl": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "icu": false
+            }
         },
         "ldap": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "ldap": false
+            }
         },
         "mbregex": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "onig": false
+            }
         },
         "mbstring": {
             "source": "php",
@@ -329,7 +389,10 @@
         },
         "mysqli": {
             "source": "php",
-            "libDeps": []
+            "libDeps": [],
+            "extDeps": {
+                "mysqlnd": false
+            }
         },
         "mysqlnd": {
             "source": "php",
@@ -341,11 +404,14 @@
         },
         "openssl": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "openssl": false
+            }
         },
         "pcntl": {
             "source": "php",
-            "libDeps": []
+            "libDeps": [],
+            "unixOnly": true
         },
         "pdo": {
             "source": "php",
@@ -353,31 +419,54 @@
         },
         "pdo_mysql": {
             "source": "php",
-            "libDeps": []
+            "libDeps": [],
+            "extDeps": {
+                "pdo": false,
+                "mysqlnd": false
+            }
         },
         "pdo_pgsql": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "pq": false
+            },
+            "extDeps": {
+                "pdo": false
+            }
         },
         "pdo_sqlite": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "sqlite": false
+            },
+            "extDeps": {
+                "pdo": false
+            }
         },
         "phar": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "zlib": true
+            }
         },
         "posix": {
             "source": "php",
-            "libDeps": []
+            "libDeps": [],
+            "unixOnly": true
         },
         "pspell": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "aspell": false
+            }
         },
         "readline": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "readline": false,
+                "libedit": true,
+                "ncurses": true
+            }
         },
         "session": {
             "source": "php",
@@ -389,15 +478,21 @@
         },
         "simplexml": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libxml": false
+            }
         },
         "snmp": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "net-snmp": false
+            }
         },
         "soap": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libxml": false
+            }
         },
         "sockets": {
             "source": "php",
@@ -405,19 +500,25 @@
         },
         "sodium": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "sodium": false
+            }
         },
         "sqlite3": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "sqlite": false
+            }
         },
         "sysvmsg": {
             "source": "php",
-            "libDeps": []
+            "libDeps": [],
+            "unixOnly": true
         },
         "sysvsem": {
             "source": "php",
-            "libDeps": []
+            "libDeps": [],
+            "unixOnly": true
         },
         "sysvshm": {
             "source": "php",
@@ -425,7 +526,9 @@
         },
         "tidy": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "tidy": false
+            }
         },
         "tokenizer": {
             "source": "php",
@@ -433,30 +536,42 @@
         },
         "xml": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libxml": false
+            }
         },
         "xmlreader": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libxml": false
+            }
         },
         "xmlwriter": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libxml": false
+            }
         },
         "xsl": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libxslt": false
+            }
         },
         "zip": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "libzip": false
+            }
         },
         "zlib": {
             "source": "php",
-            "libDeps": []
+            "libDeps": {
+                "zlib": false
+            }
         }
     },
-    "lib": {
+    "libs": {
         "brotli": {
             "source": "brotli",
             "libDeps": []
@@ -465,23 +580,24 @@
             "source": "bzip2",
             "libDeps": []
         },
-        "bz2": {
-            "source": "bzip2",
-            "libDeps": []
-        },
         "curl": {
             "source": "curl",
-            "libDeps": []
+            "libDeps": {
+                "zlib": false,
+                "libssh2": true,
+                "brotli": true,
+                "nghttp2": true,
+                "zstd": true,
+                "openssl": true,
+                "idn2": true,
+                "psl": true
+            }
         },
         "libffi": {
             "source": "libffi",
             "libDeps": []
         },
-        "ffi": {
-            "source": "libffi",
-            "libDeps": []
-        },
-        "iconv": {
+        "libiconv": {
             "source": "libiconv",
             "libDeps": []
         },
@@ -491,31 +607,42 @@
         },
         "libssh2": {
             "source": "libssh2",
-            "libDeps": []
+            "libDeps": {
+                "zlib": true,
+                "openssl": false
+            }
         },
         "libyaml": {
             "source": "libyaml",
             "libDeps": []
         },
-        "yaml": {
-            "source": "libyaml",
-            "libDeps": []
-        },
         "libzip": {
             "source": "libzip",
-            "libDeps": []
-        },
-        "zip": {
-            "source": "libzip",
-            "libDeps": []
-        },
-        "micro": {
-            "source": "micro",
-            "libDeps": []
+            "libDeps": {
+                "zlib": false,
+                "bzip2": true,
+                "xz": true,
+                "zstd": true,
+                "openssl": true
+            }
         },
         "nghttp2": {
             "source": "nghttp2",
-            "libDeps": []
+            "libDeps": {
+                "zlib": false,
+                "openssl": false,
+                "libxml2": true,
+                "libev": true,
+                "libcares": true,
+                "libngtcp2": true,
+                "libnghttp3": true,
+                "libbpf": true,
+                "libevent-openssl": true,
+                "jansson": true,
+                "jemalloc": true,
+                "systemd": true,
+                "cunit": true
+            }
         },
         "onig": {
             "source": "onig",
@@ -523,7 +650,9 @@
         },
         "openssl": {
             "source": "openssl",
-            "libDeps": []
+            "libDeps": {
+                "zlib": true
+            }
         },
         "pthreads4w": {
             "source": "pthreads4w",
@@ -531,7 +660,9 @@
         },
         "xz": {
             "source": "xz",
-            "libDeps": []
+            "libDeps": {
+                "libiconv": true
+            }
         },
         "zlib": {
             "source": "zlib",
@@ -545,18 +676,1071 @@
     "size": {
         "8.1-linux-x86_64-glibc_shared": {
             "libs": {
-                "zlib": 81952,
-                "xz": 143456,
-                "libzip": 119840,
-                "bzip2": 60456,
-                "zstd": 983360,
-                "openssl": 5611392
+                "zlib": 77824,
+                "xz": 147520,
+                "libzip": 128032,
+                "bzip2": 64512,
+                "zstd": 987528,
+                "openssl": 5611456,
+                "libssh2": 258592,
+                "brotli": 802816,
+                "nghttp2": 159840,
+                "curl": 622144,
+                "libffi": 57696,
+                "onig": 591552,
+                "libyaml": 118784
             },
             "exts": {
-                "zip": 45248
+                "zip": 49344,
+                "opcache": 820480,
+                "bcmath": 20672,
+                "pdo": 73920,
+                "phar": 229664,
+                "mysqlnd": 175712,
+                "mysqli": 127168,
+                "pdo_mysql": 12480,
+                "mbstring": 961280,
+                "mbregex": 24576,
+                "session": 70944,
+                "ctype": 4288,
+                "fileinfo": 7098592,
+                "filter": 32960,
+                "tokenizer": 16576,
+                "curl": 73920,
+                "ffi": 127200,
+                "swow": 549856,
+                "redis": 486752,
+                "parallel": 54880,
+                "sockets": 73920,
+                "openssl": 110784,
+                "zlib": 28864,
+                "bz2": 8384,
+                "yaml": 33216,
+                "zstd": 5216
             },
             "micro": 5025896,
             "cli": 5169744
+        },
+        "8.1-linux-x86_64-glibc_static": {
+            "libs": {
+                "zstd": 963896,
+                "zlib": 73728,
+                "openssl": 4546304,
+                "libssh2": 238112,
+                "brotli": 798720,
+                "nghttp2": 139360,
+                "curl": 597568,
+                "bzip2": 56352,
+                "xz": 139264,
+                "libzip": 95424,
+                "onig": 542400,
+                "libyaml": 114688
+            },
+            "exts": {
+                "opcache": 734176,
+                "bcmath": 16576,
+                "pdo": 69824,
+                "phar": 209184,
+                "mysqlnd": 130656,
+                "mysqli": 94400,
+                "pdo_mysql": 12480,
+                "mbstring": 916224,
+                "mbregex": 20480,
+                "session": 58624,
+                "ctype": 4288,
+                "fileinfo": 7094496,
+                "filter": 24768,
+                "tokenizer": 20672,
+                "curl": 69824,
+                "swow": 455144,
+                "redis": 429376,
+                "parallel": 54880,
+                "sockets": 61632,
+                "openssl": 98496,
+                "zip": 37056,
+                "zlib": 28864,
+                "bz2": 8384,
+                "yaml": 25024,
+                "zstd": 9312
+            },
+            "micro": 5743872,
+            "cli": 5826304
+        },
+        "8.0-linux-x86_64-glibc_shared": {
+            "libs": {
+                "zstd": 991624,
+                "zlib": 90112,
+                "openssl": 5635968,
+                "libssh2": 266816,
+                "brotli": 811008,
+                "nghttp2": 172128,
+                "curl": 622208,
+                "libffi": 61792,
+                "bzip2": 64512,
+                "xz": 147520,
+                "libzip": 132128,
+                "onig": 591552,
+                "libyaml": 114688
+            },
+            "exts": {
+                "opcache": 1037376,
+                "bcmath": 24768,
+                "pdo": 78016,
+                "phar": 221472,
+                "mysqlnd": 208640,
+                "mysqli": 106688,
+                "pdo_mysql": 12480,
+                "mbstring": 949056,
+                "mbregex": 12288,
+                "session": 70944,
+                "ctype": 8384,
+                "fileinfo": 6734048,
+                "filter": 32960,
+                "tokenizer": 12480,
+                "curl": 78016,
+                "ffi": 118976,
+                "swow": 545792,
+                "redis": 490816,
+                "parallel": 63104,
+                "sockets": 65728,
+                "openssl": 123072,
+                "zip": 41152,
+                "zlib": 32960,
+                "bz2": 12480,
+                "yaml": 20928,
+                "zstd": 13408
+            },
+            "micro": 4968296,
+            "cli": 5108080
+        },
+        "8.0-linux-x86_64-glibc_static": {
+            "libs": {
+                "zstd": 968008,
+                "zlib": 73728,
+                "openssl": 4570848,
+                "libssh2": 246304,
+                "brotli": 806912,
+                "nghttp2": 151648,
+                "curl": 597600,
+                "bzip2": 56352,
+                "xz": 135168,
+                "libzip": 107712,
+                "onig": 538304,
+                "libyaml": 114688
+            },
+            "exts": {
+                "opcache": 959456,
+                "bcmath": 20672,
+                "pdo": 69824,
+                "phar": 200992,
+                "mysqlnd": 159488,
+                "mysqli": 86208,
+                "pdo_mysql": 12480,
+                "mbstring": 891712,
+                "mbregex": 12288,
+                "session": 58624,
+                "ctype": 192,
+                "fileinfo": 6738112,
+                "filter": 24768,
+                "tokenizer": 16576,
+                "curl": 65728,
+                "swow": 459240,
+                "redis": 433472,
+                "parallel": 54880,
+                "sockets": 61632,
+                "openssl": 106688,
+                "zip": 37056,
+                "zlib": 24768,
+                "bz2": 8384,
+                "yaml": 20928,
+                "zstd": 9312
+            },
+            "micro": 5719080,
+            "cli": 5801504
+        },
+        "8.1-linux-x86_64-musl_shared": {
+            "libs": {
+                "zstd": 910272,
+                "zlib": 88560,
+                "openssl": 5186208,
+                "libssh2": 240672,
+                "brotli": 876800,
+                "nghttp2": 179904,
+                "curl": 592128,
+                "libffi": 61952,
+                "bzip2": 80928,
+                "xz": 152480,
+                "libzip": 112576,
+                "onig": 613152,
+                "libyaml": 114688
+            },
+            "exts": {
+                "opcache": 920416,
+                "bcmath": 21856,
+                "pdo": 81632,
+                "phar": 234208,
+                "mysqlnd": 193024,
+                "mysqli": 125216,
+                "pdo_mysql": 12960,
+                "mbstring": 972256,
+                "mbregex": 23104,
+                "session": 72288,
+                "ctype": 736,
+                "fileinfo": 7109664,
+                "filter": 34624,
+                "tokenizer": 13152,
+                "curl": 82336,
+                "ffi": 144224,
+                "swow": 579912,
+                "redis": 520576,
+                "parallel": 64640,
+                "sockets": 72192,
+                "openssl": 121152,
+                "zip": 47264,
+                "zlib": 32576,
+                "bz2": 9760,
+                "yaml": 26304,
+                "zstd": 13728
+            },
+            "micro": 5173600,
+            "cli": 5324040
+        },
+        "8.1-linux-x86_64-musl_static": {
+            "libs": {
+                "zstd": 913960,
+                "zlib": 83840,
+                "openssl": 4706656,
+                "libssh2": 232512,
+                "brotli": 876768,
+                "nghttp2": 171712,
+                "curl": 571680,
+                "bzip2": 81024,
+                "xz": 152608,
+                "libzip": 109088,
+                "onig": 580384,
+                "libyaml": 114688
+            },
+            "exts": {
+                "opcache": 865952,
+                "bcmath": 21824,
+                "pdo": 69312,
+                "phar": 221984,
+                "mysqlnd": 152000,
+                "mysqli": 96608,
+                "pdo_mysql": 12960,
+                "mbstring": 931232,
+                "mbregex": 18912,
+                "session": 64192,
+                "ctype": 4864,
+                "fileinfo": 7106432,
+                "filter": 22304,
+                "tokenizer": 17312,
+                "curl": 78240,
+                "swow": 546032,
+                "redis": 475488,
+                "parallel": 56416,
+                "sockets": 68128,
+                "openssl": 108928,
+                "zip": 39040,
+                "zlib": 28480,
+                "bz2": 5696,
+                "yaml": 30368,
+                "zstd": 5568
+            },
+            "micro": 4718856,
+            "cli": 4808712
+        },
+        "8.0-linux-x86_64-musl_shared": {
+            "libs": {
+                "zstd": 910416,
+                "zlib": 84528,
+                "openssl": 5191664,
+                "libssh2": 240672,
+                "brotli": 872704,
+                "nghttp2": 179904,
+                "curl": 592096,
+                "libffi": 61984,
+                "bzip2": 85024,
+                "xz": 152480,
+                "libzip": 112544,
+                "onig": 609088,
+                "libyaml": 118784
+            },
+            "exts": {
+                "opcache": 1176256,
+                "bcmath": 21856,
+                "pdo": 85728,
+                "phar": 233728,
+                "mysqlnd": 217824,
+                "mysqli": 111744,
+                "pdo_mysql": 17056,
+                "mbstring": 950720,
+                "mbregex": 16928,
+                "session": 72256,
+                "ctype": 4736,
+                "fileinfo": 6744960,
+                "filter": 26400,
+                "tokenizer": 17280,
+                "curl": 82144,
+                "ffi": 135296,
+                "swow": 575824,
+                "redis": 520640,
+                "parallel": 64576,
+                "sockets": 72256,
+                "openssl": 121152,
+                "zip": 42816,
+                "zlib": 36672,
+                "bz2": 9760,
+                "yaml": 22208,
+                "zstd": 17824
+            },
+            "micro": 5088960,
+            "cli": 5237224
+        },
+        "8.0-linux-x86_64-musl_static": {
+            "libs": {
+                "zstd": 914352,
+                "zlib": 83776,
+                "openssl": 4704384,
+                "libssh2": 236608,
+                "brotli": 872672,
+                "nghttp2": 171712,
+                "curl": 575744,
+                "bzip2": 76928,
+                "xz": 152608,
+                "libzip": 113216,
+                "onig": 580352,
+                "libyaml": 110592
+            },
+            "exts": {
+                "opcache": 1113312,
+                "bcmath": 21824,
+                "pdo": 69344,
+                "phar": 225568,
+                "mysqlnd": 172768,
+                "mysqli": 91264,
+                "pdo_mysql": 12960,
+                "mbstring": 905632,
+                "mbregex": 12768,
+                "session": 64128,
+                "ctype": 4704,
+                "fileinfo": 6737632,
+                "filter": 30496,
+                "tokenizer": 13184,
+                "curl": 78080,
+                "swow": 546320,
+                "redis": 475520,
+                "parallel": 56416,
+                "sockets": 64000,
+                "openssl": 112992,
+                "zip": 34624,
+                "zlib": 24384,
+                "bz2": 13856,
+                "yaml": 22208,
+                "zstd": 9632
+            },
+            "micro": 4662888,
+            "cli": 4750528
+        },
+        "8.1-linux-aarch64-glibc_shared": {
+            "libs": {
+                "zstd": 1245424,
+                "zlib": 131088,
+                "openssl": 4610200,
+                "libssh2": 262624,
+                "brotli": 720896,
+                "nghttp2": 263008,
+                "curl": 532128,
+                "libffi": 65856,
+                "bzip2": 134320,
+                "xz": 196656,
+                "libzip": 131968,
+                "onig": 646176,
+                "libyaml": 131072
+            },
+            "exts": {
+                "opcache": 1574000,
+                "bcmath": 65712,
+                "pdo": 65696,
+                "phar": 196784,
+                "mysqlnd": 134448,
+                "mysqli": 131248,
+                "pdo_mysql": 160,
+                "mbstring": 919968,
+                "mbregex": 0,
+                "session": 66784,
+                "ctype": 240,
+                "fileinfo": 7078128,
+                "filter": 65712,
+                "tokenizer": 160,
+                "curl": 65712,
+                "ffi": 131232,
+                "swow": 590800,
+                "redis": 408848,
+                "parallel": 67152,
+                "sockets": 65728,
+                "openssl": 65696,
+                "zip": 65712,
+                "zlib": 160,
+                "bz2": 176,
+                "yaml": 416,
+                "zstd": 66576
+            },
+            "micro": 4464200,
+            "cli": 4530072
+        },
+        "8.1-linux-aarch64-glibc_static": {
+            "libs": {
+                "zstd": 1245360,
+                "zlib": 131072,
+                "openssl": 4020136,
+                "libssh2": 262608,
+                "brotli": 720896,
+                "nghttp2": 197440,
+                "curl": 532064,
+                "bzip2": 134336,
+                "xz": 196608,
+                "libzip": 66560,
+                "onig": 646176,
+                "libyaml": 131072
+            },
+            "exts": {
+                "opcache": 1573904,
+                "bcmath": 65712,
+                "pdo": 65712,
+                "phar": 196768,
+                "mysqlnd": 134464,
+                "mysqli": 65696,
+                "pdo_mysql": 176,
+                "mbstring": 919968,
+                "mbregex": 65536,
+                "session": 66752,
+                "ctype": 176,
+                "fileinfo": 7078096,
+                "filter": 160,
+                "tokenizer": 65712,
+                "curl": 65696,
+                "swow": 459104,
+                "redis": 408848,
+                "parallel": 67136,
+                "sockets": 65712,
+                "openssl": 65696,
+                "zip": 65712,
+                "zlib": 160,
+                "bz2": 176,
+                "yaml": 65952,
+                "zstd": 1040
+            },
+            "micro": 5456816,
+            "cli": 5522832
+        },
+        "8.0-linux-aarch64-glibc_shared": {
+            "libs": {
+                "zstd": 1245432,
+                "zlib": 131088,
+                "openssl": 4675752,
+                "libssh2": 197088,
+                "brotli": 786432,
+                "nghttp2": 197472,
+                "curl": 532128,
+                "libffi": 65856,
+                "bzip2": 134320,
+                "xz": 196656,
+                "libzip": 131968,
+                "onig": 646176,
+                "libyaml": 131072
+            },
+            "exts": {
+                "opcache": 393744,
+                "bcmath": 176,
+                "pdo": 65712,
+                "phar": 196768,
+                "mysqlnd": 200160,
+                "mysqli": 65696,
+                "pdo_mysql": 176,
+                "mbstring": 919952,
+                "mbregex": 65536,
+                "session": 1232,
+                "ctype": 160,
+                "fileinfo": 6750400,
+                "filter": 65712,
+                "tokenizer": 160,
+                "curl": 65712,
+                "ffi": 131248,
+                "swow": 525264,
+                "redis": 408864,
+                "parallel": 67136,
+                "sockets": 65728,
+                "openssl": 131232,
+                "zip": 176,
+                "zlib": 160,
+                "bz2": 65712,
+                "yaml": 416,
+                "zstd": 1040
+            },
+            "micro": 4398240,
+            "cli": 4464240
+        },
+        "8.0-linux-aarch64-glibc_static": {
+            "libs": {
+                "zstd": 1179824,
+                "zlib": 196608,
+                "openssl": 4020168,
+                "libssh2": 262608,
+                "brotli": 720896,
+                "nghttp2": 197440,
+                "curl": 532064,
+                "bzip2": 68800,
+                "xz": 262144,
+                "libzip": 66560,
+                "onig": 646176,
+                "libyaml": 131072
+            },
+            "exts": {
+                "opcache": 393680,
+                "bcmath": 176,
+                "pdo": 65696,
+                "phar": 196784,
+                "mysqlnd": 134608,
+                "mysqli": 131248,
+                "pdo_mysql": 160,
+                "mbstring": 854432,
+                "mbregex": 65536,
+                "session": 66752,
+                "ctype": 176,
+                "fileinfo": 6684848,
+                "filter": 65696,
+                "tokenizer": 176,
+                "curl": 65696,
+                "swow": 459104,
+                "redis": 408848,
+                "parallel": 67136,
+                "sockets": 65712,
+                "openssl": 131232,
+                "zip": 176,
+                "zlib": 65696,
+                "bz2": 176,
+                "yaml": 416,
+                "zstd": 1040
+            },
+            "micro": 5391040,
+            "cli": 5457048
+        },
+        "8.1-linux-aarch64-musl_shared": {
+            "libs": {
+                "zstd": 1274672,
+                "zlib": 139272,
+                "openssl": 5249712,
+                "libssh2": 250320,
+                "brotli": 745472,
+                "nghttp2": 217920,
+                "curl": 577168,
+                "libffi": 94544,
+                "bzip2": 105664,
+                "xz": 225328,
+                "libzip": 123776,
+                "onig": 711712,
+                "libyaml": 98400
+            },
+            "exts": {
+                "opcache": 1623168,
+                "bcmath": 20656,
+                "pdo": 77984,
+                "phar": 209168,
+                "mysqlnd": 199984,
+                "mysqli": 135344,
+                "pdo_mysql": 4256,
+                "mbstring": 985504,
+                "mbregex": 8192,
+                "session": 66784,
+                "ctype": 20640,
+                "fileinfo": 7086304,
+                "filter": 41136,
+                "tokenizer": 4256,
+                "curl": 78000,
+                "ffi": 155824,
+                "swow": 578480,
+                "redis": 486704,
+                "parallel": 50768,
+                "sockets": 86192,
+                "openssl": 94384,
+                "zip": 49312,
+                "zlib": 24752,
+                "bz2": 20640,
+                "yaml": 25008,
+                "zstd": 1024
+            },
+            "micro": 5090712,
+            "cli": 5234528
+        },
+        "8.1-linux-aarch64-musl_static": {
+            "libs": {
+                "zstd": 1278704,
+                "zlib": 143360,
+                "openssl": 5245408,
+                "libssh2": 258512,
+                "brotli": 741376,
+                "nghttp2": 222032,
+                "curl": 577120,
+                "bzip2": 97456,
+                "xz": 217088,
+                "libzip": 132064,
+                "onig": 695328,
+                "libyaml": 106592
+            },
+            "exts": {
+                "opcache": 1627184,
+                "bcmath": 28848,
+                "pdo": 69808,
+                "phar": 217344,
+                "mysqlnd": 191808,
+                "mysqli": 123040,
+                "pdo_mysql": 16560,
+                "mbstring": 969120,
+                "mbregex": 24576,
+                "session": 79040,
+                "ctype": 176,
+                "fileinfo": 7102672,
+                "filter": 28832,
+                "tokenizer": 16560,
+                "curl": 86176,
+                "swow": 573856,
+                "redis": 478496,
+                "parallel": 67152,
+                "sockets": 65696,
+                "openssl": 110768,
+                "zip": 49312,
+                "zlib": 28848,
+                "bz2": 12448,
+                "yaml": 25008,
+                "zstd": 9216
+            },
+            "micro": 5261168,
+            "cli": 5404992
+        },
+        "8.0-linux-aarch64-musl_shared": {
+            "libs": {
+                "zstd": 1278776,
+                "zlib": 139272,
+                "openssl": 5249720,
+                "libssh2": 250320,
+                "brotli": 741376,
+                "nghttp2": 217936,
+                "curl": 581264,
+                "libffi": 90448,
+                "bzip2": 122032,
+                "xz": 208944,
+                "libzip": 140160,
+                "onig": 699424,
+                "libyaml": 94304
+            },
+            "exts": {
+                "opcache": 418352,
+                "bcmath": 20656,
+                "pdo": 77984,
+                "phar": 225552,
+                "mysqlnd": 220624,
+                "mysqli": 98480,
+                "pdo_mysql": 20640,
+                "mbstring": 944544,
+                "mbregex": 36864,
+                "session": 54464,
+                "ctype": 176,
+                "fileinfo": 6758592,
+                "filter": 24736,
+                "tokenizer": 20656,
+                "curl": 57504,
+                "ffi": 155840,
+                "swow": 562112,
+                "redis": 486704,
+                "parallel": 67136,
+                "sockets": 69824,
+                "openssl": 110752,
+                "zip": 32944,
+                "zlib": 41120,
+                "bz2": 20656,
+                "yaml": 20896,
+                "zstd": 5136
+            },
+            "micro": 5020808,
+            "cli": 5164624
+        },
+        "8.0-linux-aarch64-musl_static": {
+            "libs": {
+                "zstd": 1282800,
+                "zlib": 139264,
+                "openssl": 5249512,
+                "libssh2": 246224,
+                "brotli": 753664,
+                "nghttp2": 217920,
+                "curl": 577120,
+                "bzip2": 105664,
+                "xz": 217088,
+                "libzip": 123872,
+                "onig": 699424,
+                "libyaml": 102496
+            },
+            "exts": {
+                "opcache": 426464,
+                "bcmath": 24752,
+                "pdo": 73904,
+                "phar": 217344,
+                "mysqlnd": 216544,
+                "mysqli": 114848,
+                "pdo_mysql": 12464,
+                "mbstring": 956816,
+                "mbregex": 8192,
+                "session": 74960,
+                "ctype": 4256,
+                "fileinfo": 6742192,
+                "filter": 28848,
+                "tokenizer": 16544,
+                "curl": 78000,
+                "swow": 582048,
+                "redis": 478496,
+                "parallel": 63040,
+                "sockets": 65712,
+                "openssl": 118944,
+                "zip": 37040,
+                "zlib": 37024,
+                "bz2": 4272,
+                "yaml": 33184,
+                "zstd": 9232
+            },
+            "micro": 5195400,
+            "cli": 5335128
+        },
+        "8.1-macos-aarch64": {
+            "libs": {
+                "zstd": 1605888,
+                "zlib": 106624,
+                "openssl": 5315904,
+                "libssh2": 223456,
+                "brotli": 770032,
+                "nghttp2": 197232,
+                "curl": 548656,
+                "libffi": 69680,
+                "bzip2": 85664,
+                "xz": 217088,
+                "libzip": 101840,
+                "onig": 727008,
+                "libyaml": 88688
+            },
+            "exts": {
+                "opcache": 1868208,
+                "bcmath": 26208,
+                "pdo": 101840,
+                "phar": 220848,
+                "mysqlnd": 195632,
+                "mysqli": 159040,
+                "pdo_mysql": 21904,
+                "mbstring": 1021072,
+                "mbregex": 6208,
+                "session": 102224,
+                "ctype": 2240,
+                "fileinfo": 7175808,
+                "filter": 24192,
+                "tokenizer": 20128,
+                "curl": 81904,
+                "ffi": 170624,
+                "swow": 772048,
+                "redis": 536352,
+                "parallel": 76240,
+                "sockets": 70256,
+                "openssl": 124112,
+                "zip": 50992,
+                "zlib": 43792,
+                "bz2": 4416,
+                "yaml": 21936,
+                "zstd": 19136
+            },
+            "micro": 5419862,
+            "cli": 5510560
+        },
+        "8.1-macos-x86_64": {
+            "libs": {
+                "zstd": 1809104,
+                "zlib": 138784,
+                "openssl": 5617632,
+                "libssh2": 222192,
+                "brotli": 911696,
+                "nghttp2": 212592,
+                "curl": 562208,
+                "libffi": 54288,
+                "bzip2": 85000,
+                "xz": 199264,
+                "libzip": 117744,
+                "onig": 705640,
+                "libyaml": 104480
+            },
+            "exts": {
+                "opcache": 923136,
+                "bcmath": 26064,
+                "pdo": 84968,
+                "phar": 236096,
+                "mysqlnd": 195424,
+                "mysqli": 125976,
+                "pdo_mysql": 21816,
+                "mbstring": 1031232,
+                "mbregex": 22736,
+                "session": 69024,
+                "ctype": 2272,
+                "fileinfo": 7136856,
+                "filter": 24112,
+                "tokenizer": 20056,
+                "curl": 81504,
+                "ffi": 153568,
+                "swow": 768128,
+                "redis": 501464,
+                "parallel": 92192,
+                "sockets": 86480,
+                "openssl": 107352,
+                "zip": 67336,
+                "zlib": 27288,
+                "bz2": 20824,
+                "yaml": 21896,
+                "zstd": 2648
+            },
+            "micro": 5384232,
+            "cli": 5507080
+        },
+        "8.0-macos-aarch64": {
+            "libs": {
+                "zstd": 1589376,
+                "zlib": 106624,
+                "openssl": 5332384,
+                "libssh2": 206976,
+                "brotli": 769984,
+                "nghttp2": 213776,
+                "curl": 532208,
+                "libffi": 86176,
+                "bzip2": 85680,
+                "xz": 200544,
+                "libzip": 101872,
+                "onig": 726992,
+                "libyaml": 105184
+            },
+            "exts": {
+                "opcache": 468544,
+                "bcmath": 26288,
+                "pdo": 68848,
+                "phar": 236240,
+                "mysqlnd": 234000,
+                "mysqli": 140016,
+                "pdo_mysql": 5312,
+                "mbstring": 1018608,
+                "mbregex": 21600,
+                "session": 68976,
+                "ctype": 18288,
+                "fileinfo": 6795584,
+                "filter": 40720,
+                "tokenizer": 3664,
+                "curl": 98080,
+                "ffi": 151024,
+                "swow": 755648,
+                "redis": 552944,
+                "parallel": 76032,
+                "sockets": 70368,
+                "openssl": 123856,
+                "zip": 50256,
+                "zlib": 43936,
+                "bz2": 20912,
+                "yaml": 21968,
+                "zstd": 19136
+            },
+            "micro": 5335622,
+            "cli": 5426320
+        },
+        "8.0-macos-x86_64": {
+            "libs": {
+                "zstd": 1809112,
+                "zlib": 138792,
+                "openssl": 5650416,
+                "libssh2": 205800,
+                "brotli": 911688,
+                "nghttp2": 212600,
+                "curl": 578608,
+                "libffi": 37896,
+                "bzip2": 85008,
+                "xz": 215664,
+                "libzip": 101376,
+                "onig": 689224,
+                "libyaml": 120880
+            },
+            "exts": {
+                "opcache": 1338592,
+                "bcmath": 91696,
+                "pdo": 68480,
+                "phar": 251152,
+                "mysqlnd": 233376,
+                "mysqli": 57744,
+                "pdo_mysql": 21696,
+                "mbstring": 1012552,
+                "mbregex": 70632,
+                "session": 68816,
+                "ctype": 1792,
+                "fileinfo": 6759600,
+                "filter": 7752,
+                "tokenizer": 20056,
+                "curl": 113896,
+                "ffi": 101240,
+                "swow": 751824,
+                "redis": 534248,
+                "parallel": 91968,
+                "sockets": 53816,
+                "openssl": 123464,
+                "zip": 50184,
+                "zlib": 92976,
+                "bz2": 4440,
+                "yaml": 21904,
+                "zstd": 19056
+            },
+            "micro": 5299920,
+            "cli": 5389976
+        },
+        "8.1-windows-x86_64-vs17": {
+            "libs": {
+                "pthreads4w": 51200,
+                "zstd": 495104,
+                "zlib": 66560,
+                "openssl": 4469760,
+                "libssh2": 206848,
+                "brotli": 743424,
+                "nghttp2": 119296,
+                "curl": 498176,
+                "libffi": 17408,
+                "bzip2": 65024,
+                "xz": 141824,
+                "libzip": 90112,
+                "onig": 516096,
+                "libyaml": 92160
+            },
+            "exts": {
+                "opcache": 133120,
+                "bcmath": 21504,
+                "pdo": 74752,
+                "phar": 234496,
+                "mysqlnd": 187392,
+                "mysqli": 114688,
+                "pdo_mysql": 16384,
+                "mbstring": 946176,
+                "mbregex": 20480,
+                "session": 72704,
+                "ctype": 2560,
+                "fileinfo": 7115776,
+                "filter": 32768,
+                "tokenizer": 17920,
+                "curl": 76288,
+                "ffi": 139776,
+                "swow": 0,
+                "redis": 497152,
+                "parallel": 60416,
+                "sockets": 71680,
+                "openssl": 120320,
+                "zip": 45056,
+                "zlib": 32768,
+                "bz2": 10240,
+                "yaml": 29696,
+                "zstd": 8192
+            },
+            "micro": 5608960,
+            "cli": 5714432
+        },
+        "8.0-windows-x86_64-vs17": {
+            "libs": {
+                "pthreads4w": 51200,
+                "zstd": 495104,
+                "zlib": 67072,
+                "openssl": 4470272,
+                "libssh2": 206336,
+                "brotli": 742400,
+                "nghttp2": 120832,
+                "curl": 497664,
+                "libffi": 17408,
+                "bzip2": 64000,
+                "xz": 141824,
+                "libzip": 90624,
+                "onig": 515584,
+                "libyaml": 93184
+            },
+            "exts": {
+                "opcache": 442368,
+                "bcmath": 22016,
+                "pdo": 84992,
+                "phar": 235520,
+                "mysqlnd": 211456,
+                "mysqli": 104960,
+                "pdo_mysql": 15360,
+                "mbstring": 914432,
+                "mbregex": 19968,
+                "session": 74240,
+                "ctype": 4608,
+                "fileinfo": 6752256,
+                "filter": 32256,
+                "tokenizer": 18432,
+                "curl": 76288,
+                "ffi": 134656,
+                "swow": 0,
+                "redis": 495616,
+                "parallel": 61952,
+                "sockets": 73216,
+                "openssl": 125440,
+                "zip": 44032,
+                "zlib": 31744,
+                "bz2": 10752,
+                "yaml": 29184,
+                "zstd": 8704
+            },
+            "micro": 5648384,
+            "cli": 5751808
+        },
+        "8.2-windows-aarch64-vs17": {
+            "libs": {
+                "pthreads4w": 54272,
+                "zstd": 456704,
+                "zlib": 66560,
+                "openssl": 4261888,
+                "libssh2": 212992,
+                "brotli": 707072,
+                "nghttp2": 127488,
+                "curl": 526848,
+                "libffi": 43520,
+                "bzip2": 64000,
+                "xz": 134144,
+                "libzip": 97792,
+                "onig": 523264,
+                "libyaml": 99840
+            },
+            "exts": {
+                "opcache": 136192,
+                "bcmath": 22528,
+                "pdo": 74752,
+                "phar": 224768,
+                "mysqlnd": 174080,
+                "mysqli": 108032,
+                "pdo_mysql": 18432,
+                "mbstring": 1049600,
+                "mbregex": 17920,
+                "session": 72704,
+                "ctype": 2560,
+                "fileinfo": 7115264,
+                "filter": 30720,
+                "tokenizer": 17408,
+                "curl": 86016,
+                "ffi": 145408,
+                "swow": 0,
+                "redis": 472064,
+                "parallel": 60416,
+                "sockets": 68096,
+                "openssl": 127488,
+                "zip": 47104,
+                "zlib": 28672,
+                "bz2": 10240,
+                "yaml": 30720,
+                "zstd": 8704
+            },
+            "micro": 5777408,
+            "cli": 5881344
         }
     }
 }
