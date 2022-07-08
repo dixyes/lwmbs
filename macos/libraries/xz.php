@@ -44,6 +44,7 @@ class Libxz extends Library
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
+                'autoreconf -i --force && ' .
                 "{$this->config->configureEnv} ./configure " .
                 '--enable-static ' .
                 '--disable-shared ' .
