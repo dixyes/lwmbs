@@ -130,7 +130,7 @@ class Config extends CommonConfig
 
         // reorder libs
         foreach ($this->libs as $lib) {
-            foreach ($lib->getDependencies() as $dep) {
+            foreach ($lib->getDependencies() as $_ => $dep) {
                 array_push($libs, $dep);
             }
             array_push($libs, $lib);

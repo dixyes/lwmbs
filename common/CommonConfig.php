@@ -49,15 +49,21 @@ class CommonConfig extends \stdClass
     public function makeLibArray(): array
     {
         $ret = [];
+        // at this time, all libraries registered
         foreach ($this->libs as $libName => $lib) {
             $lib->calcDependency();
-            $deps = $lib->getDependencies();
-            foreach ($deps as $dep) {
-                if (!in_array($dep->getName(), array_keys($ret), true)) {
-                    $ret[$dep->getName()] = $dep;
+        }
+        foreach ($this->libs as $libName => $lib) {
+            $deps = $lib->getDependencies(true);
+            //var_dump($libName,array_keys($deps));
+            foreach ($deps as $depName => $dep) {
+                if (!in_array($depName, array_keys($ret), true)) {
+                    //Log::i("add $depName as dependency of $libName");
+                    $ret[$depName] = $dep;
                 }
             }
             if (!in_array($libName, array_keys($ret), true)) {
+                //Log::i("add $libName");
                 $ret[$libName] = $lib;
             }
         }

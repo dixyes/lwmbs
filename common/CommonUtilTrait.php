@@ -256,7 +256,7 @@ trait CommonUtilTrait
             if (false !== array_search('libffi', $libNames, true)) {
                 unset($libNames[array_search('libffi', $libNames, true)]);
             }
-            if (false !== array_search('libffi', $libNames, true)) {
+            if (false !== array_search('ffi', $extNames, true)) {
                 unset($extNames[array_search('ffi', $extNames, true)]);
             }
         }

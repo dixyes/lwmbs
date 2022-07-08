@@ -37,25 +37,29 @@ trait CommonLibraryTrait
 
     public function getDependencies(bool $recursive = false): array
     {
-        $ret = $this->dependencies;
         if (!$recursive) {
-            return $ret;
+            return $this->dependencies;
         }
+
+        $deps = [];
 
         $added = 1;
         while ($added !==0) {
             $added = 0;
-            foreach ($ret as $dep) {
-                foreach ($dep->getDependencies(true) as $depdep) {
-                    if (!in_array($depdep, $ret, true)) {
-                        array_push($ret, $depdep);
+            foreach ($this->dependencies as $depName => $dep) {
+                foreach ($dep->getDependencies(true) as $depdepName => $depdep) {
+                    if (!in_array($depdepName, array_keys($deps), true)) {
+                        $deps[$depdepName] = $depdep;
                         $added++;
                     }
+                }
+                if (!in_array($depName, array_keys($deps), true)) {
+                    $deps[$depName] = $dep;
                 }
             }
         }
 
-        return $ret;
+        return $deps;
     }
 
     public function calcDependency(): void
@@ -67,6 +71,7 @@ trait CommonLibraryTrait
 
     protected function addLibraryDependency(string $name, bool $optional = false)
     {
+        // Log::i("add $name as dep of {$this->name}");
         $depLib =$this->config->getLib($name);
         if (!$depLib) {
             if (!$optional) {
@@ -75,7 +80,7 @@ trait CommonLibraryTrait
                 Log::i("enabling {$this->name} without $name");
             }
         } else {
-            $this->dependencies[] = $depLib;
+            $this->dependencies[$name] = $depLib;
         }
     }
     public function getStaticLibs(): array

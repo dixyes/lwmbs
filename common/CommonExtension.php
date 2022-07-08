@@ -101,19 +101,24 @@ class CommonExtension
             return $ret;
         }
 
+        $deps = [];
+
         $added = 1;
         while ($added !==0) {
             $added = 0;
-            foreach ($ret as $dep) {
-                foreach ($dep->getDependencies(true) as $depdep) {
-                    if (!in_array($depdep, $ret, true)) {
-                        array_push($ret, $depdep);
+            foreach ($ret as $depName => $dep) {
+                foreach ($dep->getDependencies(true) as $depdepName => $depdep) {
+                    if (!in_array($depdepName, array_keys($deps), true)) {
+                        $deps[$depdepName] = $depdep;
                         $added++;
                     }
+                }
+                if (!in_array($depName, array_keys($deps), true)) {
+                    $deps[$depName] = $dep;
                 }
             }
         }
 
-        return $ret;
+        return $deps;
     }
 }

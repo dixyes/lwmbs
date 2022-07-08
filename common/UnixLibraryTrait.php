@@ -33,7 +33,7 @@ trait UnixLibraryTrait {
     {
         $libs = [$this];
         if ($recursive) {
-            array_unshift($libs, ...$this->getDependencies(recursive: true));
+            array_unshift($libs, ...array_values($this->getDependencies(recursive: true)));
         }
 
         $sep = match ($style) {
