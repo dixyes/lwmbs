@@ -24,11 +24,11 @@ class Liblibiconv extends Library
     protected string $name = 'libiconv';
     protected array $staticLibs = [
         'libiconv.a',
-        'libcharset.a',
+        //'libcharset.a',
     ];
     protected array $headers = [
         'iconv.h',
-        'libcharset.h',
+        //'libcharset.h',
     ];
     protected array $depNames = [];
 

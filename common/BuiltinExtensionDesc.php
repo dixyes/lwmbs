@@ -108,7 +108,8 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         ],
         'iconv' => [
             'argType' => 'with',
-            'libDeps' => ['libiconv' => false],
+            'libDeps' => ['libiconv' => true],
+            'libDepsWin' => ['libiconv' => false],
         ],
         'imap' => [
             'argType' => 'with',
