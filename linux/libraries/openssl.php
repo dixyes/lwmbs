@@ -120,10 +120,14 @@ EOF,
                 '--libdir=lib ' .
                 '--static ' .
                 '-static ' .
-                " linux-{$this->config->arch}{$clangPostfix} && " .
+                'no-legacy ' .
+                "linux-{$this->config->arch}{$clangPostfix} && " .
                 "make clean && " .
                 "make -j{$this->config->concurrency} CNF_EX_LIBS=\"$ex_lib\" && " .
-                'make install_sw DESTDIR=' . realpath('.'),
+                'make install_sw DESTDIR=' . realpath('.') // . '&&' .
+                // remove liblegacy
+                //'ar t lib/libcrypto.a | grep -e \'^liblegacy-\' | xargs ar d lib/libcrypto.a'
+                ,
             $ret
         );
         if ($ret !== 0) {

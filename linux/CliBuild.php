@@ -34,7 +34,13 @@ class CliBuild
         if (!$bloat) {
             $extra_libs = implode(' ', $this->config->getAllStaticLibFiles());
         } else {
-            $extra_libs = implode(' ', array_map(fn ($x) => "-Xcompiler $x", $this->config->getAllStaticLibFiles()));
+            $extra_libs = implode(
+                ' ',
+                array_map(
+                    fn ($x) => "-Xcompiler $x",
+                    array_filter($this->config->getAllStaticLibFiles())
+                )
+            );
         }
 
         $envs = $this->config->pkgconfEnv . ' ' .
