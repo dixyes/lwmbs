@@ -85,10 +85,17 @@ EOF,
         $zstd = '-DENABLE_ZSTD=OFF ';
         $libzstd = $this->config->getLib('zstd');
         if ($libzstd) {
-            // TODO: enable it
             $zstd = '-DENABLE_ZSTD=ON ' .
                 '-DZstd_LIBRARY="' . $libzstd->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DZstd_INCLUDE_DIR="' . realpath('include') . '" ';
+        }
+
+        $openssl = '-DENABLE_OPENSSL=OFF ';
+        $libopenssl = $this->config->getLib('openssl');
+        if ($libopenssl) {
+            $openssl = '-DENABLE_ZSTD=ON ' .
+                '-DOpenSSL_LIBRARY="' . $libopenssl->getStaticLibFiles(style: 'cmake') . '" ' .
+                '-DOpenSSL_INCLUDE_DIR="' . realpath('include') . '" ';
         }
 
         passthru(
@@ -112,6 +119,7 @@ EOF,
                 $xz .
                 $zstd .
                 $zlib .
+                $openssl .
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .

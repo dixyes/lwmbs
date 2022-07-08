@@ -56,6 +56,11 @@ class Liblibzip extends Library
             $zstd = 'ON';
         }
 
+        $openssl = 'OFF';
+        if ($this->config->getLib('openssl')) {
+            $openssl = 'ON';
+        }
+
         $ret = 0;
         if (is_dir("{$this->sourceDir}\\builddir")) {
             exec("rmdir /s /q \"{$this->sourceDir}\\builddir\"", result_code: $ret);
@@ -73,6 +78,7 @@ class Liblibzip extends Library
                     "-DENABLE_BZIP2=$bzip2 " .
                     "-DENABLE_LZMA=$xz " .
                     "-DENABLE_ZSTD=$zstd " .
+                    "-DENABLE_OPENSSL=$openssl " .
                     '-DBUILD_DOC=OFF ' .
                     '-DBUILD_EXAMPLES=OFF ' .
                     '-DBUILD_REGRESS=OFF '.
