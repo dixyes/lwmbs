@@ -427,20 +427,20 @@ function mian($argv): int
     $libraries = array_map('trim', array_filter(explode(',', $cmdArgs['positional']['libraries'])));
     if ($libraries) {
         foreach ($libraries as $lib) {
-            $srcName = $data['lib'][$lib];
+            $srcName = $data['lib'][$lib]['source'];
             $chosen[] = $srcName;
         }
     } else {
-        $chosen = [...$chosen, ...array_values($data['lib'])];
+        $chosen = [...$chosen, ...array_map(fn($x) => $x['source'], array_values($data['lib']))];
     }
     $extensions = array_map('trim', array_filter(explode(',', $cmdArgs['positional']['extensions'])));
     if ($extensions) {
         foreach ($extensions as $lib) {
-            $srcName = $data['ext'][$lib];
+            $srcName = $data['ext'][$lib]['source'];
             $chosen[] = $srcName;
         }
     } else {
-        $chosen = [...$chosen, ...array_values($data['ext'])];
+        $chosen = [...$chosen, ...array_map(fn($x) => $x['source'], array_values($data['ext']))];
     }
     $chosen = array_unique($chosen);
     $filter = fn($_, $name) => in_array($name, $chosen, true);
