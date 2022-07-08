@@ -54,6 +54,8 @@ EOF
         'nghttp2' => true,
         'zstd' => true,
         'openssl' => true,
+        'idn2' => true,
+        'psl' => true,
     ];
 
     public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
@@ -116,6 +118,18 @@ EOF
                 '-DZstd_INCLUDE_DIR="' . realpath('include') . '" ';
         }
 
+        $idn2 = '-DUSE_LIBIDN2=OFF ';
+        $libidn2 = $this->config->getLib('idn2');
+        if ($libidn2) {
+            $idn2 = '-DUSE_LIBIDN2=ON ';
+        }
+
+        $psl = '-DCURL_USE_LIBPSL=OFF ';
+        $libpsl = $this->config->getLib('psl');
+        if ($libpsl) {
+            $psl = '-DCURL_USE_LIBPSL=ON ';
+        }
+
         $ret = 0;
         passthru(
             $this->config->setX . ' && ' .
@@ -133,6 +147,8 @@ EOF
                 $nghttp2 .
                 $ldap .
                 $zstd .
+                $idn2 .
+                $psl .
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .

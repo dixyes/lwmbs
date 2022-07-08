@@ -35,6 +35,8 @@ class Libcurl extends Library
         'nghttp2' => true,
         'zstd' => true,
         'openssl' => true,
+        'idn2' => true,
+        'psl' => true,
     ];
 
     protected function build(): void
@@ -69,6 +71,16 @@ class Libcurl extends Library
             $zstd = 'ON';
         }
 
+        $idn2 = 'OFF';
+        if ($this->config->getLib('idn2')) {
+            $idn2 = 'ON';
+        }
+
+        $psl = 'OFF';
+        if ($this->config->getLib('psl')) {
+            $psl = 'ON';
+        }
+
         $ssl = '-DCURL_USE_OPENSSL=OFF -DCURL_USE_SCHANNEL=ON -DCURL_WINDOWS_SSPI=ON';
         if ($this->config->getLib('openssl')) {
             $ssl = '-DCURL_USE_OPENSSL=ON';
@@ -95,6 +107,8 @@ class Libcurl extends Library
                     "$brotli " .
                     "-DUSE_NGHTTP2=$nghttp2 " .
                     "-DCURL_ZSTD=$zstd " .
+                    "-DUSE_LIBIDN2=$idn2 " .
+                    "-DCURL_USE_LIBPSL=$psl " .
                     "$ssl " .
                     "-DUSE_WIN32_IDN=ON " .
                     //'-DCMAKE_C_FLAGS_MINSIZEREL="/MT /O1 /Ob1 /DNDEBUG" ' .
