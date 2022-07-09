@@ -47,4 +47,10 @@ trait MacOSLibraryTrait
 
         Log::i("{$this->name} proven");
     }
+
+    
+    public function getFrameworks(): array
+    {
+        return $this->frameworks;
+    }
 }

@@ -108,7 +108,7 @@ class Config extends CommonConfig
         return rtrim($ret);
     }
 
-    public function getAllStaticLibFiles(): string
+    public function getAllStaticLibFiles(): array
     {
         $libs = [];
 
@@ -120,7 +120,39 @@ class Config extends CommonConfig
             array_push($libs, $lib);
         }
 
-        return implode(' ', array_map(fn ($x) => $x->getStaticLibFiles(), $libs));
+        $libFiles = [];
+        $libNames = [];
+        // merge libs
+        foreach ($libs as $lib) {
+            if (!in_array($lib->getName(), $libNames, true)) {
+                array_push($libNames, $lib->getName());
+                array_unshift($libFiles, ...$lib->getStaticLibs());
+            }
+        }
+        return array_map(fn ($x) => realpath("lib/$x"), $libFiles);
+    }
+
+    public function getFrameworks(bool $asString = false): array|string
+    {
+        $libs = [];
+
+        // reorder libs
+        foreach ($this->libs as $lib) {
+            foreach ($lib->getDependencies() as $_ => $dep) {
+                array_push($libs, $dep);
+            }
+            array_push($libs, $lib);
+        }
+
+        $frameworks = [];
+        foreach ($libs as $lib) {
+            array_push($frameworks, ...$lib->getFrameworks());
+        }
+
+        if($asString) {
+            return implode(' ', array_map(fn($x)=>"-framework $x",$frameworks));
+        }
+        return $frameworks;
     }
 
     public function getCXXEnv(): string

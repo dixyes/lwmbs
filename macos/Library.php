@@ -21,4 +21,6 @@ declare(strict_types=1);
 class Library
 {
     use MacOSLibraryTrait;
+    
+    protected array $frameworks = [];
 }

@@ -20,9 +20,7 @@ declare(strict_types=1);
 
 class Libcurl extends Library
 {
-    use MacOSLibraryTrait{
-        MacOSLibraryTrait::getStaticLibFiles as _getStaticLibFiles;
-    }
+    use MacOSLibraryTrait;
     protected string $name = 'curl';
     protected array $staticLibs = [
         'libcurl.a',
@@ -40,11 +38,10 @@ class Libcurl extends Library
         'idn2' => true,
         'psl' => true,
     ];
-
-    public function getStaticLibFiles(string $style = 'autoconf', bool $recursive = true): string
-    {
-        return $this->_getStaticLibFiles($style, $recursive) . ' -framework CoreFoundation -framework SystemConfiguration';
-    }
+    protected array $frameworks = [
+        'CoreFoundation',
+        'SystemConfiguration',
+    ];
 
     protected function build(): void
     {

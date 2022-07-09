@@ -209,35 +209,6 @@ final class Util
         return static::chooseCC();
     }
 
-    public static function patchConfigure(Config $config): void
-    {
-
-        passthru(
-            $config->setX . ' && ' .
-                'cd src/php-src && ' .
-                './buildconf --force',
-            $ret
-        );
-        if ($ret !== 0) {
-            throw new Exception("failed to configure micro");
-        }
-
-        $curl = $config->getExt('curl');
-        if ($curl) {
-            Log::i('patching configure for curl checks');
-            $configure = file_get_contents('src/php-src/configure');
-            $configure = preg_replace('/-lcurl/', $curl->getStaticLibFiles(), $configure);
-            file_put_contents('src/php-src/configure', $configure);
-        }
-        $bzip2 = $config->getExt('bz2');
-        if ($bzip2) {
-            Log::i('patching configure for bzip2 checks');
-            $configure = file_get_contents('src/php-src/configure');
-            $configure = preg_replace('/-lbz2/', $bzip2->getStaticLibFiles(), $configure);
-            file_put_contents('src/php-src/configure', $configure);
-        }
-    }
-
     public static function replaceConfigHeaderLine(string $line, string $replace = ''): void
     {
         $header = file_get_contents('src/php-src/main/php_config.h');

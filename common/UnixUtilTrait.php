@@ -73,18 +73,27 @@ CMAKE;
     }
 
     public static function patchPHPConfigure(Config $config) {
+        $frameworks = PHP_OS_FAMILY === 'Darwin' ? ' ' . $config->getFrameworks(true) : '';
         $curl = $config->getExt('curl');
         if ($curl) {
             Log::i('patching configure for curl checks');
             $configure = file_get_contents('src/php-src/configure');
-            $configure = preg_replace('/-lcurl/', $curl->getStaticLibFiles(), $configure);
+            $configure = preg_replace(
+                '/-lcurl/',
+                $curl->getStaticLibFiles() . $frameworks,
+                $configure
+            );
             file_put_contents('src/php-src/configure', $configure);
         }
         $bzip2 = $config->getExt('bz2');
         if ($bzip2) {
             Log::i('patching configure for bzip2 checks');
             $configure = file_get_contents('src/php-src/configure');
-            $configure = preg_replace('/-lbz2/', $bzip2->getStaticLibFiles(), $configure);
+            $configure = preg_replace(
+                '/-lbz2/',
+                $bzip2->getStaticLibFiles(). $frameworks,
+                $configure
+            );
             file_put_contents('src/php-src/configure', $configure);
         }
         if (php_uname('m') !== $config->arch) {
@@ -98,6 +107,8 @@ CMAKE;
                     $configure = preg_replace('/have_shm_mmap_anon=no/', 'have_shm_mmap_anon=yes', $configure);
                     $configure = preg_replace('/have_shm_mmap_posix=no/', 'have_shm_mmap_posix=yes', $configure);
                     file_put_contents('src/php-src/configure', $configure);
+                    break;
+                case 'x86_64':
                     break;
                 default:
                     throw new Exception("unsupported arch: " . $config->arch);

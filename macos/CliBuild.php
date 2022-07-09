@@ -26,12 +26,24 @@ class CliBuild
     ) {
     }
 
-    public function build(bool $fresh = false): void
+    public function build(bool $fresh = false, bool $bloat = false): void
     {
         Log::i("building cli");
         $ret = 0;
 
-        $extra_libs = $this->config->getAllStaticLibFiles();
+        $extra_libs = $this->config->getFrameworks(true) . ' ';
+        if (!$bloat) {
+            $extra_libs .= implode(' ', $this->config->getAllStaticLibFiles());
+        } else {
+            Log::i('bloat linking');
+            $extra_libs .= implode(
+                ' ',
+                array_map(
+                    fn ($x) => "-Wl,-force_load,$x",
+                    array_filter($this->config->getAllStaticLibFiles())
+                )
+            );
+        }
 
         passthru(
             $this->config->setX . ' && ' .
