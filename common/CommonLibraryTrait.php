@@ -35,6 +35,11 @@ trait CommonLibraryTrait
         return $this->name;
     }
 
+    public function getDepNames(): array
+    {
+        return $this->depNames;
+    }
+
     public function getDependencies(bool $recursive = false): array
     {
         if (!$recursive) {
