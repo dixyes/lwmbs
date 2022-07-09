@@ -248,7 +248,9 @@ trait CommonUtilTrait
 
         $libNames = array_filter(array_map('trim', explode(',', $cmdArgs['positional']['libraries'])));
 
-        $extNames = array_filter(array_map('trim', explode(',', $cmdArgs['positional']['extensions'])));
+        if (!$libsOnly) {
+            $extNames = array_filter(array_map('trim', explode(',', $cmdArgs['positional']['extensions'])));
+        }
 
         $allStatic = (bool)($cmdArgs['named']['allStatic'] ?? false);
 
@@ -256,7 +258,7 @@ trait CommonUtilTrait
             if (false !== array_search('libffi', $libNames, true)) {
                 unset($libNames[array_search('libffi', $libNames, true)]);
             }
-            if (false !== array_search('ffi', $extNames, true)) {
+            if (!$libsOnly && false !== array_search('ffi', $extNames, true)) {
                 unset($extNames[array_search('ffi', $extNames, true)]);
             }
         }
@@ -266,9 +268,11 @@ trait CommonUtilTrait
             $config->addLib($lib);
         }
 
-        foreach ($extNames as $name) {
-            $ext = new Extension(name: $name, config: $config);
-            $config->addExt($ext);
+        if (!$libsOnly) {
+            foreach ($extNames as $name) {
+                $ext = new Extension(name: $name, config: $config);
+                $config->addExt($ext);
+            }
         }
 
         return [$cmdArgs, $config];

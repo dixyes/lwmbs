@@ -32,7 +32,7 @@ class CliBuild
     ) {
     }
 
-    public function build(bool $fresh = false, array $additionalLibs = []): void
+    public function build(bool $fresh = false, bool $bloat = false): void
     {
         Log::i("building cli");
 
@@ -81,36 +81,27 @@ class CliBuild
         }
         file_put_contents('src\php-src\Makefile', $makefile);
 
-        // add indirect libs
+        // add extra libs
         $extra_libs = '';
-        if ($this->config->getLib('zstd')) {
-            $extra_libs .= ' zstd.lib';
-        }
-        if ($this->config->getLib('brotli')) {
-            $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
-        }
-
-        foreach ($additionalLibs as $lib) {
-            /** @var Library $lib */
-            foreach ($lib->getStaticLibs() as $libName) {
-                if (is_array($libName)) {
-                    foreach ($libName as $name) {
-                        if (str_contains($makefile, $name) || str_contains($extra_libs, $name)){
-                            continue 3;
-                        }
-                    }
-                    Log::i("adding lib $name");
-                    $extra_libs[] = " $name";
-                }
-                if (str_contains($makefile, $libName) || str_contains($extra_libs, $libName)){
-                    continue 2;
-                }
-                Log::i("adding lib $libName");
-                $extra_libs[] = " $libName";
+        if ($bloat) {
+            Log::i('bloat linking');
+            $bloat_libs = [];
+            foreach ($this->config->makeLibArray() as $lib) {
+                array_push($bloat_libs, ...$lib->getStaticLibs());
+            }
+            $extra_libs .= ' ' . implode(' ', array_map(fn($x)=>"/WHOLEARCHIVE:$x",$bloat_libs));
+        } else {
+            // add indirect libs only
+            if ($this->config->getLib('zstd')) {
+                $extra_libs .= ' zstd.lib';
+            }
+            if ($this->config->getLib('brotli')) {
+                $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
             }
         }
 
-        file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_CLI="' . $extra_libs . ' ws2_32.lib shell32.lib" %*');
+        file_put_contents('src\php-src\nmake_wrapper.bat',
+            'nmake /nologo LIBS_CLI="' . $extra_libs . ' ws2_32.lib shell32.lib" EXTRA_LD_FLAGS_PROGRAM= %*');
 
         if ($fresh) {
             Log::i('cleanning up');

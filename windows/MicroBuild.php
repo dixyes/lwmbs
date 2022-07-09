@@ -27,7 +27,7 @@ class MicroBuild
     ) {
     }
 
-    public function build(bool $fresh = false): void
+    public function build(bool $fresh = false, bool $bloat = false): void
     {
         Log::i("building micro");
 
@@ -69,13 +69,30 @@ class MicroBuild
             file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
         }
 
-        // add indirect libs
-        $extra_libs = '';
-        if ($this->config->getLib('zstd')) {
-            $extra_libs .= ' zstd.lib';
+        // workaround for fiber
+        $makefile = file_get_contents('src\php-src\Makefile');
+        if ($this->config->arch !== 'arm64' && str_contains($makefile, 'FIBER_ASM_ARCH')) {
+            $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj' . "\r\n\r\n";
         }
-        if ($this->config->getLib('brotli')) {
-            $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
+        file_put_contents('src\php-src\Makefile', $makefile);
+
+        // add extra libs
+        $extra_libs = '';
+        if ($bloat) {
+            Log::i('bloat linking');
+            $bloat_libs = [];
+            foreach ($this->config->makeLibArray() as $lib) {
+                array_push($bloat_libs, ...$lib->getStaticLibs());
+            }
+            $extra_libs .= ' ' . implode(' ', array_map(fn($x)=>"/WHOLEARCHIVE:$x",$bloat_libs));
+        } else {
+            // add indirect libs only
+            if ($this->config->getLib('zstd')) {
+                $extra_libs .= ' zstd.lib';
+            }
+            if ($this->config->getLib('brotli')) {
+                $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
+            }
         }
 
         file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_MICRO="' . $extra_libs . ' ws2_32.lib shell32.lib" %*');

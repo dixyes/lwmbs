@@ -86,6 +86,11 @@ class Libcurl extends Library
             $ssl = '-DCURL_USE_OPENSSL=ON';
         }
 
+        // patch libcurl cmake file to avoid bloat build res file conflict
+        $cmakelists = file_get_contents('src/curl/lib/CMakeLists.txt');
+        $cmakelists = preg_replace('/\s*list\s*\(\s*APPEND\s+CSOURCES\s+libcurl.rc\s*\)/', '', $cmakelists);
+        file_put_contents('src/curl/lib/CMakeLists.txt', $cmakelists);
+
         $ret = 0;
         if (is_dir("{$this->sourceDir}\\builddir")) {
             exec("rmdir /s /q \"{$this->sourceDir}\\builddir\"", result_code: $ret);

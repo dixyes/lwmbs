@@ -32,7 +32,7 @@ trait WindowsLibraryTrait
                 // choosable libs
                 $lib = null;
                 foreach ($name as $file) {
-                    if (file_exists("lib/{$file}")) {
+                    if (file_exists("deps/lib/{$file}")) {
                         $lib = $file;
                         break;
                     }
@@ -41,6 +41,7 @@ trait WindowsLibraryTrait
                     Log::i('missing ' . implode(' or ', array_map(fn ($x) => "deps/lib/{$x}", $name)));
                     goto make;
                 }
+                continue;
             }
             if (!file_exists("deps/lib/{$name}")) {
                 Log::i("missing deps/lib/{$name}");
@@ -60,5 +61,34 @@ trait WindowsLibraryTrait
         $this->build();
 
         Log::i("{$this->name} proven");
+    }
+
+    public function getStaticLibs(): array
+    {
+        $ret = [];
+        foreach ($this->staticLibs as $name) {
+            if (is_array($name)) {
+                // choosable libs
+                $lib = null;
+                foreach ($name as $file) {
+                    if (file_exists("deps/lib/{$file}")) {
+                        $lib = $file;
+                        break;
+                    }
+                }
+                if (!$lib) {
+                    // not proven
+                    throw new Exception('never here');
+                }
+                $ret[]=$lib;
+                continue;
+            }
+            if (!file_exists("deps/lib/{$name}")) {
+                // not proven
+                throw new Exception('never here');
+            }
+            $ret[]=$name;
+        }
+        return $ret;
     }
 }

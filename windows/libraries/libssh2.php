@@ -45,6 +45,11 @@ class Liblibssh2 extends Library
             $enable_zlib = 'ON';
         }
 
+        // patch libssh2 cmake file to avoid bloat build res file conflict
+        $cmakelists = file_get_contents('src/libssh2/src/CMakeLists.txt');
+        $cmakelists = preg_replace('|\s*list\s*\(\s*APPEND\s+SOURCES\s+\$\{PROJECT_SOURCE_DIR\}/win32/libssh2\.rc\s*\)|', '', $cmakelists);
+        file_put_contents('src/libssh2/src/CMakeLists.txt', $cmakelists);
+        
         $ret = 0;
         if (is_dir("{$this->sourceDir}\\builddir")) {
             exec("rmdir /s /q \"{$this->sourceDir}\\builddir\"", result_code: $ret);
