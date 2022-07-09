@@ -67,7 +67,7 @@ class Liblibffi extends Library
             if (!$_7zExe) {
                 throw new Exception('needs 7z to unpack');
             }
-            passthru("\"$_7zExe\" x downloads/$file -odeps/", $ret);
+            passthru("\"$_7zExe\" x -y downloads/$file -odeps/", $ret);
             if ($ret !== 0) {
                 throw new Exception("failed to extract {$this->name}");
             }
