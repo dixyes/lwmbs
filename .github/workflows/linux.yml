@@ -134,6 +134,7 @@ jobs:
           case "${{ matrix.libc }}-${{ matrix.arch }}" in
             "musl-aarch64") apk add --no-cache \
                 alpine-sdk automake autoconf bison flex re2c cmake \
+                libtool gettext-dev \
                 vim \
                 xz tar &&
               mkdir -p downloads &&
@@ -149,6 +150,7 @@ jobs:
               ;;
             "musl-x86_64") apk add --no-cache \
                 alpine-sdk automake autoconf bison flex re2c cmake clang lld linux-headers \
+                libtool gettext-dev \
                 vim \
                 zlib-static zlib-dev \
                 bzip2 bzip2-static bzip2-dev \
@@ -162,6 +164,7 @@ jobs:
                 file less make ncurses pkgconf pkgconf-m4 pkgconf-pkg-config \
                 procps-ng unzip util-linux zip diffutils \
                 re2c perl bison flex autoconf automake cmake \
+                libtool gettext-devel \
                 vim \
                 xz zstd bzip2 tar curl \
                 binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu gcc-c++-aarch64-linux-gnu &&
@@ -178,6 +181,7 @@ jobs:
                 re2c perl-IPC-Cmd devtoolset-11-binutils \
                 devtoolset-11-gcc devtoolset-11-libstdc++-devel \
                 devtoolset-11-gcc-c++ devtoolset-11-make \
+                libtool gettext-devel \
                 vim \
                 glibc-static \
                 xz zstd bzip2 tar curl &&
