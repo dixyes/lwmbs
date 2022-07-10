@@ -93,12 +93,12 @@ class Config extends CommonConfig
             'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '"';
         $this->configureEnv = 
             $this->pkgconfEnv . ' ' .
-            "CC='{$this->cc}' ".
+            "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
             (php_uname('m') === $arch?'':"CFLAGS='{$this->archCFlags}'");
         if (php_uname('m') !== $this->arch){
             $this->crossCompilePrefix =Util::getCrossCompilePrefix($this->cc, $this->arch);
-            Log::i('using cross compile prefix '.$this->crossCompilePrefix);
+            Log::i('using cross compile prefix ' . $this->crossCompilePrefix);
             $this->configureEnv .= " CROSS_COMPILE='{$this->crossCompilePrefix}'";
         }
     }
@@ -154,7 +154,7 @@ class Config extends CommonConfig
             CLib::GLIBC => '',
             CLib::MUSL => '',
             CLib::MUSL_WRAPPER => 
-                'CC='.$this->cc . ($usedCXX ? ' CXX="' . $this->cxx . '"' : ''),
+                'CC=' . $this->cc . ($usedCXX ? ' CXX="' . $this->cxx . '"' : ''),
         };
     }
 }

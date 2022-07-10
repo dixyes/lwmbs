@@ -83,7 +83,7 @@ EOF
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
                 "{$this->config->configureEnv} " . ' ./configure ' .
-                '--enable-static '.
+                '--enable-static ' .
                 '--disable-shared ' .
                 "--host={$this->config->arch}-unknown-linux " .
                 '--enable-lib-only ' .

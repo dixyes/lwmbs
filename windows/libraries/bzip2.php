@@ -39,8 +39,8 @@ class Libbzip2 extends Library
 
         $ret = 0;
         passthru(
-            "cd {$this->sourceDir} && ".
-            "{$this->config->phpBinarySDKCmd} -t nmake_wrapper.bat --task-args clean && ".
+            "cd {$this->sourceDir} && " .
+            "{$this->config->phpBinarySDKCmd} -t nmake_wrapper.bat --task-args clean && " .
             "{$this->config->phpBinarySDKCmd} -t nmake_wrapper.bat --task-args lib"
             ,
             $ret

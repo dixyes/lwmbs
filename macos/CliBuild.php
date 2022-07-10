@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -94,7 +93,7 @@ class CliBuild
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
-                "make -j{$this->config->concurrency} "  .
+                "make -j{$this->config->concurrency} " .
                 'EXTRA_CFLAGS="-g -Os -fno-ident" ' .
                 "EXTRA_LIBS=\"$extra_libs -lresolv\" " .
                 // TODO: comment things

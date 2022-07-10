@@ -55,13 +55,13 @@ EOF,
         passthru(
             $this->config->setX . ' && ' .
             "cd {$this->sourceDir} && " .
-            "make {$this->config->configureEnv} PREFIX='".realpath('.')."' clean" . ' && ' .
+            "make {$this->config->configureEnv} PREFIX='" . realpath('.') . "' clean" . ' && ' .
             "make -j{$this->config->concurrency} " .
                 "{$this->config->configureEnv} " .
-                "PREFIX='".realpath('.')."' ".
+                "PREFIX='" . realpath('.') . "' " .
                 '-C lib libzstd.a CPPFLAGS_STATLIB=-DZSTD_MULTITHREAD && ' .
-            'cp lib/libzstd.a '.realpath('./lib').'  && '.
-            'cp lib/zdict.h  lib/zstd_errors.h  lib/zstd.h '.realpath('./include'),
+            'cp lib/libzstd.a ' . realpath('./lib') . '  && ' .
+            'cp lib/zdict.h  lib/zstd_errors.h  lib/zstd.h ' . realpath('./include'),
             $ret
         );
         if ($ret !== 0) {

@@ -37,7 +37,10 @@ class Extension extends CommonExtension
 
     public function getStaticLibFiles(): string
     {
-        $ret = array_map(fn ($x) => $x->getStaticLibFiles(), $this->getLibraryDependencies(recursive: true));
+        $ret = array_map(
+            fn ($x) => $x->getStaticLibFiles(),
+            $this->getLibraryDependencies(recursive: true)
+        );
         return implode(' ', $ret);
     }
 }

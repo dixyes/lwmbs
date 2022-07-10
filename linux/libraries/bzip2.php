@@ -51,11 +51,11 @@ EOF
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "make {$this->config->configureEnv} PREFIX='".realpath('.')."' clean" . ' && ' .
-                "make -j{$this->config->concurrency} {$this->config->configureEnv} PREFIX='".realpath('.')."' libbz2.a" . ' && ' .
+                "make {$this->config->configureEnv} PREFIX='" . realpath('.') . "' clean" . ' && ' .
+                "make -j{$this->config->concurrency} {$this->config->configureEnv} PREFIX='" . realpath('.') . "' libbz2.a" . ' && ' .
                 // make install may fail when cross-compiling, so we copy files.
-                'cp libbz2.a '.realpath('./lib').'  && '.
-                'cp bzlib.h '.realpath('./include'),
+                'cp libbz2.a ' . realpath('./lib') . '  && ' .
+                'cp bzlib.h ' . realpath('./include'),
             $ret
         );
         if ($ret !== 0) {

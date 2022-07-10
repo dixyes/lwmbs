@@ -47,11 +47,11 @@ trait UnixUtilTrait {
         $root = realpath('.');
         $ccLine = '';
         if($cc) {
-            $ccLine = 'SET(CMAKE_C_COMPILER ' . Util::findCommand($cc) .')';
+            $ccLine = 'SET(CMAKE_C_COMPILER ' . Util::findCommand($cc) . ')';
         }
         $cxxLine = '';
         if($cxx) {
-            $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . Util::findCommand($cxx) .')';
+            $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . Util::findCommand($cxx) . ')';
         }
         $toolchain = <<<CMAKE
 SET(CMAKE_SYSTEM_NAME $os)
@@ -67,9 +67,9 @@ CMAKE;
     }
 
     public static function replaceConfigHeaderLine(string $line, string $replace = '', string $file = 'src/php-src/main/php_config.h') {
-        $header = file_get_contents('src/php-src/main/php_config.h');
-        $header = preg_replace('/^'.$line.'$/m', $replace, $header);
-        file_put_contents('src/php-src/main/php_config.h', $header);
+        $header = file_get_contents($file);
+        $header = preg_replace('/^' . $line . '$/m', $replace, $header);
+        file_put_contents($file, $header);
     }
 
     public static function patchPHPConfigure(Config $config) {
@@ -91,7 +91,7 @@ CMAKE;
             $configure = file_get_contents('src/php-src/configure');
             $configure = preg_replace(
                 '/-lbz2/',
-                $bzip2->getStaticLibFiles(). $frameworks,
+                $bzip2->getStaticLibFiles() . $frameworks,
                 $configure
             );
             file_put_contents('src/php-src/configure', $configure);

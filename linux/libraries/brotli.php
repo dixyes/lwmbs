@@ -94,10 +94,10 @@ EOF,
                 "cmake --build . -j{$this->config->concurrency} --target=brotlicommon-static && " .
                 "cmake --build . -j{$this->config->concurrency} --target=brotlidec-static && " .
                 "cmake --build . -j{$this->config->concurrency} --target=brotlienc-static && " .
-                'cp libbrotlidec-static.a '.realpath('./lib').' && ' .
-                'cp libbrotlienc-static.a '.realpath('./lib').' && ' .
-                'cp libbrotlicommon-static.a '.realpath('./lib').' && ' .
-                'cp -r ../c/include/brotli '.realpath('./include'),
+                'cp libbrotlidec-static.a ' . realpath('./lib') . ' && ' .
+                'cp libbrotlienc-static.a ' . realpath('./lib') . ' && ' .
+                'cp libbrotlicommon-static.a ' . realpath('./lib') . ' && ' .
+                'cp -r ../c/include/brotli ' . realpath('./include'),
             $ret
         );
         if ($ret !== 0) {

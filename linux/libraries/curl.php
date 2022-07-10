@@ -137,7 +137,7 @@ EOF
                 'rm -rf build && ' .
                 'mkdir -p build && ' .
                 'cd build && ' .
-                "{$this->config->configureEnv} ". ' cmake ' .
+                "{$this->config->configureEnv} " . ' cmake ' .
                 // '--debug-find ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .

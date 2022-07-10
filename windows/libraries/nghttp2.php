@@ -68,9 +68,9 @@ class Libnghttp2 extends Library
                     '-DENABLE_STATIC_CRT=ON ' .
                     ((0 && 0/* TODO: zstd+openssl+libev support */) ? '-DENABLE_APP=ON -DENABLE_LIB_ONLY=OFF ' : '-DENABLE_LIB_ONLY=ON ') .
                     //'-DCMAKE_C_FLAGS_MINSIZEREL="/MT /O1 /Ob1 /DNDEBUG" ' .
-                    '-DCMAKE_INSTALL_PREFIX="'. realpath('deps'). '" ' . 
+                    '-DCMAKE_INSTALL_PREFIX="' . realpath('deps') . '" ' . 
                     "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
-                '&& '.
+                '&& ' .
                 "cmake --build builddir --config RelWithDebInfo --target install -j {$this->config->concurrency}",
             $ret
         );

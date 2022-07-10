@@ -124,7 +124,7 @@ class CliBuild
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
                 'sed -i "s|//lib|/lib|g" Makefile && ' .
-                "make -j{$this->config->concurrency} "  .
+                "make -j{$this->config->concurrency} " .
                 'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . " $use_lld\" " .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 ($this->config->allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ' : '') .

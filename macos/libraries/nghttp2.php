@@ -68,8 +68,8 @@ class Libnghttp2 extends Library
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} ". ' ./configure ' .
-                '--enable-static '.
+                "{$this->config->configureEnv} " . ' ./configure ' .
+                '--enable-static ' .
                 '--disable-shared ' .
                 "--host={$this->config->gnuArch}-apple-darwin " .
                 '--enable-lib-only ' .

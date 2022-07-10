@@ -27,7 +27,7 @@ trait CommonLibraryTrait
         ?string $sourceDir = null,
         private array $dependencies = [],
     ) {
-        $this->sourceDir = $sourceDir ?? ('src' .DIRECTORY_SEPARATOR . $this->name);
+        $this->sourceDir = $sourceDir ?? ('src' . DIRECTORY_SEPARATOR . $this->name);
     }
 
     public function getName(): string

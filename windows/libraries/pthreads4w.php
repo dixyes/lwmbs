@@ -39,18 +39,18 @@ class Libpthreads4w extends Library
         Log::i("building {$this->name}");
         
         file_put_contents('src/pthreads4w/nmake_wrapper.bat',
-            'nmake /E /nologo /f Makefile '.
-            'DESTROOT=../../deps '.
-            'XCFLAGS="/MT /Z7" '.
-            'EHFLAGS="/I. /DHAVE_CONFIG_H /W3 /O2 /Ob2 /D__PTW32_STATIC_LIB /D__PTW32_BUILD_INLINED" '.
-            'CLEANUP=__PTW32_CLEANUP_C '.
-            'RESOURCE_OBJS="" '.
+            'nmake /E /nologo /f Makefile ' .
+            'DESTROOT=../../deps ' .
+            'XCFLAGS="/MT /Z7" ' .
+            'EHFLAGS="/I. /DHAVE_CONFIG_H /W3 /O2 /Ob2 /D__PTW32_STATIC_LIB /D__PTW32_BUILD_INLINED" ' .
+            'CLEANUP=__PTW32_CLEANUP_C ' .
+            'RESOURCE_OBJS="" ' .
             '%*');
 
         $ret = 0;
         passthru(
             "cd {$this->sourceDir} && " .
-            "{$this->config->phpBinarySDKCmd} -t nmake_wrapper.bat --task-args clean && ".
+            "{$this->config->phpBinarySDKCmd} -t nmake_wrapper.bat --task-args clean && " .
             "{$this->config->phpBinarySDKCmd} -t nmake_wrapper.bat --task-args pthreadVC3.inlined_static_stamp ",
             $ret
         );

@@ -137,7 +137,7 @@ EOF;
 
         passthru(
             "cd {$this->sourceDir} && " .
-                $this->config->phpBinarySDKCmd . ' -t msbuild_wrapper.bat --task-args -t:Clean && '.
+                $this->config->phpBinarySDKCmd . ' -t msbuild_wrapper.bat --task-args -t:Clean && ' .
                 $this->config->phpBinarySDKCmd . ' -t msbuild_wrapper.bat --task-args -t:Build'
             ,
             $ret

@@ -82,9 +82,9 @@ class Libopenssl extends Library
                 "perl Configure $zlib $confArch " .
                     "disable-shared " .
                     '--prefix="' . realpath('deps') . '" ' .
-                    '-I"' . realpath('deps\include'). '" '.
+                    '-I"' . realpath('deps\include') . '" ' .
                     '--release && ' .
-                $this->config->phpBinarySDKCmd . ' -t nmake_wrapper.bat --task-args clean && '.
+                $this->config->phpBinarySDKCmd . ' -t nmake_wrapper.bat --task-args clean && ' .
                 $this->config->phpBinarySDKCmd . ' -t nmake_wrapper.bat --task-args install' .
                 (0 ? '' : '_dev')
                 ,

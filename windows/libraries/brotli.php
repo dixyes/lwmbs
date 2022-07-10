@@ -53,9 +53,9 @@ class Libbrotli extends Library
                     '-DBUILD_SHARED_LIBS=OFF ' .
                     '-DBROTLI_DISABLE_TESTS=ON ' .
                     //'-DCMAKE_C_FLAGS_MINSIZEREL="/MT /O1 /Ob1 /DNDEBUG" ' .
-                    '-DCMAKE_INSTALL_PREFIX="'. realpath('deps'). '" ' . 
+                    '-DCMAKE_INSTALL_PREFIX="' . realpath('deps') . '" ' . 
                     "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
-                '&& '.
+                '&& ' .
                 "cmake --build builddir --config RelWithDebInfo --target install -j {$this->config->concurrency}",
             $ret
         );
