@@ -273,6 +273,8 @@ trait CommonUtilTrait
                 $ext = new Extension(name: $name, config: $config);
                 $config->addExt($ext);
             }
+            //check dependencies
+            $config->makeExtArray();
         }
 
         return [$cmdArgs, $config];
