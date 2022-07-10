@@ -58,6 +58,12 @@ trait WindowsLibraryTrait
         return;
         make:
 
+        if (!is_dir('deps/lib')) {
+            @mkdir('deps/lib', recursive:true);
+        }
+        if (!is_dir('deps/include')) {
+            @mkdir('deps/include', recursive:true);
+        }
         $this->build();
 
         Log::i("{$this->name} proven");

@@ -84,7 +84,9 @@ class MicroBuild
             foreach ($this->config->makeLibArray() as $lib) {
                 array_push($bloat_libs, ...$lib->getStaticLibs());
             }
-            $extra_libs .= ' ' . implode(' ', array_map(fn($x)=>"/WHOLEARCHIVE:$x",$bloat_libs));
+            $extra_libs .= ' ' . implode(' ', array_map(fn($x)=>"/WHOLEARCHIVE:$x $x",$bloat_libs));
+            $makefile = str_replace('/opt:ref,icf', '/opt:noref', $makefile);
+            file_put_contents('src\php-src\Makefile', $makefile);
         } else {
             // add indirect libs only
             if ($this->config->getLib('zstd')) {
@@ -93,6 +95,12 @@ class MicroBuild
             if ($this->config->getLib('brotli')) {
                 $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
             }
+        }
+        if ($this->config->getLib('openssl')) {
+            $extra_libs .= ' crypt32.lib';
+        }
+        if ($this->config->getLib('curl')) {
+            $extra_libs .= ' wldap32.lib';
         }
 
         file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_MICRO="' . $extra_libs . ' ws2_32.lib shell32.lib" %*');

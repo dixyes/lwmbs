@@ -44,6 +44,7 @@ class Libpthreads4w extends Library
             'XCFLAGS="/MT /Z7" '.
             'EHFLAGS="/I. /DHAVE_CONFIG_H /W3 /O2 /Ob2 /D__PTW32_STATIC_LIB /D__PTW32_BUILD_INLINED" '.
             'CLEANUP=__PTW32_CLEANUP_C '.
+            'RESOURCE_OBJS="" '.
             '%*');
 
         $ret = 0;

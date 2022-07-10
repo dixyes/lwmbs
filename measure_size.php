@@ -19,6 +19,49 @@
 
 require __DIR__ . '/autoload.php';
 
+function cliPath(Config $testConfig):string
+{
+    return match (PHP_OS_FAMILY) {
+        'Windows', 'WINNT' => "src\\php-src\\{$testConfig->arch}\\Release_TS\\php.exe",
+        default => 'src/php-src/sapi/cli/php',
+    };
+}
+
+function microPath(Config $testConfig):string
+{
+    return match (PHP_OS_FAMILY) {
+        'Windows', 'WINNT' => "src\\php-src\\{$testConfig->arch}\\Release_TS\\micro.sfx",
+        default => 'src/php-src/sapi/micro/micro.sfx',
+    };
+}
+
+function buildCli(Config $testConfig, bool $fresh)
+{
+    $cliBuild = new CliBuild($testConfig);
+    if (!$fresh) {
+        unlink(cliPath($testConfig));
+    }
+    $cliBuild->build(
+        fresh: $fresh,
+        bloat: true,
+    );
+    clearstatcache(clear_realpath_cache: true, filename: cliPath($testConfig));
+    $stat = stat(cliPath($testConfig));
+    return $stat['size'];
+}
+
+function buildMicro(Config $testConfig, bool $fresh)
+{
+    $microBuild = new MicroBuild($testConfig);
+    $microBuild->build(
+        fresh: $fresh,
+        bloat: true,
+    );
+    clearstatcache(clear_realpath_cache: true, filename: microPath($testConfig));
+    $stat = stat(microPath($testConfig));
+    return $stat['size'];
+}
+
 function measure_size($argv): int
 {
     Util::setErrorHandler();
@@ -48,7 +91,7 @@ function measure_size($argv): int
         positionalNames: [
             'libraries' => ['LIBRARIES', true, null, 'select libraries, comma separated'],
             'extensions' => ['EXTENSIONS', true, null, 'select extensions, comma separated'],
-            'srcFile' => ['SRCFILE', false, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
+            'srcFile' => ['SRCFILE', true, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
         ],
         namedKeys: $namedKeys,
     );
@@ -103,9 +146,6 @@ function measure_size($argv): int
     // make clean args
     array_splice($argv, 1, 3, ['', '', '--fresh']);
 
-    $libs = [];
-    $exts = [];
-
     // make size struct
     $srcJson['size'] = $srcJson['size'] ?? [];
     $srcJson['size'][$base]['libs'] = $srcJson['size'][$base]['libs'] ?? [];
@@ -113,36 +153,14 @@ function measure_size($argv): int
 
     // make test config
     [$_, $testConfig] = Util::makeConfig($argv);
-    $fresh = false;
-    $build = function () use ($testConfig, $fresh) {
-        $cliBuild = new CliBuild($testConfig);
-        $cliBuild->build(
-            fresh: $fresh,
-            bloat: true,
-        );
-        clearstatcache(clear_realpath_cache: true, filename: 'src/php-src/sapi/cli/php');
-        $stat = stat(match (PHP_OS_FAMILY) {
-            'Windows', 'WINNT' => "src\\php-src\\{$testConfig->arch}\\Release_TS\\php.exe",
-            default => 'src/php-src/sapi/cli/php',
-        });
-        return $stat['size'];
-    };
 
     // try build base micro binary
-    $microBuild = new MicroBuild($testConfig);
-    $microBuild->build(
-        fresh: true,
-        bloat: true,
-    );
-    $stat = stat(match (PHP_OS_FAMILY) {
-        'Windows', 'WINNT' => "src\\php-src\\{$testConfig->arch}\\Release_TS\\micro.sfx",
-        default => 'src/php-src/sapi/micro/micro.sfx',
-    });
-    $srcJson['size'][$base]['micro'] = $stat['size'];
-    Log::i("size of base micro is {$stat['size']}");
+    $microSize = buildMicro($testConfig, true);
+    $srcJson['size'][$base]['micro'] = $microSize;
+    Log::i("size of base micro is {$microSize}");
 
     // try build base cli binary
-    $lastSize = $build($libs, $exts);
+    $lastSize = buildCli($testConfig, true);
 
     $srcJson['size'][$base]['cli'] = $lastSize;
     Log::i("size of base cli is {$lastSize}");
@@ -154,7 +172,7 @@ function measure_size($argv): int
             forceBuild: $cmdArgs['named']['noSystem'] ?? false,
             fresh: true,
         );
-        $size = $build($libs, $exts);
+        $size = buildCli($testConfig, false);
         $delta = $size - $lastSize;
         $lastSize = $size;
         Log::i("size of library {$name} is {$delta}");
@@ -167,7 +185,7 @@ function measure_size($argv): int
     $fresh = true;
     foreach ($allExts as $name => $ext) {
         $testConfig->addExt($ext);
-        $size = $build($libs, $exts);
+        $size = buildCli($testConfig, true);
         $delta = $size - $lastSize;
         $lastSize = $size;
         Log::i("size of extension {$name} is {$delta}");
