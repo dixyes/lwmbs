@@ -73,7 +73,7 @@ CMAKE;
     }
 
     public static function patchPHPConfigure(Config $config) {
-        $frameworks = PHP_OS_FAMILY === 'Darwin' ? ' ' . $config->getFrameworks(true) : '';
+        $frameworks = PHP_OS_FAMILY === 'Darwin' ? ' ' . $config->getFrameworks(true) . ' ' : '';
         $curl = $config->getExt('curl');
         if ($curl) {
             Log::i('patching configure for curl checks');

@@ -30,7 +30,7 @@ class MicroBuild
         Log::i("building micro");
         $ret = 0;
 
-        $extra_libs = $this->config->getFrameworks(true);
+        $extra_libs = $this->config->getFrameworks(true) . ' ';
         if (!$bloat) {
             $extra_libs .= implode(' ', $this->config->getAllStaticLibFiles());
         } else {
