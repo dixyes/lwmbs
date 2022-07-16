@@ -86,6 +86,7 @@ EOF
                 "-DLIBXML2_WITH_LZMA=$enable_xz " .
                 '-DLIBXML2_WITH_PYTHON=OFF ' .
                 '-DLIBXML2_WITH_PROGRAMS=OFF ' .
+                '-DLIBXML2_WITH_TESTS=OFF ' .
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .

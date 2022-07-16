@@ -44,6 +44,10 @@ class MicroBuild
             );
         }
 
+        if ($this->config->getLib('libxml2')) {
+            $extra_libs .= ' -liconv';
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
