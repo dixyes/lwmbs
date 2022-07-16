@@ -626,6 +626,12 @@
                 "icu": true,
                 "xz": true,
                 "zlib": true
+            },
+            "libDepsWin": {
+                "icu": true,
+                "xz": true,
+                "zlib": true,
+                "pthreads4w": true
             }
         },
         "libyaml": {

@@ -46,4 +46,14 @@ CMAKE;
         file_put_contents('./toolchain.cmake', $toolchain);
         return realpath('./toolchain.cmake');
     }
+
+    public static function patchLibxml() {
+        $config_w32 = file_get_contents('src\php-src\ext\libxml\config.w32');
+        $config_w32 = preg_replace('/CHECK_LIB.+libiconv.+/', '', $config_w32);
+        $config_w32 = preg_replace('/ADD_EXTENSION_DEP\s*\(\s*\'libxml\'\s*,\s*\'iconv\'\s*\)/', 'true', $config_w32);
+        file_put_contents('src\php-src\ext\libxml\config.w32', $config_w32);
+        $config_w32 = file_get_contents('src\php-src\win32\build\config.w32');
+        $config_w32 = preg_replace('/dllmain.c\s+/', '', $config_w32);
+        file_put_contents('src\php-src\win32\build\config.w32', $config_w32);
+    }
 }

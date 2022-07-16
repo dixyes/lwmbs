@@ -31,6 +31,12 @@ class Extension extends CommonExtension
                 //     $arg .= ' --enable-redis-zstd --with-libzstd ';
                 // }
                 break;
+            case 'xml':
+            case 'soap':
+            case 'xmlreader':
+            case 'xmlwriter':
+            case 'dom':
+                $arg .= ' --with-libxml ';
         }
         return $arg;
     }

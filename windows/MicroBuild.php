@@ -32,6 +32,8 @@ class MicroBuild
 
         $ret = 0;
 
+        Util::patchLibxml();
+
         passthru(
             "cd src\\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
             $ret
