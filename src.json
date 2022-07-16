@@ -136,7 +136,7 @@
         },
         "libxml2": {
             "type": "url",
-            "url": "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.14/libxml2-v2.9.14.tar.gz",
+            "url": "https:\/\/gitlab.gnome.org\/GNOME\/libxml2\/-\/archive\/v2.9.14\/libxml2-v2.9.14.tar.gz",
             "license": {
                 "type": "file",
                 "path": "Copyright"
@@ -710,7 +710,8 @@
                 "curl": 622144,
                 "libffi": 57696,
                 "onig": 591552,
-                "libyaml": 118784
+                "libyaml": 118784,
+                "libxml2": 1514720
             },
             "exts": {
                 "zip": 49344,
@@ -738,7 +739,13 @@
                 "zlib": 28864,
                 "bz2": 8384,
                 "yaml": 33216,
-                "zstd": 5216
+                "zstd": 5216,
+                "dom": 123264,
+                "xml": 24768,
+                "soap": 217280,
+                "xmlreader": 12480,
+                "xmlwriter": 16576,
+                "simplexml": 24768
             },
             "micro": 5025896,
             "cli": 5169744
@@ -756,7 +763,8 @@
                 "xz": 139264,
                 "libzip": 95424,
                 "onig": 542400,
-                "libyaml": 114688
+                "libyaml": 114688,
+                "libxml2": 1514720
             },
             "exts": {
                 "opcache": 734176,
@@ -783,7 +791,13 @@
                 "zlib": 28864,
                 "bz2": 8384,
                 "yaml": 25024,
-                "zstd": 9312
+                "zstd": 9312,
+                "dom": 123264,
+                "xml": 24768,
+                "soap": 217280,
+                "xmlreader": 12480,
+                "xmlwriter": 16576,
+                "simplexml": 24768
             },
             "micro": 5743872,
             "cli": 5826304
@@ -802,7 +816,8 @@
                 "xz": 147520,
                 "libzip": 132128,
                 "onig": 591552,
-                "libyaml": 114688
+                "libyaml": 114688,
+                "libxml2": 1518816
             },
             "exts": {
                 "opcache": 1037376,
@@ -830,7 +845,13 @@
                 "zlib": 32960,
                 "bz2": 12480,
                 "yaml": 20928,
-                "zstd": 13408
+                "zstd": 13408,
+                "dom": 102784,
+                "xml": 20672,
+                "soap": 209088,
+                "xmlreader": 8384,
+                "xmlwriter": 20672,
+                "simplexml": 24768
             },
             "micro": 4968296,
             "cli": 5108080
@@ -848,7 +869,8 @@
                 "xz": 135168,
                 "libzip": 107712,
                 "onig": 538304,
-                "libyaml": 114688
+                "libyaml": 114688,
+                "libxml2": 1518816
             },
             "exts": {
                 "opcache": 959456,
@@ -875,7 +897,13 @@
                 "zlib": 24768,
                 "bz2": 8384,
                 "yaml": 20928,
-                "zstd": 9312
+                "zstd": 9312,
+                "dom": 102784,
+                "xml": 20672,
+                "soap": 209088,
+                "xmlreader": 8384,
+                "xmlwriter": 20672,
+                "simplexml": 24768
             },
             "micro": 5719080,
             "cli": 5801504
@@ -894,7 +922,8 @@
                 "xz": 152480,
                 "libzip": 112576,
                 "onig": 613152,
-                "libyaml": 114688
+                "libyaml": 114688,
+                "libxml2": 1569904
             },
             "exts": {
                 "opcache": 920416,
@@ -922,7 +951,13 @@
                 "zlib": 32576,
                 "bz2": 9760,
                 "yaml": 26304,
-                "zstd": 13728
+                "zstd": 13728,
+                "dom": 144880,
+                "xml": 30080,
+                "soap": 255408,
+                "xmlreader": 18144,
+                "xmlwriter": 29680,
+                "simplexml": 32080
             },
             "micro": 5173600,
             "cli": 5324040
@@ -940,7 +975,8 @@
                 "xz": 152608,
                 "libzip": 109088,
                 "onig": 580384,
-                "libyaml": 114688
+                "libyaml": 114688,
+                "libxml2": 1631232
             },
             "exts": {
                 "opcache": 865952,
@@ -967,7 +1003,13 @@
                 "zlib": 28480,
                 "bz2": 5696,
                 "yaml": 30368,
-                "zstd": 5568
+                "zstd": 5568,
+                "dom": 129568,
+                "xml": 26880,
+                "soap": 243648,
+                "xmlreader": 15360,
+                "xmlwriter": 19552,
+                "simplexml": 28352
             },
             "micro": 4718856,
             "cli": 4808712
@@ -986,7 +1028,8 @@
                 "xz": 152480,
                 "libzip": 112544,
                 "onig": 609088,
-                "libyaml": 118784
+                "libyaml": 118784,
+                "libxml2": 1570016
             },
             "exts": {
                 "opcache": 1176256,
@@ -1014,7 +1057,13 @@
                 "zlib": 36672,
                 "bz2": 9760,
                 "yaml": 22208,
-                "zstd": 17824
+                "zstd": 17824,
+                "dom": 126704,
+                "xml": 30080,
+                "soap": 245088,
+                "xmlreader": 15648,
+                "xmlwriter": 29776,
+                "simplexml": 31712
             },
             "micro": 5088960,
             "cli": 5237224
@@ -1032,7 +1081,8 @@
                 "xz": 152608,
                 "libzip": 113216,
                 "onig": 580352,
-                "libyaml": 110592
+                "libyaml": 110592,
+                "libxml2": 1635816
             },
             "exts": {
                 "opcache": 1113312,
@@ -1059,7 +1109,13 @@
                 "zlib": 24384,
                 "bz2": 13856,
                 "yaml": 22208,
-                "zstd": 9632
+                "zstd": 9632,
+                "dom": 112256,
+                "xml": 26784,
+                "soap": 233376,
+                "xmlreader": 13024,
+                "xmlwriter": 19520,
+                "simplexml": 28128
             },
             "micro": 4662888,
             "cli": 4750528
@@ -1078,7 +1134,8 @@
                 "xz": 196656,
                 "libzip": 131968,
                 "onig": 646176,
-                "libyaml": 131072
+                "libyaml": 131072,
+                "libxml2": 1444760
             },
             "exts": {
                 "opcache": 1574000,
@@ -1106,7 +1163,13 @@
                 "zlib": 160,
                 "bz2": 176,
                 "yaml": 416,
-                "zstd": 66576
+                "zstd": 66576,
+                "dom": 131408,
+                "xml": 176,
+                "soap": 262320,
+                "xmlreader": 160,
+                "xmlwriter": 176,
+                "simplexml": 65696
             },
             "micro": 4464200,
             "cli": 4530072
@@ -1124,7 +1187,8 @@
                 "xz": 196608,
                 "libzip": 66560,
                 "onig": 646176,
-                "libyaml": 131072
+                "libyaml": 131072,
+                "libxml2": 1379080
             },
             "exts": {
                 "opcache": 1573904,
@@ -1151,7 +1215,13 @@
                 "zlib": 160,
                 "bz2": 176,
                 "yaml": 65952,
-                "zstd": 1040
+                "zstd": 1040,
+                "dom": 131408,
+                "xml": 176,
+                "soap": 262320,
+                "xmlreader": 160,
+                "xmlwriter": 176,
+                "simplexml": 65696
             },
             "micro": 5456816,
             "cli": 5522832
@@ -1170,7 +1240,8 @@
                 "xz": 196656,
                 "libzip": 131968,
                 "onig": 646176,
-                "libyaml": 131072
+                "libyaml": 131072,
+                "libxml2": 1444752
             },
             "exts": {
                 "opcache": 393744,
@@ -1198,7 +1269,13 @@
                 "zlib": 160,
                 "bz2": 65712,
                 "yaml": 416,
-                "zstd": 1040
+                "zstd": 1040,
+                "dom": 131408,
+                "xml": 176,
+                "soap": 262320,
+                "xmlreader": 160,
+                "xmlwriter": 176,
+                "simplexml": 65696
             },
             "micro": 4398240,
             "cli": 4464240
@@ -1206,7 +1283,7 @@
         "8.0-linux-aarch64-glibc_static": {
             "libs": {
                 "zstd": 1179824,
-                "zlib": 196608,
+                "zlib": 131072,
                 "openssl": 4020168,
                 "libssh2": 262608,
                 "brotli": 720896,
@@ -1216,7 +1293,8 @@
                 "xz": 262144,
                 "libzip": 66560,
                 "onig": 646176,
-                "libyaml": 131072
+                "libyaml": 131072,
+                "libxml2": 1379080
             },
             "exts": {
                 "opcache": 393680,
@@ -1243,7 +1321,13 @@
                 "zlib": 65696,
                 "bz2": 176,
                 "yaml": 416,
-                "zstd": 1040
+                "zstd": 1040,
+                "dom": 65872,
+                "xml": 65712,
+                "soap": 196784,
+                "xmlreader": 160,
+                "xmlwriter": 176,
+                "simplexml": 65696
             },
             "micro": 5391040,
             "cli": 5457048
@@ -1262,7 +1346,8 @@
                 "xz": 225328,
                 "libzip": 123776,
                 "onig": 711712,
-                "libyaml": 98400
+                "libyaml": 98400,
+                "libxml2": 1567592
             },
             "exts": {
                 "opcache": 1623168,
@@ -1290,7 +1375,13 @@
                 "zlib": 24752,
                 "bz2": 20640,
                 "yaml": 25008,
-                "zstd": 1024
+                "zstd": 1024,
+                "dom": 147808,
+                "xml": 32928,
+                "soap": 237744,
+                "xmlreader": 20656,
+                "xmlwriter": 28832,
+                "simplexml": 28848
             },
             "micro": 5090712,
             "cli": 5234528
@@ -1308,7 +1399,8 @@
                 "xz": 217088,
                 "libzip": 132064,
                 "onig": 695328,
-                "libyaml": 106592
+                "libyaml": 106592,
+                "libxml2": 1727240
             },
             "exts": {
                 "opcache": 1627184,
@@ -1335,7 +1427,13 @@
                 "zlib": 28848,
                 "bz2": 12448,
                 "yaml": 25008,
-                "zstd": 9216
+                "zstd": 9216,
+                "dom": 143696,
+                "xml": 32944,
+                "soap": 241840,
+                "xmlreader": 16544,
+                "xmlwriter": 28848,
+                "simplexml": 28832
             },
             "micro": 5261168,
             "cli": 5404992
@@ -1354,7 +1452,8 @@
                 "xz": 208944,
                 "libzip": 140160,
                 "onig": 699424,
-                "libyaml": 94304
+                "libyaml": 94304,
+                "libxml2": 1571704
             },
             "exts": {
                 "opcache": 418352,
@@ -1382,7 +1481,13 @@
                 "zlib": 41120,
                 "bz2": 20656,
                 "yaml": 20896,
-                "zstd": 5136
+                "zstd": 5136,
+                "dom": 127312,
+                "xml": 32944,
+                "soap": 229552,
+                "xmlreader": 16544,
+                "xmlwriter": 28848,
+                "simplexml": 28832
             },
             "micro": 5020808,
             "cli": 5164624
@@ -1400,7 +1505,8 @@
                 "xz": 217088,
                 "libzip": 123872,
                 "onig": 699424,
-                "libyaml": 102496
+                "libyaml": 102496,
+                "libxml2": 1727232
             },
             "exts": {
                 "opcache": 426464,
@@ -1427,7 +1533,13 @@
                 "zlib": 37024,
                 "bz2": 4272,
                 "yaml": 33184,
-                "zstd": 9232
+                "zstd": 9232,
+                "dom": 127328,
+                "xml": 32928,
+                "soap": 229552,
+                "xmlreader": 16560,
+                "xmlwriter": 28832,
+                "simplexml": 28848
             },
             "micro": 5195400,
             "cli": 5335128
@@ -1446,7 +1558,8 @@
                 "xz": 217088,
                 "libzip": 101840,
                 "onig": 727008,
-                "libyaml": 88688
+                "libyaml": 88688,
+                "libxml2": 1411152
             },
             "exts": {
                 "opcache": 1868208,
@@ -1474,7 +1587,13 @@
                 "zlib": 43792,
                 "bz2": 4416,
                 "yaml": 21936,
-                "zstd": 19136
+                "zstd": 19136,
+                "dom": 182656,
+                "xml": 31008,
+                "soap": 269344,
+                "xmlreader": 25152,
+                "xmlwriter": 28720,
+                "simplexml": 46400
             },
             "micro": 5419862,
             "cli": 5510560
@@ -1493,7 +1612,8 @@
                 "xz": 199264,
                 "libzip": 117744,
                 "onig": 705640,
-                "libyaml": 104480
+                "libyaml": 104480,
+                "libxml2": 1506008
             },
             "exts": {
                 "opcache": 923136,
@@ -1521,7 +1641,13 @@
                 "zlib": 27288,
                 "bz2": 20824,
                 "yaml": 21896,
-                "zstd": 2648
+                "zstd": 2648,
+                "dom": 165480,
+                "xml": 47296,
+                "soap": 251768,
+                "xmlreader": 25000,
+                "xmlwriter": 28928,
+                "simplexml": 29712
             },
             "micro": 5384232,
             "cli": 5507080
@@ -1540,7 +1666,8 @@
                 "xz": 200544,
                 "libzip": 101872,
                 "onig": 726992,
-                "libyaml": 105184
+                "libyaml": 105184,
+                "libxml2": 1427712
             },
             "exts": {
                 "opcache": 468544,
@@ -1568,7 +1695,13 @@
                 "zlib": 43936,
                 "bz2": 20912,
                 "yaml": 21968,
-                "zstd": 19136
+                "zstd": 19136,
+                "dom": 163968,
+                "xml": 31040,
+                "soap": 252368,
+                "xmlreader": 24512,
+                "xmlwriter": 28832,
+                "simplexml": 29328
             },
             "micro": 5335622,
             "cli": 5426320
@@ -1587,7 +1720,8 @@
                 "xz": 215664,
                 "libzip": 101376,
                 "onig": 689224,
-                "libyaml": 120880
+                "libyaml": 120880,
+                "libxml2": 1506072
             },
             "exts": {
                 "opcache": 1338592,
@@ -1615,7 +1749,13 @@
                 "zlib": 92976,
                 "bz2": 4440,
                 "yaml": 21904,
-                "zstd": 19056
+                "zstd": 19056,
+                "dom": 146880,
+                "xml": 30936,
+                "soap": 267696,
+                "xmlreader": 24472,
+                "xmlwriter": 12560,
+                "simplexml": 29240
             },
             "micro": 5299920,
             "cli": 5389976
@@ -1635,7 +1775,8 @@
                 "xz": 141824,
                 "libzip": 90112,
                 "onig": 516096,
-                "libyaml": 92160
+                "libyaml": 92160,
+                "libxml2": 1201152
             },
             "exts": {
                 "opcache": 133120,
@@ -1663,7 +1804,13 @@
                 "zlib": 32768,
                 "bz2": 10240,
                 "yaml": 29696,
-                "zstd": 8192
+                "zstd": 8192,
+                "dom": 150528,
+                "xml": 30720,
+                "soap": 265728,
+                "xmlreader": 16896,
+                "xmlwriter": 24576,
+                "simplexml": 32768
             },
             "micro": 5608960,
             "cli": 5714432
@@ -1683,7 +1830,8 @@
                 "xz": 141824,
                 "libzip": 90624,
                 "onig": 515584,
-                "libyaml": 93184
+                "libyaml": 93184,
+                "libxml2": 1201152
             },
             "exts": {
                 "opcache": 442368,
@@ -1711,7 +1859,13 @@
                 "zlib": 31744,
                 "bz2": 10752,
                 "yaml": 29184,
-                "zstd": 8704
+                "zstd": 8704,
+                "dom": 134144,
+                "xml": 30720,
+                "soap": 257024,
+                "xmlreader": 14336,
+                "xmlwriter": 24576,
+                "simplexml": 32768
             },
             "micro": 5648384,
             "cli": 5751808
@@ -1731,7 +1885,8 @@
                 "xz": 134144,
                 "libzip": 97792,
                 "onig": 523264,
-                "libyaml": 99840
+                "libyaml": 99840,
+                "libxml2": 1242112
             },
             "exts": {
                 "opcache": 136192,
@@ -1759,7 +1914,13 @@
                 "zlib": 28672,
                 "bz2": 10240,
                 "yaml": 30720,
-                "zstd": 8704
+                "zstd": 8704,
+                "dom": 144384,
+                "xml": 29184,
+                "soap": 265216,
+                "xmlreader": 16896,
+                "xmlwriter": 24064,
+                "simplexml": 32768
             },
             "micro": 5777408,
             "cli": 5881344
