@@ -71,7 +71,7 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         ],
         'dom' => [
             'argTypeWin' => 'with',
-            'libDeps' => ['libxml' => false],
+            'libDeps' => ['libxml2' => false],
         ],
         'enchant' => [
             'argType' => 'with',
@@ -186,7 +186,7 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
             'libDeps' => ['net-snmp' => false],
         ],
         'soap' => [
-            'libDeps' => ['libxml' => false],
+            'libDeps' => ['libxml2' => false],
         ],
         'sockets' => [],
         'sodium' => [
@@ -210,17 +210,17 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
         ],
         'xml' => [
             'argTypeWin' => 'with',
-            'libDeps' => ['libxml' => false],
+            'libDeps' => ['libxml2' => false],
         ],
         'simplexml' => [
             'argTypeWin' => 'with',
-            'libDeps' => ['libxml' => false],
+            'libDeps' => ['libxml2' => false],
         ],
         'xmlreader' => [
-            'libDeps' => ['libxml' => false],
+            'libDeps' => ['libxml2' => false],
         ],
         'xmlwriter' => [
-            'libDeps' => ['libxml' => false],
+            'libDeps' => ['libxml2' => false],
         ],
         'xsl' => [
             'argType' => 'with',

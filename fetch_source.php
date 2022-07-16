@@ -259,7 +259,7 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
                 goto download;
             case 'url':
                 $url = $source['url'];
-                $filename = $source['name'];
+                $filename = $source['filename'] ?? basename($source['url']);
                 download:
                 if (!file_exists("downloads/$filename")) {
                     Log::i("downloading $name source from $url");
@@ -461,7 +461,7 @@ function mian($argv): int
                     [$url, $filename] = getFromFileList($name, $source);
                     break;
                 case 'url':
-                    $filename = $source['name'];
+                    $filename = $source['filename'] ?? basename($source['url']);
                     break;
                 default:
                     throw new Exception("unknown source type: " . $source['type']);

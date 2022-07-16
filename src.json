@@ -134,6 +134,14 @@
                 "path": "LICENSE"
             }
         },
+        "libxml2": {
+            "type": "url",
+            "url": "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.9.14/libxml2-v2.9.14.tar.gz",
+            "license": {
+                "type": "file",
+                "path": "Copyright"
+            }
+        },
         "pthreads4w": {
             "type": "git",
             "rev": "master",
@@ -291,7 +299,7 @@
         "dom": {
             "source": "php",
             "libDeps": {
-                "libxml": false
+                "libxml2": false
             }
         },
         "enchant": {
@@ -479,7 +487,7 @@
         "simplexml": {
             "source": "php",
             "libDeps": {
-                "libxml": false
+                "libxml2": false
             }
         },
         "snmp": {
@@ -491,7 +499,7 @@
         "soap": {
             "source": "php",
             "libDeps": {
-                "libxml": false
+                "libxml2": false
             }
         },
         "sockets": {
@@ -537,19 +545,19 @@
         "xml": {
             "source": "php",
             "libDeps": {
-                "libxml": false
+                "libxml2": false
             }
         },
         "xmlreader": {
             "source": "php",
             "libDeps": {
-                "libxml": false
+                "libxml2": false
             }
         },
         "xmlwriter": {
             "source": "php",
             "libDeps": {
-                "libxml": false
+                "libxml2": false
             }
         },
         "xsl": {
@@ -610,6 +618,14 @@
             "libDeps": {
                 "zlib": true,
                 "openssl": false
+            }
+        },
+        "libxml2": {
+            "source": "libxml2",
+            "libDeps": {
+                "icu": true,
+                "xz": true,
+                "zlib": true
             }
         },
         "libyaml": {

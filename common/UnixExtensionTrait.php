@@ -58,13 +58,19 @@ trait UnixExtensionTrait
                     'ZLIB_CFLAGS=-I"' . realpath('include') . '" ' .
                     'ZLIB_LIBS="' . $this->getStaticLibFiles() . '" ';
                 break;
+            case 'xml': // xml may use expat
+                if ($this->getLibraryDependencies()['expat'] ?? null) {
+                    $arg .= ' --with-expat="' . realpath('.') . '" ' .
+                        'EXPAT_CFLAGS=-I"' . realpath('include') . '" ' .
+                        'EXPAT_LIBS="' . $this->getStaticLibFiles() . '" ';
+                    break;
+                }
             case 'soap':
-            case 'xml':
             case 'xmlreader':
             case 'xmlwriter':
             case 'dom':
-                $arg .= ' ' .
-                    'LIBXML_CFLAGS=-I"' . realpath('include') . '" ' .
+                $arg .= ' --with-libxml="' . realpath('.') . '" ' .
+                    'LIBXML_CFLAGS=-I"' . realpath('include/libxml2') . '" ' .
                     'LIBXML_LIBS="' . $this->getStaticLibFiles() . '" ';
                 break;
             case 'ffi':
