@@ -239,7 +239,9 @@ jobs:
             micro_shared
 
       - name: Build micro static
-        if: "! (github.event.inputs && github.event.inputs.lib_only)"
+        if: |
+          (!(github.event.inputs && github.event.inputs.lib_only)) &&
+          matrix.libc != 'glibc'
         id: micro_static
         continue-on-error: true
         run: |
@@ -288,7 +290,9 @@ jobs:
             cli_shared
 
       - name: Build cli static
-        if: "! (github.event.inputs && github.event.inputs.lib_only)"
+        if:  |
+          (!(github.event.inputs && github.event.inputs.lib_only)) &&
+          matrix.libc != 'glibc'
         id: cli_static
         continue-on-error: true
         run: |
