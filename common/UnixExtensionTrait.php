@@ -36,9 +36,6 @@ trait UnixExtensionTrait
             case 'zstd':
                 $arg .= ' --with-libzstd';
                 break;
-            case 'iconv':
-                $arg = '--with-iconv="' . realpath('.') . '" ';
-                break;
             case 'bz2':
                 $arg = '--with-bz2="' . realpath('.') . '" ';
                 break;

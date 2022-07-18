@@ -102,7 +102,6 @@ EOF;
         'lzma.h',
     ];
     protected array $depNames = [
-        'libiconv' => true,
     ];
 
     protected function build(): void

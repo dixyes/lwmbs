@@ -27,15 +27,6 @@
                 "path": "COPYING"
             }
         },
-        "libiconv": {
-            "type": "filelist",
-            "url": "https:\/\/ftp.gnu.org\/pub\/gnu\/libiconv\/",
-            "regex": "\/href=\"(?<file>libiconv-(?<version>[^\"]+)\\.tar\\.gz)\"\/",
-            "license": {
-                "type": "file",
-                "path": "COPYING"
-            }
-        },
         "xz": {
             "type": "filelist",
             "url": "https:\/\/tukaani.org\/xz\/",
@@ -359,9 +350,6 @@
         },
         "iconv": {
             "source": "php",
-            "libDeps": {
-                "libiconv": true
-            },
             "libDepsWin": {
                 "libiconv": false
             }
@@ -605,10 +593,6 @@
             "source": "libffi",
             "libDeps": []
         },
-        "libiconv": {
-            "source": "libiconv",
-            "libDeps": []
-        },
         "libressl": {
             "source": "libressl",
             "libDeps": []
@@ -681,10 +665,7 @@
             "libDeps": []
         },
         "xz": {
-            "source": "xz",
-            "libDeps": {
-                "libiconv": true
-            }
+            "source": "xz"
         },
         "zlib": {
             "source": "zlib",

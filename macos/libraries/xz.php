@@ -29,18 +29,12 @@ class Libxz extends Library
         'lzma',
     ];
     protected array $depNames = [
-        'libiconv' => true,
     ];
 
     protected function build(): void
     {
         Log::i("building {$this->name}");
         $ret = 0;
-        $libiconv = '';
-        if ($this->config->getLib('libiconv')) {
-            Log::i("{$this->name} with libiconv support");
-            $libiconv = '--with-libiconv-prefix=' . realpath('.');
-        }
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
@@ -55,7 +49,7 @@ class Libxz extends Library
                 '--disable-lzmainfo ' .
                 '--disable-scripts ' .
                 '--disable-doc ' .
-                "$libiconv " .
+                '--with-libiconv ' .
                 '--prefix= && ' . //use prefix=/
                 "make clean && " .
                 "make -j{$this->config->concurrency} && " .
