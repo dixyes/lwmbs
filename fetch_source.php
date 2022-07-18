@@ -308,9 +308,7 @@ function patch(string $majDotMin)
         throw new Exception("failed to reset php");
     }
 
-    $patches = [];
-    $serial = ['80', '81', '82'];
-    foreach ([
+    $patchNames = [
         'static_opcache',
         'static_extensions_win32',
         'cli_checks',
@@ -318,7 +316,19 @@ function patch(string $majDotMin)
         'vcruntime140',
         'win32',
         'zend_stream',
-    ] as $patchName) {
+    ];
+    $patchNames = array_merge($patchNames, match (PHP_OS_FAMILY) {
+        'Windows' => [
+            'cli_static',
+        ],
+        'Darwin' => [
+            'macos_iconv',
+        ],
+        default => [],
+    });
+    $patches = [];
+    $serial = ['80', '81', '82'];
+    foreach ($patchNames as $patchName) {
         if (file_exists("src/php-src/sapi/micro/patches/{$patchName}.patch")) {
             $patches[]="sapi/micro/patches/{$patchName}.patch";
             continue;
