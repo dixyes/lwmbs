@@ -44,10 +44,6 @@ class MicroBuild
             );
         }
 
-        if ($this->config->getLib('libxml2')) {
-            $extra_libs .= ' -liconv';
-        }
-
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
@@ -59,6 +55,13 @@ class MicroBuild
         }
     
         Util::patchPHPConfigure($this->config);
+
+        if (
+            $this->config->getLib('libxml2') ||
+            $this->config->getExt('iconv')
+        ) {
+            $extra_libs .= ' -liconv';
+        }
 
         passthru(
             $this->config->setX . ' && ' .
