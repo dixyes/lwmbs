@@ -10,7 +10,7 @@ on:
       extensions:
         description: "extensions"
         required: false
-        default: "iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd"
+        default: "iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg"
       lib_only:
         description: "build libraries only"
         required: false
@@ -21,7 +21,7 @@ on:
 
 env:
   LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2
-  LWMBS_EXTENSIONS: iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd
+  LWMBS_EXTENSIONS: iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,parallel,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg
 
 jobs:
   libs:
