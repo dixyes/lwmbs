@@ -49,6 +49,11 @@ trait UnixExtensionTrait
                     'CURL_CFLAGS=-I"' . realpath('include') . '" ' .
                     'CURL_LIBS="' . $this->getStaticLibFiles() . '" ';
                 break;
+            case 'gd':
+                $arg .= ' ' .
+                    'PNG_CFLAGS=-I"' . realpath('include') . '" ' .
+                    'PNG_LIBS="' . $this->getStaticLibFiles() . '" ';
+                // TODO: other libraries
             case 'phar':
             case 'zlib':
                 $arg .= ' ' .

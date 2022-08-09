@@ -682,7 +682,9 @@
         },
         "libpng": {
             "source": "libpng",
-            "libDeps": []
+            "libDeps": {
+                "zlib": false
+            }
         },
         "zstd": {
             "source": "zstd",
@@ -919,7 +921,7 @@
         "8.1-linux-x86_64-musl_shared": {
             "libs": {
                 "zstd": 910272,
-                "zlib": 88560,
+                "zlib": 84528,
                 "openssl": 5186208,
                 "libssh2": 240672,
                 "brotli": 876800,
@@ -931,7 +933,8 @@
                 "libzip": 112576,
                 "onig": 613152,
                 "libyaml": 114688,
-                "libxml2": 1569904
+                "libxml2": 1569904,
+                "libpng": 289120
             },
             "exts": {
                 "opcache": 920416,
@@ -965,7 +968,13 @@
                 "soap": 255408,
                 "xmlreader": 18144,
                 "xmlwriter": 29680,
-                "simplexml": 32080
+                "simplexml": 32080,
+                "gd": 314960,
+                "sysvshm": 6160,
+                "sysvsem": 4416,
+                "sysvmsg": 7920,
+                "pcntl": 24576,
+                "posix": 23888
             },
             "micro": 5173600,
             "cli": 5324040
@@ -973,7 +982,7 @@
         "8.1-linux-x86_64-musl_static": {
             "libs": {
                 "zstd": 913960,
-                "zlib": 83840,
+                "zlib": 87936,
                 "openssl": 4706656,
                 "libssh2": 232512,
                 "brotli": 876768,
@@ -984,7 +993,8 @@
                 "libzip": 109088,
                 "onig": 580384,
                 "libyaml": 114688,
-                "libxml2": 1631232
+                "libxml2": 1631232,
+                "libpng": 288800
             },
             "exts": {
                 "opcache": 865952,
@@ -1017,7 +1027,13 @@
                 "soap": 243648,
                 "xmlreader": 15360,
                 "xmlwriter": 19552,
-                "simplexml": 28352
+                "simplexml": 28352,
+                "gd": 299360,
+                "sysvshm": 5024,
+                "sysvsem": 3584,
+                "sysvmsg": 6592,
+                "pcntl": 20608,
+                "posix": 22112
             },
             "micro": 4718856,
             "cli": 4808712
@@ -1025,7 +1041,7 @@
         "8.0-linux-x86_64-musl_shared": {
             "libs": {
                 "zstd": 910416,
-                "zlib": 84528,
+                "zlib": 86016,
                 "openssl": 5191664,
                 "libssh2": 240672,
                 "brotli": 872704,
@@ -1037,7 +1053,8 @@
                 "libzip": 112544,
                 "onig": 609088,
                 "libyaml": 118784,
-                "libxml2": 1570016
+                "libxml2": 1570016,
+                "libpng": 290816
             },
             "exts": {
                 "opcache": 1176256,
@@ -1071,15 +1088,21 @@
                 "soap": 245088,
                 "xmlreader": 15648,
                 "xmlwriter": 29776,
-                "simplexml": 31712
+                "simplexml": 31712,
+                "gd": 311648,
+                "sysvshm": 4256,
+                "sysvsem": 8368,
+                "sysvmsg": 8352,
+                "pcntl": 24736,
+                "posix": 16560
             },
-            "micro": 5088960,
-            "cli": 5237224
+            "micro": 5071176,
+            "cli": 5214976
         },
         "8.0-linux-x86_64-musl_static": {
             "libs": {
                 "zstd": 914352,
-                "zlib": 83776,
+                "zlib": 86016,
                 "openssl": 4704384,
                 "libssh2": 236608,
                 "brotli": 872672,
@@ -1090,7 +1113,8 @@
                 "libzip": 113216,
                 "onig": 580352,
                 "libyaml": 110592,
-                "libxml2": 1635816
+                "libxml2": 1635816,
+                "libpng": 290816
             },
             "exts": {
                 "opcache": 1113312,
@@ -1123,10 +1147,16 @@
                 "soap": 233376,
                 "xmlreader": 13024,
                 "xmlwriter": 19520,
-                "simplexml": 28128
+                "simplexml": 28128,
+                "gd": 311648,
+                "sysvshm": 4256,
+                "sysvsem": 8368,
+                "sysvmsg": 8352,
+                "pcntl": 24736,
+                "posix": 16560
             },
-            "micro": 4662888,
-            "cli": 4750528
+            "micro": 4518320,
+            "cli": 5214976
         },
         "8.1-linux-aarch64-glibc_shared": {
             "libs": {
@@ -1143,7 +1173,8 @@
                 "libzip": 131968,
                 "onig": 646176,
                 "libyaml": 131072,
-                "libxml2": 1444760
+                "libxml2": 1444760,
+                "libpng": 262200
             },
             "exts": {
                 "opcache": 1574000,
@@ -1177,7 +1208,13 @@
                 "soap": 262320,
                 "xmlreader": 160,
                 "xmlwriter": 176,
-                "simplexml": 65696
+                "simplexml": 65696,
+                "gd": 262544,
+                "sysvshm": 65736,
+                "sysvsem": 192,
+                "sysvmsg": 200,
+                "pcntl": 288,
+                "posix": 352
             },
             "micro": 4464200,
             "cli": 4530072
@@ -1185,7 +1222,7 @@
         "8.1-linux-aarch64-glibc_static": {
             "libs": {
                 "zstd": 1245360,
-                "zlib": 131072,
+                "zlib": 131088,
                 "openssl": 4020136,
                 "libssh2": 262608,
                 "brotli": 720896,
@@ -1196,7 +1233,8 @@
                 "libzip": 66560,
                 "onig": 646176,
                 "libyaml": 131072,
-                "libxml2": 1379080
+                "libxml2": 1379080,
+                "libpng": 262200
             },
             "exts": {
                 "opcache": 1573904,
@@ -1229,10 +1267,16 @@
                 "soap": 262320,
                 "xmlreader": 160,
                 "xmlwriter": 176,
-                "simplexml": 65696
+                "simplexml": 65696,
+                "gd": 262544,
+                "sysvshm": 65736,
+                "sysvsem": 192,
+                "sysvmsg": 200,
+                "pcntl": 288,
+                "posix": 352
             },
             "micro": 5456816,
-            "cli": 5522832
+            "cli": 4530072
         },
         "8.0-linux-aarch64-glibc_shared": {
             "libs": {
@@ -1249,7 +1293,8 @@
                 "libzip": 131968,
                 "onig": 646176,
                 "libyaml": 131072,
-                "libxml2": 1444752
+                "libxml2": 1444752,
+                "libpng": 262200
             },
             "exts": {
                 "opcache": 393744,
@@ -1283,7 +1328,13 @@
                 "soap": 262320,
                 "xmlreader": 160,
                 "xmlwriter": 176,
-                "simplexml": 65696
+                "simplexml": 65696,
+                "gd": 328080,
+                "sysvshm": 200,
+                "sysvsem": 192,
+                "sysvmsg": 200,
+                "pcntl": 288,
+                "posix": 352
             },
             "micro": 4398240,
             "cli": 4464240
@@ -1291,7 +1342,7 @@
         "8.0-linux-aarch64-glibc_static": {
             "libs": {
                 "zstd": 1179824,
-                "zlib": 131072,
+                "zlib": 131088,
                 "openssl": 4020168,
                 "libssh2": 262608,
                 "brotli": 720896,
@@ -1302,7 +1353,8 @@
                 "libzip": 66560,
                 "onig": 646176,
                 "libyaml": 131072,
-                "libxml2": 1379080
+                "libxml2": 1379080,
+                "libpng": 262200
             },
             "exts": {
                 "opcache": 393680,
@@ -1335,15 +1387,21 @@
                 "soap": 196784,
                 "xmlreader": 160,
                 "xmlwriter": 176,
-                "simplexml": 65696
+                "simplexml": 65696,
+                "gd": 328080,
+                "sysvshm": 200,
+                "sysvsem": 192,
+                "sysvmsg": 200,
+                "pcntl": 288,
+                "posix": 352
             },
             "micro": 5391040,
-            "cli": 5457048
+            "cli": 4464240
         },
         "8.1-linux-aarch64-musl_shared": {
             "libs": {
                 "zstd": 1274672,
-                "zlib": 139272,
+                "zlib": 143368,
                 "openssl": 5249712,
                 "libssh2": 250320,
                 "brotli": 745472,
@@ -1355,7 +1413,8 @@
                 "libzip": 123776,
                 "onig": 711712,
                 "libyaml": 98400,
-                "libxml2": 1567592
+                "libxml2": 1567592,
+                "libpng": 290888
             },
             "exts": {
                 "opcache": 1623168,
@@ -1389,15 +1448,21 @@
                 "soap": 237744,
                 "xmlreader": 20656,
                 "xmlwriter": 28832,
-                "simplexml": 28848
+                "simplexml": 28848,
+                "gd": 295416,
+                "sysvshm": 8392,
+                "sysvsem": 4288,
+                "sysvmsg": 8392,
+                "pcntl": 20768,
+                "posix": 24920
             },
-            "micro": 5090712,
+            "micro": 5094808,
             "cli": 5234528
         },
         "8.1-linux-aarch64-musl_static": {
             "libs": {
                 "zstd": 1278704,
-                "zlib": 143360,
+                "zlib": 139264,
                 "openssl": 5245408,
                 "libssh2": 258512,
                 "brotli": 741376,
@@ -1408,7 +1473,8 @@
                 "libzip": 132064,
                 "onig": 695328,
                 "libyaml": 106592,
-                "libxml2": 1727240
+                "libxml2": 1727240,
+                "libpng": 299008
             },
             "exts": {
                 "opcache": 1627184,
@@ -1441,15 +1507,21 @@
                 "soap": 241840,
                 "xmlreader": 16544,
                 "xmlwriter": 28848,
-                "simplexml": 28832
+                "simplexml": 28832,
+                "gd": 295360,
+                "sysvshm": 4264,
+                "sysvsem": 4264,
+                "sysvmsg": 8360,
+                "pcntl": 20648,
+                "posix": 28840
             },
-            "micro": 5261168,
+            "micro": 5265264,
             "cli": 5404992
         },
         "8.0-linux-aarch64-musl_shared": {
             "libs": {
                 "zstd": 1278776,
-                "zlib": 139272,
+                "zlib": 143368,
                 "openssl": 5249720,
                 "libssh2": 250320,
                 "brotli": 741376,
@@ -1461,7 +1533,8 @@
                 "libzip": 140160,
                 "onig": 699424,
                 "libyaml": 94304,
-                "libxml2": 1571704
+                "libxml2": 1571704,
+                "libpng": 294984
             },
             "exts": {
                 "opcache": 418352,
@@ -1495,7 +1568,13 @@
                 "soap": 229552,
                 "xmlreader": 16544,
                 "xmlwriter": 28848,
-                "simplexml": 28832
+                "simplexml": 28832,
+                "gd": 295416,
+                "sysvshm": 4296,
+                "sysvsem": 4288,
+                "sysvmsg": 8392,
+                "pcntl": 24864,
+                "posix": 20824
             },
             "micro": 5020808,
             "cli": 5164624
@@ -1503,7 +1582,7 @@
         "8.0-linux-aarch64-musl_static": {
             "libs": {
                 "zstd": 1282800,
-                "zlib": 139264,
+                "zlib": 143368,
                 "openssl": 5249512,
                 "libssh2": 246224,
                 "brotli": 753664,
@@ -1514,7 +1593,8 @@
                 "libzip": 123872,
                 "onig": 699424,
                 "libyaml": 102496,
-                "libxml2": 1727232
+                "libxml2": 1727232,
+                "libpng": 294984
             },
             "exts": {
                 "opcache": 426464,
@@ -1547,15 +1627,21 @@
                 "soap": 229552,
                 "xmlreader": 16560,
                 "xmlwriter": 28832,
-                "simplexml": 28848
+                "simplexml": 28848,
+                "gd": 295416,
+                "sysvshm": 4296,
+                "sysvsem": 4288,
+                "sysvmsg": 8392,
+                "pcntl": 24864,
+                "posix": 20824
             },
             "micro": 5195400,
-            "cli": 5335128
+            "cli": 5164624
         },
         "8.1-macos-aarch64": {
             "libs": {
                 "zstd": 1605888,
-                "zlib": 106624,
+                "zlib": 123248,
                 "openssl": 5315904,
                 "libssh2": 223456,
                 "brotli": 770032,
@@ -1567,7 +1653,8 @@
                 "libzip": 101840,
                 "onig": 727008,
                 "libyaml": 88688,
-                "libxml2": 1411152
+                "libxml2": 1411152,
+                "libpng": 295920
             },
             "exts": {
                 "opcache": 1868208,
@@ -1601,7 +1688,13 @@
                 "soap": 269344,
                 "xmlreader": 25152,
                 "xmlwriter": 28720,
-                "simplexml": 46400
+                "simplexml": 46400,
+                "gd": 313120,
+                "sysvshm": 2688,
+                "sysvsem": 18624,
+                "sysvmsg": 2800,
+                "pcntl": 39600,
+                "posix": 8752
             },
             "micro": 5419862,
             "cli": 5510560
@@ -1609,7 +1702,7 @@
         "8.1-macos-x86_64": {
             "libs": {
                 "zstd": 1809104,
-                "zlib": 138784,
+                "zlib": 122504,
                 "openssl": 5617632,
                 "libssh2": 222192,
                 "brotli": 911696,
@@ -1621,7 +1714,8 @@
                 "libzip": 117744,
                 "onig": 705640,
                 "libyaml": 104480,
-                "libxml2": 1506008
+                "libxml2": 1506008,
+                "libpng": 277256
             },
             "exts": {
                 "opcache": 923136,
@@ -1655,7 +1749,13 @@
                 "soap": 251768,
                 "xmlreader": 25000,
                 "xmlwriter": 28928,
-                "simplexml": 29712
+                "simplexml": 29712,
+                "gd": 327792,
+                "sysvshm": 2752,
+                "sysvsem": 18528,
+                "sysvmsg": 19232,
+                "pcntl": 6688,
+                "posix": 25272
             },
             "micro": 5384232,
             "cli": 5507080
@@ -1663,7 +1763,7 @@
         "8.0-macos-aarch64": {
             "libs": {
                 "zstd": 1589376,
-                "zlib": 106624,
+                "zlib": 106720,
                 "openssl": 5332384,
                 "libssh2": 206976,
                 "brotli": 769984,
@@ -1675,7 +1775,8 @@
                 "libzip": 101872,
                 "onig": 726992,
                 "libyaml": 105184,
-                "libxml2": 1427712
+                "libxml2": 1427712,
+                "libpng": 295920
             },
             "exts": {
                 "opcache": 468544,
@@ -1709,7 +1810,13 @@
                 "soap": 252368,
                 "xmlreader": 24512,
                 "xmlwriter": 28832,
-                "simplexml": 29328
+                "simplexml": 29328,
+                "gd": 329248,
+                "sysvshm": 19248,
+                "sysvsem": 2064,
+                "sysvmsg": 2816,
+                "pcntl": 22992,
+                "posix": 25264
             },
             "micro": 5335622,
             "cli": 5426320
@@ -1717,7 +1824,7 @@
         "8.0-macos-x86_64": {
             "libs": {
                 "zstd": 1809112,
-                "zlib": 138792,
+                "zlib": 138904,
                 "openssl": 5650416,
                 "libssh2": 205800,
                 "brotli": 911688,
@@ -1729,7 +1836,8 @@
                 "libzip": 101376,
                 "onig": 689224,
                 "libyaml": 120880,
-                "libxml2": 1506072
+                "libxml2": 1506072,
+                "libpng": 277264
             },
             "exts": {
                 "opcache": 1338592,
@@ -1763,7 +1871,13 @@
                 "soap": 267696,
                 "xmlreader": 24472,
                 "xmlwriter": 12560,
-                "simplexml": 29240
+                "simplexml": 29240,
+                "gd": 343944,
+                "sysvshm": 2736,
+                "sysvsem": 2120,
+                "sysvmsg": 2848,
+                "pcntl": 22936,
+                "posix": 25296
             },
             "micro": 5299920,
             "cli": 5389976

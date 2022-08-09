@@ -31,7 +31,9 @@ class Liblibpng extends Library
         'pngconf.h',
         'pnglibconf.h',
     ];
-    protected array $depNames = [];
+    protected array $depNames = [
+        'zlib' => false,
+    ];
 
     protected function build(): void
     {
@@ -43,20 +45,28 @@ class Liblibpng extends Library
             default => '',
         };
 
+        // patch configure
+        $configure = file_get_contents(realpath('./src/libpng/configure'));
+        $configure = str_replace('-lz', realpath('lib/libz.a'), $configure);
+        file_put_contents(realpath('./src/libpng/configure'), $configure);
+
         $ret = 0;
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} " . ' ./configure ' .
+                "{$this->config->configureEnv} " .
+                "./configure " .
+                "--host={$this->config->gnuArch}-apple-darwin " .
                 '--disable-shared ' .
                 '--enable-static ' .
                 '--enable-hardware-optimizations ' .
                 $optimizations .
-                '--with-zlib-prefix=' . realpath('.') . ' ' .
                 '--prefix= && ' . //use prefix=/
                 "make clean && " .
-                "make -j{$this->config->concurrency} && " .
-                'make install DESTDIR=' . realpath('.'),
+                "make -j{$this->config->concurrency} DEFAULT_INCLUDES='-I. -I" . realpath('include') . "' LIBS= libpng16.la && " .
+                'make install-libLTLIBRARIES install-data-am DESTDIR=' . realpath('.') . ' && ' .
+                'cd ' . realpath('./lib') . ' && ' .
+                'ln -sf libpng16.a libpng.a',
             $ret
         );
         if ($ret !== 0) {
