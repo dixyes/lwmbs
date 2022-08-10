@@ -56,7 +56,7 @@ class MicroBuild
                 break;
             case CLib::MUSL:
                 if (str_ends_with($this->config->cc, 'clang') && Util::findCommand('lld')) {
-                    $use_lld = '-fuse-ld=lld';
+                    $use_lld = '-Xcompiler -fuse-ld=lld';
                 }
                 break;
             default:
@@ -125,8 +125,11 @@ class MicroBuild
                 'cd src/php-src && ' .
                 'sed -i "s|//lib|/lib|g" Makefile && ' .
                 "make -j{$this->config->concurrency} " .
-                'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . " $use_lld\" " .
+                'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . '" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
+                "EXTRA_LDFLAGS_PROGRAM='$cflags $use_lld" .
+                ($this->config->allStatic ? ' -all-static' : '') .
+                "' " .
                 'POST_MICRO_BUILD_COMMANDS="sh -xc \'' .
                 'cd sapi/micro && ' .
                 "{$this->config->crossCompilePrefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug && " .

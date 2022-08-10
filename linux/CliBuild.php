@@ -56,7 +56,7 @@ class CliBuild
                 break;
             case CLib::MUSL:
                 if (str_ends_with($this->config->cc, 'clang') && Util::findCommand('lld')) {
-                    $use_lld = '-fuse-ld=lld';
+                    $use_lld = '-Xcompiler -fuse-ld=lld';
                 }
                 break;
             default:
@@ -125,9 +125,11 @@ class CliBuild
                 'cd src/php-src && ' .
                 'sed -i "s|//lib|/lib|g" Makefile && ' .
                 "make -j{$this->config->concurrency} " .
-                'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . " $use_lld\" " .
+                'EXTRA_CFLAGS="-g -Os -fno-ident ' . Util::libtoolCCFlags($this->config->tuneCFlags) . '" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
-                ($this->config->allStatic ? 'EXTRA_LDFLAGS_PROGRAM=-all-static ' : '') .
+                "EXTRA_LDFLAGS_PROGRAM='$use_lld" .
+                ($this->config->allStatic ? ' -all-static' : '') .
+                "' " .
                 'cli && ' .
                 'cd sapi/cli && ' .
                 "{$this->config->crossCompilePrefix}objcopy --only-keep-debug php php.debug && " .
