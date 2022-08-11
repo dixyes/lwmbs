@@ -343,6 +343,17 @@
                 "libjpeg": true,
                 "xpm": true,
                 "libfreetype": true
+            },
+            "libDepsWin": {
+                "gd": true,
+                "libiconv": false,
+                "libfreetype": false,
+                "libjpeg": false,
+                "zlib": false,
+                "libpng": false,
+                "libavif": true,
+                "libwebp": true,
+                "xpm": false
             }
         },
         "gettext": {

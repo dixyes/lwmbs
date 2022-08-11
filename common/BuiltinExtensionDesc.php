@@ -96,7 +96,18 @@ class BuiltinExtensionDesc extends \stdClass implements ExtensionDesc
                 'libjpeg' => true,
                 'xpm' => true,
                 'libfreetype' => true,
-            ]
+            ],
+            'libDepsWin' => [
+                'gd' => true,
+                'libiconv' => false,
+                'xpm' => false,
+                'libfreetype' => false,
+                'libjpeg' => false,
+                'zlib' => false,
+                'libpng' => false,
+                'libavif' => true,
+                'libwebp' => true,
+            ],
         ],
         'gettext' => [
             'argType' => 'with',
