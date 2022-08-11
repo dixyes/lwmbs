@@ -281,7 +281,9 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
                 }
                 Log::i("cloning $name source");
                 passthru(
-                    "git clone --branch \"{$source['rev']}\" " . ($shallowClone ? '--depth 1 --single-branch' : '') . " --recursive \"{$source['url']}\" \"{$path}\"",
+                    'git clone '.
+                        '--config core.autocrlf=false ' .
+                        "--branch \"{$source['rev']}\" " . ($shallowClone ? '--depth 1 --single-branch' : '') . " --recursive \"{$source['url']}\" \"{$path}\"",
                     $ret
                 );
                 if ($ret !== 0) {
