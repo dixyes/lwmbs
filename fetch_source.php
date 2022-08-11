@@ -296,6 +296,13 @@ function fetchSources(array $data, callable $filter, bool $shallowClone = false)
     }
 }
 
+function getPHPVer(): string
+{
+    $version_h = file_get_contents('./src/php-src/main/php_version.h');
+    preg_match('/#\s*define\s+PHP_MAJOR_VERSION\s+(\d+)\s+#\s*define\s+PHP_MINOR_VERSION\s+(\d+)\s+/m', $version_h, $match);
+    return "{$match[1]}.{$match[2]}";
+}
+
 function patch(string $majDotMin)
 {
     Log::i('patching php');
@@ -497,7 +504,7 @@ function mian($argv): int
     // download all sources
     fetchSources($data, $filter, $shallowClone);
     
-    patch($majMin);
+    patch(getPHPVer());
 
     if (!$openssl11 && $majMin === '8.0') {
         Log::i('patching php for openssl 3');
