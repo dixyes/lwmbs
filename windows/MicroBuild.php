@@ -63,12 +63,12 @@ class MicroBuild
             throw new Exception("failed to configure micro");
         }
 
-        if ($this->config->arch === 'arm64') {
-            // workaround for InterlockedExchange8 missing (seems to be a MSVC bug)
-            $zend_atomic = file_get_contents('src\php-src\Zend\zend_atomic.h');
-            $zend_atomic = preg_replace('/\bInterlockedExchange8\b/', '_InterlockedExchange8', $zend_atomic);
-            file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
-        }
+        // if ($this->config->arch === 'arm64') {
+        //     // workaround for InterlockedExchange8 missing (seems to be a MSVC bug)
+        //     $zend_atomic = file_get_contents('src\php-src\Zend\zend_atomic.h');
+        //     $zend_atomic = preg_replace('/\bInterlockedExchange8\b/', '_InterlockedExchange8', $zend_atomic);
+        //     file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
+        // }
 
         // workaround for fiber
         $makefile = file_get_contents('src\php-src\Makefile');

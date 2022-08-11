@@ -22,7 +22,7 @@ class CliBuild
 {
     const CLI_TARGET = [
         '$(BUILD_DIR)\php.exe: generated_files $(DEPS_CLI) $(PHP_GLOBAL_OBJS) $(CLI_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS) $(BUILD_DIR)\php.exe.res $(BUILD_DIR)\php.exe.manifest',
-        '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286',
+        '"$(LINK)" /nologo $(PHP_GLOBAL_OBJS_RESP) $(CLI_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(ASM_OBJS) $(LIBS) $(LIBS_CLI) $(BUILD_DIR)\php.exe.res /out:$(BUILD_DIR)\php.exe $(LDFLAGS) $(LDFLAGS_CLI) /ltcg /nodefaultlib:msvcrt /nodefaultlib:msvcrtd /ignore:4286',
         '-@$(_VC_MANIFEST_EMBED_EXE)',
     ];
 
@@ -65,13 +65,6 @@ class CliBuild
         );
         if ($ret !== 0) {
             throw new Exception("failed to configure cli");
-        }
-
-        if ($this->config->arch === 'arm64') {
-            // workaround for InterlockedExchange8 missing (seems to be a MSVC bug)
-            $zend_atomic = file_get_contents('src\php-src\Zend\zend_atomic.h');
-            $zend_atomic = preg_replace('/\bInterlockedExchange8\b/', '_InterlockedExchange8', $zend_atomic);
-            file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
         }
 
         // workaround for static cli build (needs cli_static.patch from micro also)
