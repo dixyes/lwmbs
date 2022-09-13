@@ -134,7 +134,7 @@ jobs:
           case "${{ matrix.libc }}-${{ matrix.arch }}" in
             "musl-aarch64") apk add --no-cache \
                 alpine-sdk automake autoconf bison flex re2c cmake \
-                libtool gettext-dev \
+                libtool gettext-dev git \
                 vim \
                 xz tar &&
               mkdir -p downloads &&
@@ -150,7 +150,7 @@ jobs:
               ;;
             "musl-x86_64") apk add --no-cache \
                 alpine-sdk automake autoconf bison flex re2c cmake clang lld linux-headers \
-                libtool gettext-dev \
+                libtool gettext-dev git \
                 vim \
                 zlib-static zlib-dev \
                 bzip2 bzip2-static bzip2-dev \
