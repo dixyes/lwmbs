@@ -107,6 +107,9 @@ class Libcurl extends Library
                     (0 ? '-DBUILD_CURL_EXE=ON ' : '-DBUILD_CURL_EXE=OFF ') .
                     '-DCURL_STATIC_CRT=ON ' .
                     '-DENABLE_UNICODE=ON ' .
+                    // since libuv things donot support windows 7 any more,
+                    // for windows 8 +
+                    '-DCURL_TARGET_WINDOWS_VERSION=0x0602 ' .
                     "-DUSE_ZLIB=$zlib " .
                     "-DCURL_USE_LIBSSH2=$libssh2 " .
                     "$brotli " .
