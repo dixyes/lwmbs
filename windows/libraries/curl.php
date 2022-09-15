@@ -110,6 +110,8 @@ class Libcurl extends Library
                     // since libuv things donot support windows 7 any more,
                     // for windows 8 +
                     '-DCURL_TARGET_WINDOWS_VERSION=0x0602 ' .
+                    // curl cmakefile bug workaround?
+                    '-DCURL_TEST_DEFINES="-DWIN32 -D_WIN32_WINNT=0x0501" ' .
                     "-DUSE_ZLIB=$zlib " .
                     "-DCURL_USE_LIBSSH2=$libssh2 " .
                     "$brotli " .
