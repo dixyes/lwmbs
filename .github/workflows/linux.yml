@@ -154,7 +154,7 @@ jobs:
                 vim \
                 zlib-static zlib-dev \
                 bzip2 bzip2-static bzip2-dev \
-                zstd zstd-static zstd-dev &&
+                zstd &&
               export LWMBS_CC=clang &&
               export LWMBS_CXX=clang++
               ;;
