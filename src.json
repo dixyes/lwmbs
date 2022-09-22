@@ -171,16 +171,6 @@
                 "path": "LICENSE"
             }
         },
-        "parallel": {
-            "type": "git",
-            "path": "php-src\/ext\/parallel",
-            "rev": "dixyes-dev",
-            "url": "https:\/\/github.com\/dixyes\/parallel",
-            "license": {
-                "type": "file",
-                "path": "LICENSE"
-            }
-        },
         "redis": {
             "type": "git",
             "path": "php-src\/ext\/redis",
@@ -243,13 +233,6 @@
             },
             "extDeps": {
                 "curl": true
-            }
-        },
-        "parallel": {
-            "source": "parallel",
-            "libDeps": [],
-            "libDepsWin": {
-                "pthreads4w": false
             }
         },
         "redis": {

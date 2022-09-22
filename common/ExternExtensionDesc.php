@@ -44,12 +44,6 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc
                 'curl' => false,
             ],
         ],
-        'parallel' => [
-            'argTypeWin' => 'with',
-            'libDepsWin' => [
-                'pthreads4w' => false,
-            ],
-        ],
         'redis' => [],
         'yaml' => [
             'argType' => 'with',
