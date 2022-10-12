@@ -97,6 +97,18 @@ class MicroBuild
             );
         }
 
+        if ($this->config->getExt('phar')) {
+            $pharPatched = true;
+            passthru(
+                "cd src\\php-src && patch -p1 < sapi/micro/patches/phar.patch",
+                $ret
+            );
+            if ($ret !== 0) {
+                Log::e("failed to patch phar");
+                $pharPatched = false;
+            }
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
@@ -128,6 +140,16 @@ class MicroBuild
             );
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
                 throw new Exception("micro failed sanity check");
+            }
+        }
+
+        if ($this->config->getExt('phar') && $pharPatched) {
+            passthru(
+                "cd src\\php-src && patch -p1 -R < sapi/micro/patches/phar.patch",
+                $ret
+            );
+            if ($ret !== 0) {
+                throw new Exception("failed to recover phar patch");
             }
         }
     }
