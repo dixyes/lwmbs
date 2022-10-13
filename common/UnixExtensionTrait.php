@@ -90,6 +90,14 @@ trait UnixExtensionTrait
                     'ONIG_CFLAGS=-I"' . realpath('include') . '" ' .
                     'ONIG_LIBS="' . $this->getStaticLibFiles() . '" ';
                 break;
+            case 'swow':
+                if ($this->config->getLib('openssl')) {
+                    $arg .= ' --enable-swow-ssl';
+                }
+                if ($this->config->getLib('curl')) {
+                    $arg .= ' --enable-swow-curl';
+                }
+                break;
         }
         return $arg;
     }

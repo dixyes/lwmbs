@@ -38,10 +38,11 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc
             'extDir' => 'ext',
             'extDeps' => [
                 'curl' => true,
+                'openssl' => true,
             ],
             'libDeps' => [
-                'openssl' => false,
-                'curl' => false,
+                'openssl' => true,
+                'curl' => true,
             ],
         ],
         'redis' => [],

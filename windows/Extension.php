@@ -37,6 +37,14 @@ class Extension extends CommonExtension
             case 'xmlwriter':
             case 'dom':
                 $arg .= ' --with-libxml ';
+            case 'swow':
+                if ($this->config->getLib('openssl')) {
+                    $arg .= ' --enable-swow-ssl';
+                }
+                if ($this->config->getLib('curl')) {
+                    $arg .= ' --enable-swow-curl';
+                }
+                break;
         }
         return $arg;
     }
