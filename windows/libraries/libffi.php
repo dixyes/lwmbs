@@ -83,6 +83,7 @@ class Liblibffi extends Library
         $vcxproj = preg_replace('|<WindowsTargetPlatformVersion>[^<]+</WindowsTargetPlatformVersion>|m', '<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>', $vcxproj);
         // update platform tools for vs 2019
         $vcxproj = preg_replace('|<PlatformToolset>v141</PlatformToolset>|m', '<PlatformToolset>v142</PlatformToolset>', $vcxproj);
+        $vcxproj = str_replace('<WarningLevel>Level3</WarningLevel>', '<WarningLevel>Level3</WarningLevel><AdditionalOptions>/wd4146</AdditionalOptions>', $vcxproj);
         // 3.4 feature
         if (!str_contains($vcxproj, 'tramp.c')) {
             $vcxproj = str_replace('<ClCompile Include="..\..\src\closures.c" />', '<ClCompile Include="..\..\src\tramp.c" /><ClCompile Include="..\..\src\closures.c" />', $vcxproj);
