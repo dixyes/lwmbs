@@ -96,6 +96,14 @@ CMAKE;
             );
             file_put_contents('src/php-src/configure', $configure);
         }
+        Log::i('patching configure for disable capstone');
+        $configure = file_get_contents('src/php-src/configure');
+        $configure = preg_replace(
+            '/have_capstone="yes"/',
+            'have_capstone="no"',
+            $configure
+        );
+        file_put_contents('src/php-src/configure', $configure);
         if (php_uname('m') !== $config->arch) {
             // cross-compiling
             switch ($config->arch) {
