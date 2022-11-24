@@ -72,8 +72,12 @@ jobs:
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
             --phpVer=${{ matrix.php-version }} \
             --shallowClone
-          mkdir -p ${GITHUB_WORKSPACE}/micro ${GITHUB_WORKSPACE}/cli
+          mkdir -p \
+            ${GITHUB_WORKSPACE}/micro \
+            ${GITHUB_WORKSPACE}/micro-cli \
+            ${GITHUB_WORKSPACE}/cli
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro-cli/licenses
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli/licenses
 
       - name: Prepare libraries
@@ -98,7 +102,6 @@ jobs:
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
             --arch=${{ matrix.arch }}
-          mkdir -p ${GITHUB_WORKSPACE}/micro
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.dwarf ${GITHUB_WORKSPACE}/micro/
 
       - name: Upload artifact for micro
@@ -108,6 +111,30 @@ jobs:
           name: micro_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
           path: |
             micro
+
+      - name: Build micro-cli
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
+        id: micro-cli
+        working-directory: build
+        continue-on-error: true
+        run: |
+          set -xeo pipefail
+          export PATH="/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH"
+          php ${GITHUB_WORKSPACE}/build_micro.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --arch=${{ matrix.arch }} \
+            --fakeCli
+          cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli/micro-cli.sfx
+          cp src/php-src/sapi/micro/micro.sfx.dwarf ${GITHUB_WORKSPACE}/micro-cli/micro-cli.sfx.dwarf
+
+      - name: Upload artifact for micro-cli
+        if: steps.micro-cli.outcome == 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: micro-cli_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          path: |
+            micro-cli
 
       - name: Build cli
         if: "! (github.event.inputs && github.event.inputs.lib_only)"
@@ -121,7 +148,6 @@ jobs:
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
             --arch=${{ matrix.arch }}
-          mkdir -p ${GITHUB_WORKSPACE}/cli
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.dwarf ${GITHUB_WORKSPACE}/cli/
 
       - name: Upload artifact for cli

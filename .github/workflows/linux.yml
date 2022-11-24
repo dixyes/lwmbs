@@ -196,9 +196,17 @@ jobs:
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
             --phpVer=${{ matrix.php-version }} \
             --shallowClone
-          mkdir -p ${GITHUB_WORKSPACE}/micro_shared ${GITHUB_WORKSPACE}/micro_static ${GITHUB_WORKSPACE}/cli_shared ${GITHUB_WORKSPACE}/cli_static
+          mkdir -p \
+            ${GITHUB_WORKSPACE}/micro_shared \
+            ${GITHUB_WORKSPACE}/micro_static \
+            ${GITHUB_WORKSPACE}/micro-cli_shared \
+            ${GITHUB_WORKSPACE}/micro-cli_static \
+            ${GITHUB_WORKSPACE}/cli_shared \
+            ${GITHUB_WORKSPACE}/cli_static
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro_shared/licenses
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro_static/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro-cli_shared/licenses
+          php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro-cli_static/licenses
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli_shared/licenses
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli_static/licenses
 
@@ -264,6 +272,61 @@ jobs:
           name: micro_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
           path: |
             micro_static
+
+      - name: Build micro-cli
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
+        id: micro-cli_shared
+        continue-on-error: true
+        run: |
+          set -xeo pipefail
+          export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
+          cd /
+          php ${GITHUB_WORKSPACE}/build_micro.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --cc=${{ steps.prepare.outputs.cc }} \
+            --cxx=${{ steps.prepare.outputs.cxx }} \
+            --arch=${{ matrix.arch }} \
+            --fakeCli
+          cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli_shared/micro-cli.sfx
+          cp src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro-cli_shared/micro-cli.sfx.debug
+
+      - name: Upload artifact for micro-cli
+        if: steps.micro-cli_shared.outcome == 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: micro-cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          path: |
+            micro-cli_shared
+
+      - name: Build micro-cli static
+        if: |
+          (!(github.event.inputs && github.event.inputs.lib_only)) &&
+          matrix.libc != 'glibc'
+        id: micro-cli_static
+        continue-on-error: true
+        run: |
+          set -xeo pipefail
+          export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
+          cd /
+          php ${GITHUB_WORKSPACE}/build_micro.php \
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
+            --cc=${{ steps.prepare.outputs.cc }} \
+            --cxx=${{ steps.prepare.outputs.cxx }} \
+            --arch=${{ matrix.arch }} \
+            --fakeCli \
+            --allStatic
+          cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli_static/micro-cli.sfx
+          cp src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro-cli_static/micro-cli.sfx.debug
+
+      - name: Upload artifact for micro-cli static
+        if: steps.micro-cli_static.outcome == 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: micro-cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          path: |
+            micro-cli_static
 
       - name: Build cli
         if: "! (github.event.inputs && github.event.inputs.lib_only)"

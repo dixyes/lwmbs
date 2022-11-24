@@ -135,6 +135,32 @@ jobs:
             licenses
             micro.sfx
 
+      - name: Build micro-cli
+        if: "! (github.event.inputs && github.event.inputs.lib_only)"
+        id: micro-cli
+        shell: pwsh
+        working-directory: build
+        continue-on-error: true
+        run: |
+          ${env:GITHUB_TOKEN} = "${{ secrets.GITHUB_TOKEN }}"
+          php ${env:GITHUB_WORKSPACE}/build_micro.php `
+            "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
+            "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" `
+            -phpBinarySDKDir=C:\tools\php-sdk-binary-tools `
+            --vsVer=17 `
+            --arch=${{ matrix.arch }} `
+            --fakeCli
+          cp src/php-src/${{ matrix.arch }}/Release_TS/micro.sfx ../micro-cli.sfx
+
+      - name: Upload artifact for micro-cli
+        if: steps.micro-cli.outcome == 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: micro-cli_${{ matrix.php-version }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
+          path: |
+            licenses
+            micro-cli.sfx
+
       - name: Build cli
         if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: cli
@@ -161,7 +187,7 @@ jobs:
             php.exe
 
       - name: Fail if anything failed
-        if: steps.micro.outcome == 'failure' || steps.cli.outcome == 'failure'
+        if: steps.micro.outcome == 'failure' || steps.micro-cli.outcome == 'failure' || steps.cli.outcome == 'failure'
         shell: cmd
         run: |
           exit /b 1
