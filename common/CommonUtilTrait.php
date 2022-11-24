@@ -227,6 +227,7 @@ trait CommonUtilTrait
         };
         $namedKeys['fresh'] = ['BOOL', false, false, 'fresh build'];
         $namedKeys['bloat'] = ['BOOL', false, false, 'add all libraries into binary'];
+        $namedKeys['fakeCli'] = ['BOOL', false, false, 'build with PHP_MICRO_FAKE_CLI defination'];
         if (!$libsOnly) {
             $namedKeys['allStatic'] = ['static', false, false, 'use -all-static in php build'];
         }

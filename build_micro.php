@@ -35,6 +35,7 @@ function build_micro($argv): int {
     $build->build(
         fresh: $cmdArgs['named']['fresh'] ?? false,
         bloat: $cmdArgs['named']['bloat'] ?? false,
+        fakeCli: $cmdArgs['named']['fakeCli'] ?? false,
     );
     return 0;
 }

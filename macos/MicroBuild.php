@@ -25,7 +25,7 @@ class MicroBuild
     ) {
     }
 
-    public function build(bool $fresh = false, bool $bloat = false): void
+    public function build(bool $fresh = false, bool $bloat = false, bool $fakeCli = false): void
     {
         Log::i("building micro");
         $ret = 0;
@@ -113,7 +113,9 @@ class MicroBuild
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
                 "make -j{$this->config->concurrency} " .
-                'EXTRA_CFLAGS="-g -Os -fno-ident" ' .
+                'EXTRA_CFLAGS="-g -Os -fno-ident' .
+                    ($fakeCli ? ' -DPHP_MICRO_FAKE_CLI' : '') .
+                '" ' .
                 "EXTRA_LIBS=\"$extra_libs -lresolv\" " .
                 "STRIP=\"dsymutil -f \" " .
                 // TODO: comment things

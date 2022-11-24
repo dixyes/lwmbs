@@ -26,7 +26,7 @@ class MicroBuild
     ) {
     }
 
-    public function build(bool $fresh = false, bool $bloat = false): void
+    public function build(bool $fresh = false, bool $bloat = false, bool $fakeCli = false): void
     {
         Log::i("building micro");
 
@@ -104,7 +104,11 @@ class MicroBuild
             $extra_libs .= ' wldap32.lib';
         }
 
-        file_put_contents('src\php-src\nmake_wrapper.bat', 'nmake /nologo LIBS_MICRO="' . $extra_libs . ' ws2_32.lib shell32.lib" %*');
+        $nmake_wrapper_bat_contents =
+            'nmake /nologo LIBS_MICRO="' . $extra_libs . ' ws2_32.lib shell32.lib"'.
+                ($fakeCli ? ' CFLAGS_MICRO="/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 /DPHP_MICRO_FAKE_CLI"' : '') .
+            ' %*';
+        file_put_contents('src\php-src\nmake_wrapper.bat', $nmake_wrapper_bat_contents);
 
         if ($fresh) {
             Log::i('cleanning up');
