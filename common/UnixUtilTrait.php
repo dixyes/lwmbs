@@ -141,4 +141,40 @@ CMAKE;
         }
         return $ccType;
     }
+    public static function sanityCheck() {
+        Log::i('running sanity check');
+        // remove hello.exe to avoid strange macos behavior on executable changed
+        @unlink('hello.exe');
+        file_put_contents(
+            'hello.exe',
+            file_get_contents('src/php-src/sapi/micro/micro.sfx') . '<?php echo "hello";'
+        );
+        chmod('hello.exe', 0755);
+        exec(
+            './hello.exe',
+            $output,
+            $ret
+        );
+        if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
+            throw new Exception("micro failed sanity check");
+        }
+    }
+    public static function sapiNameCheck(string $expectedName) {
+        Log::i('running SAPI name check');
+        // remove sapiName.exe to avoid strange macos behavior on executable changed
+        @unlink('sapiName.exe');
+        file_put_contents(
+            'sapiName.exe',
+            file_get_contents('src/php-src/sapi/micro/micro.sfx') . '<?php echo PHP_SAPI;'
+        );
+        chmod('sapiName.exe', 0755);
+        exec(
+            './sapiName.exe',
+            $output,
+            $ret
+        );
+        if ($ret !== 0 || trim(implode('', $output)) !== $expectedName) {
+            throw new Exception("micro failed SAPI name check");
+        }
+    }
 }
