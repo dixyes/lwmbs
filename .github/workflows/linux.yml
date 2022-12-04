@@ -281,6 +281,7 @@ jobs:
           set -xeo pipefail
           export "PATH=/opt/rh/devtoolset-11/root/usr/bin:/opt/php/bin:/opt/cmake/bin:$PATH"
           cd /
+          rm -f src/php-src/sapi/micro/php_micro.lo
           php ${GITHUB_WORKSPACE}/build_micro.php \
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \

@@ -143,6 +143,7 @@ jobs:
         continue-on-error: true
         run: |
           ${env:GITHUB_TOKEN} = "${{ secrets.GITHUB_TOKEN }}"
+          rm -Force src/php-src/${{ matrix.arch }}/Release_TS/sapi/micro/php_micro.obj
           php ${env:GITHUB_WORKSPACE}/build_micro.php `
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" `
