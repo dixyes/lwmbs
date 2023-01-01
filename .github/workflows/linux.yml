@@ -390,7 +390,7 @@ jobs:
 
       - name: Upload micro_shared release asset
         if: steps.micro_shared.outcome == 'success' && steps.get_release.outputs.upload_url
-        id: upload-release-asset
+        id: upload-micro_shared-release-asset
         uses: actions/upload-release-asset@v1
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -402,7 +402,7 @@ jobs:
 
       - name: Upload micro_static release asset
         if: steps.micro_static.outcome == 'success' && steps.get_release.outputs.upload_url
-        id: upload-release-asset
+        id: upload-micro_static-release-asset
         uses: actions/upload-release-asset@v1
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -414,7 +414,7 @@ jobs:
 
       - name: Upload micro-cli_shared release asset
         if: steps.micro-cli_shared.outcome == 'success' && steps.get_release.outputs.upload_url
-        id: upload-release-asset
+        id: upload-micro-cli_shared-release-asset
         uses: actions/upload-release-asset@v1
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -426,7 +426,7 @@ jobs:
 
       - name: Upload micro-cli_static release asset
         if: steps.micro-cli_static.outcome == 'success' && steps.get_release.outputs.upload_url
-        id: upload-release-asset
+        id: upload-micro-cli_static-release-asset
         uses: actions/upload-release-asset@v1
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -438,7 +438,7 @@ jobs:
 
       - name: Upload cli_shared release asset
         if: steps.cli_shared.outcome == 'success' && steps.get_release.outputs.upload_url
-        id: upload-release-asset
+        id: upload-cli_shared-release-asset
         uses: actions/upload-release-asset@v1
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -450,7 +450,7 @@ jobs:
 
       - name: Upload cli_shared release asset
         if: steps.cli_static.outcome == 'success' && steps.get_release.outputs.upload_url
-        id: upload-release-asset
+        id: upload-cli_shared-release-asset
         uses: actions/upload-release-asset@v1
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
