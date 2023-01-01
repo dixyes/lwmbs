@@ -16,6 +16,8 @@ on:
         required: false
         default: ""
   push:
+      release:
+          type: [created]
   schedule:
     - cron: "33 4 * * *"
 
@@ -158,7 +160,7 @@ jobs:
               export LWMBS_CC=clang &&
               export LWMBS_CXX=clang++
               ;;
-            "glibc-aarch64") 
+            "glibc-aarch64")
               dnf install -yy \
                 git diffstat gettext git patch patchutils \
                 file less make ncurses pkgconf pkgconf-m4 pkgconf-pkg-config \
@@ -171,7 +173,7 @@ jobs:
               export LWMBS_CC=aarch64-linux-gnu-gcc &&
               export LWMBS_CXX=aarch64-linux-gnu-g++
               ;;
-            "glibc-x86_64") 
+            "glibc-x86_64")
               yum install -yy \
                 perl m4 autoconf automake bison byacc cscope ctags \
                 diffstat elfutils flex gettext \
@@ -379,6 +381,84 @@ jobs:
           name: cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_${{ steps.src_hash.outputs.hash }}
           path: |
             cli_static
+
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.3
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload micro_shared release asset
+        if: steps.micro_shared.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./micro_shared
+            asset_name: micro_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}
+            asset_content_type: application/x-sh
+
+      - name: Upload micro_static release asset
+        if: steps.micro_static.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./micro_static
+            asset_name: micro_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}
+            asset_content_type: application/x-sh
+
+      - name: Upload micro-cli_shared release asset
+        if: steps.micro-cli_shared.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./micro-cli_shared
+            asset_name: micro-cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}
+            asset_content_type: application/x-sh
+
+      - name: Upload micro-cli_static release asset
+        if: steps.micro-cli_static.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./micro-cli_static
+            asset_name: micro-cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}
+            asset_content_type: application/x-sh
+
+      - name: Upload cli_shared release asset
+        if: steps.cli_shared.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./cli_shared
+            asset_name: cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}
+            asset_content_type: application/x-sh
+
+      - name: Upload cli_shared release asset
+        if: steps.cli_static.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./cli_static
+            asset_name: cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}
+            asset_content_type: application/x-sh
 
       - name: Fail if anything failed
         if: |
