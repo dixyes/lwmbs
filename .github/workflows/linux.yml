@@ -448,9 +448,9 @@ jobs:
             asset_name: cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}
             asset_content_type: application/x-sh
 
-      - name: Upload cli_shared release asset
+      - name: Upload cli_static release asset
         if: steps.cli_static.outcome == 'success' && steps.get_release.outputs.upload_url
-        id: upload-cli_shared-release-asset
+        id: upload-cli_static-release-asset
         uses: actions/upload-release-asset@v1
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
