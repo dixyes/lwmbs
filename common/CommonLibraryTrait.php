@@ -22,11 +22,6 @@ trait CommonLibraryTrait
 {
     use SourceTrait;
 
-    protected string $name = '';
-    protected array $depNames = [];
-    protected array $staticLibs = [];
-    protected array $headers = [];
-
     public function __construct(
         private Config $config,
         private ?string $sourceDir = null,
