@@ -151,12 +151,30 @@ function fetch(string $url, string $method = 'GET', array $headers = [], array $
     };
     $headerArg = implode(' ', array_map(fn ($v) => '"-H' . $v . '"', $headers));
 
-    $cmd = "curl -sfSL $methodArg $headerArg \"$url\"";
-    exec($cmd, $output, $ret);
-    if (0 !== $ret) {
-        throw new Exception('failed http fetch');
-    }
+    $output = retry(static function () use ($methodArg, $headerArg, $url) {
+        $cmd = "curl -sfSL $methodArg $headerArg \"$url\"";
+        exec($cmd, $output, $ret);
+        if (0 !== $ret) {
+            throw new Exception('failed http fetch');
+        }
+        return $output;
+    });
     return implode("\n", $output);
+}
+
+function retry(callable $callable, int $count = 3) {
+    $retry = 0;
+    while (true) {
+        try {
+            return $callable();
+        } catch (Exception $e) {
+            if ($retry >= $count) {
+                throw $e;
+            }
+            $retry++;
+            Log::i("retrying after exception: $e");
+        }
+    }
 }
 
 function getLatestGithubTarball(string $name, array $source): array
