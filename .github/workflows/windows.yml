@@ -1,4 +1,4 @@
-name: windows test
+name: windows build
 
 on:
   workflow_dispatch:
@@ -16,6 +16,8 @@ on:
         required: false
         default: ""
   push:
+      release:
+          type: [created]
   schedule:
     - cron: "33 4 * * *"
 
@@ -186,6 +188,48 @@ jobs:
           path: |
             licenses
             php.exe
+
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.3
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload micro release asset
+        if: steps.micro.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-micro-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./micro
+            asset_name: micro_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows
+            asset_content_type: application/x-sh
+
+      - name: Upload micro-cli release asset
+        if: steps.micro-cli.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-micro-cli-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./micro-cli
+            asset_name: micro-cli_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows
+            asset_content_type: application/x-sh
+
+      - name: Upload cli release asset
+        if: steps.cli.outcome == 'success' && steps.get_release.outputs.upload_url
+        id: upload-cli-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.get_release.outputs.upload_url }}
+            asset_path: ./cli
+            asset_name: cli_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows
+            asset_content_type: application/x-sh
 
       - name: Fail if anything failed
         if: steps.micro.outcome == 'failure' || steps.micro-cli.outcome == 'failure' || steps.cli.outcome == 'failure'
