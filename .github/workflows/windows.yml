@@ -219,7 +219,7 @@ jobs:
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
             asset_path: ./micro.zip
-            asset_name: micro_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows.zip
+            asset_name: micro_${{ matrix.php-version }}_${{ matrix.arch }}_windows.zip
             asset_content_type: application/x-sh
 
       - name: Upload micro-cli release asset
@@ -231,7 +231,7 @@ jobs:
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
             asset_path: ./micro-cli.zip
-            asset_name: micro-cli_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows.zip
+            asset_name: micro-cli_${{ matrix.php-version }}_${{ matrix.arch }}_windows.zip
             asset_content_type: application/x-sh
 
       - name: Upload cli release asset
@@ -243,7 +243,7 @@ jobs:
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
             asset_path: ./cli.zip
-            asset_name: cli_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows.zip
+            asset_name: cli_${{ matrix.php-version }}_${{ matrix.arch }}_windows.zip
             asset_content_type: application/x-sh
 
       - name: Fail if anything failed
