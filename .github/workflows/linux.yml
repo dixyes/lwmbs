@@ -402,8 +402,8 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./micro_shared
-            asset_name: micro_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux
+            asset_path: ./micro_shared.tar.gz
+            asset_name: micro_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
       - name: Upload micro_static release asset
@@ -414,8 +414,8 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./micro_static
-            asset_name: micro_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux
+            asset_path: ./micro_static.tar.gz
+            asset_name: micro_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
       - name: Upload micro-cli_shared release asset
@@ -426,8 +426,8 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./micro-cli_shared
-            asset_name: micro-cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux
+            asset_path: ./micro-cli_shared.tar.gz
+            asset_name: micro-cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
       - name: Upload micro-cli_static release asset
@@ -438,8 +438,8 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./micro-cli_static
-            asset_name: micro-cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux
+            asset_path: ./micro-cli_static.tar.gz
+            asset_name: micro-cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
       - name: Upload cli_shared release asset
@@ -450,8 +450,8 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./cli_shared
-            asset_name: cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux
+            asset_path: ./cli_shared.tar.gz
+            asset_name: cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
       - name: Upload cli_static release asset
@@ -462,8 +462,8 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./cli_static
-            asset_name: cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux
+            asset_path: ./cli_static.tar.gz
+            asset_name: cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
       - name: Fail if anything failed
