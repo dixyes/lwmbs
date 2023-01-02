@@ -239,7 +239,8 @@ jobs:
             --cxx=${{ steps.prepare.outputs.cxx }} \
             --arch=${{ matrix.arch }}
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_shared/
-          tar -zcvf /micro_shared.tar.gz ${GITHUB_WORKSPACE}/micro_shared/
+          tar -zcvf micro_shared.tar.gz ${GITHUB_WORKSPACE}/micro_shared/
+          cp micro_shared.tar.gz ${GITHUB_WORKSPACE}/
 
       - name: Upload artifact for micro
         if: steps.micro_shared.outcome == 'success'
@@ -267,7 +268,8 @@ jobs:
             --arch=${{ matrix.arch }} \
             --allStatic
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_static/
-          tar -zcvf /micro_static.tar.gz ${GITHUB_WORKSPACE}/micro_static/
+          tar -zcvf micro_static.tar.gz ${GITHUB_WORKSPACE}/micro_static/
+          cp micro_static.tar.gz ${GITHUB_WORKSPACE}/
 
       - name: Upload artifact for micro static
         if: steps.micro_static.outcome == 'success'
@@ -295,7 +297,8 @@ jobs:
             --fakeCli
           cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli_shared/micro-cli.sfx
           cp src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro-cli_shared/micro-cli.sfx.debug
-          tar -zcvf /micro-cli_shared.tar.gz ${GITHUB_WORKSPACE}/micro-cli_shared/
+          tar -zcvf micro-cli_shared.tar.gz ${GITHUB_WORKSPACE}/micro-cli_shared/
+          cp micro-cli_shared.tar.gz ${GITHUB_WORKSPACE}/
 
       - name: Upload artifact for micro-cli
         if: steps.micro-cli_shared.outcome == 'success'
@@ -325,7 +328,8 @@ jobs:
             --allStatic
           cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli_static/micro-cli.sfx
           cp src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro-cli_static/micro-cli.sfx.debug
-          tar -zcvf /micro-cli_static.tar.gz ${GITHUB_WORKSPACE}/micro-cli_static/
+          tar -zcvf micro-cli_static.tar.gz ${GITHUB_WORKSPACE}/micro-cli_static/
+          cp micro-cli_static.tar.gz ${GITHUB_WORKSPACE}/
 
       - name: Upload artifact for micro-cli static
         if: steps.micro-cli_static.outcome == 'success'
@@ -350,7 +354,8 @@ jobs:
             --cxx=${{ steps.prepare.outputs.cxx }} \
             --arch=${{ matrix.arch }}
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_shared/
-          tar -zcvf /cli_shared.tar.gz ${GITHUB_WORKSPACE}/cli_shared/
+          tar -zcvf cli_shared.tar.gz ${GITHUB_WORKSPACE}/cli_shared/
+          cp cli_shared.tar.gz ${GITHUB_WORKSPACE}/
 
       - name: Upload artifact for cli
         if: steps.cli_shared.outcome == 'success'
@@ -378,7 +383,8 @@ jobs:
             --arch=${{ matrix.arch }} \
             --allStatic
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_static/
-          tar -zcvf /cli_static.tar.gz ${GITHUB_WORKSPACE}/cli_static/
+          tar -zcvf cli_static.tar.gz ${GITHUB_WORKSPACE}/cli_static/
+          cp cli_static.tar.gz ${GITHUB_WORKSPACE}/
 
       - name: Upload artifact for cli static
         if: steps.cli_static.outcome == 'success'
@@ -402,7 +408,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: /micro_shared.tar.gz
+            asset_path: ${GITHUB_WORKSPACE}/micro_shared.tar.gz
             asset_name: micro_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
@@ -414,7 +420,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: /micro_static.tar.gz
+            asset_path: ${GITHUB_WORKSPACE}/micro_static.tar.gz
             asset_name: micro_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
@@ -426,7 +432,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: /micro-cli_shared.tar.gz
+            asset_path: ${GITHUB_WORKSPACE}/micro-cli_shared.tar.gz
             asset_name: micro-cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
@@ -438,7 +444,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: /micro-cli_static.tar.gz
+            asset_path: ${GITHUB_WORKSPACE}/micro-cli_static.tar.gz
             asset_name: micro-cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
@@ -450,7 +456,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: /cli_shared.tar.gz
+            asset_path: ${GITHUB_WORKSPACE}/cli_shared.tar.gz
             asset_name: cli_shared_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
@@ -462,7 +468,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: /cli_static.tar.gz
+            asset_path: ${GITHUB_WORKSPACE}/cli_static.tar.gz
             asset_name: cli_static_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_linux.tar.gz
             asset_content_type: application/x-sh
 
@@ -470,6 +476,7 @@ jobs:
         if: |
           steps.micro_shared.outcome == 'failure' ||
           steps.cli_shared.outcome == 'failure' ||
+          steps.micro-cli.outcome == 'failure' ||
           (steps.micro_static.outcome == 'failure' && matrix.libc != 'glibc') ||
           (steps.cli_static.outcome == 'failure' && matrix.libc != 'glibc')
         run: |
