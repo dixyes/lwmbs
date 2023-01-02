@@ -137,6 +137,11 @@ jobs:
             licenses
             micro.sfx
 
+      - uses: vimtor/action-zip@v1
+        with:
+          files: licenses/ micro.sfx
+          dest: micro.zip
+
       - name: Build micro-cli
         if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: micro-cli
@@ -164,6 +169,11 @@ jobs:
             licenses
             micro-cli.sfx
 
+      - uses: vimtor/action-zip@v1
+        with:
+          files: licenses/ micro-cli.sfx
+          dest: micro-cli.zip
+
       - name: Build cli
         if: "! (github.event.inputs && github.event.inputs.lib_only)"
         id: cli
@@ -189,6 +199,11 @@ jobs:
             licenses
             php.exe
 
+      - uses: vimtor/action-zip@v1
+        with:
+          files: licenses/ php.exe
+          dest: cli.zip
+
       - name: Get release
         id: get_release
         uses: bruceadams/get-release@v1.2.3
@@ -203,7 +218,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./micro
+            asset_path: ./micro.zip
             asset_name: micro_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows
             asset_content_type: application/x-sh
 
@@ -215,7 +230,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./micro-cli
+            asset_path: ./micro-cli.zip
             asset_name: micro-cli_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows
             asset_content_type: application/x-sh
 
@@ -227,7 +242,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
             upload_url: ${{ steps.get_release.outputs.upload_url }}
-            asset_path: ./cli
+            asset_path: ./cli.zip
             asset_name: cli_${{ matrix.php-version }}_${{ matrix.libc }}_${{ matrix.arch }}_windows
             asset_content_type: application/x-sh
 
