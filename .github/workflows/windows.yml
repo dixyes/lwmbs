@@ -16,8 +16,8 @@ on:
         required: false
         default: ""
   push:
-      release:
-          type: [created]
+    tags:
+      - "v*"
   schedule:
     - cron: "33 4 * * *"
 
