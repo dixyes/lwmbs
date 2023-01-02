@@ -22,9 +22,14 @@ trait CommonLibraryTrait
 {
     use SourceTrait;
 
+    private string $name = '';
+    private array $depNames = [];
+    private array $staticLibs = [];
+    private array $headers = [];
+
     public function __construct(
         private Config $config,
-        ?string $sourceDir = null,
+        private ?string $sourceDir = null,
         private array $dependencies = [],
     ) {
         $this->sourceDir = $sourceDir ?? ('src' . DIRECTORY_SEPARATOR . $this->name);
