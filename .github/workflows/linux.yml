@@ -295,7 +295,7 @@ jobs:
             --fakeCli
           cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli_shared/micro-cli.sfx
           cp src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro-cli_shared/micro-cli.sfx.debug
-          tar -zcvf /micro-cli_share.tar.gz ${GITHUB_WORKSPACE}/micro-cli_share/
+          tar -zcvf /micro-cli_shared.tar.gz ${GITHUB_WORKSPACE}/micro-cli_shared/
 
       - name: Upload artifact for micro-cli
         if: steps.micro-cli_shared.outcome == 'success'
