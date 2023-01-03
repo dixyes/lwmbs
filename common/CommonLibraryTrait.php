@@ -24,7 +24,7 @@ trait CommonLibraryTrait
 
     public function __construct(
         private Config $config,
-        ?string $sourceDir = null,
+        private ?string $sourceDir = null,
         private array $dependencies = [],
     ) {
         $this->sourceDir = $sourceDir ?? ('src' . DIRECTORY_SEPARATOR . $this->name);
