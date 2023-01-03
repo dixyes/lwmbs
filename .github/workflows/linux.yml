@@ -397,6 +397,7 @@ jobs:
       - name: Get release
         id: get_release
         uses: bruceadams/get-release@v1.2.3
+        continue-on-error: true
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
