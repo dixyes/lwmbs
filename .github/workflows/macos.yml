@@ -105,8 +105,6 @@ jobs:
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
             --arch=${{ matrix.arch }}
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.dwarf ${GITHUB_WORKSPACE}/micro/
-          tar -zcvf micro.tar.gz ${GITHUB_WORKSPACE}/micro/
-          mv micro.tar.gz /
 
       - name: Upload artifact for micro
         if: steps.micro.outcome == 'success'
@@ -132,8 +130,6 @@ jobs:
             --fakeCli
           cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli/micro-cli.sfx
           cp src/php-src/sapi/micro/micro.sfx.dwarf ${GITHUB_WORKSPACE}/micro-cli/micro-cli.sfx.dwarf
-          tar -zcvf micro-cli.tar.gz ${GITHUB_WORKSPACE}/micro-cli/
-          mv micro-cli.tar.gz /
 
       - name: Upload artifact for micro-cli
         if: steps.micro-cli.outcome == 'success'
@@ -156,8 +152,6 @@ jobs:
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
             --arch=${{ matrix.arch }}
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.dwarf ${GITHUB_WORKSPACE}/cli/
-          tar -zcvf cli.tar.gz ${GITHUB_WORKSPACE}/cli/
-          mv cli.tar.gz /
 
       - name: Upload artifact for cli
         if: steps.cli.outcome == 'success'
