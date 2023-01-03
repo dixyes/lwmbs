@@ -239,8 +239,6 @@ jobs:
             --cxx=${{ steps.prepare.outputs.cxx }} \
             --arch=${{ matrix.arch }}
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_shared/
-          tar -zcvf micro_shared.tar.gz ${GITHUB_WORKSPACE}/micro_shared/
-          mv micro_shared.tar.gz /
 
       - name: Upload artifact for micro
         if: steps.micro_shared.outcome == 'success'
@@ -268,8 +266,6 @@ jobs:
             --arch=${{ matrix.arch }} \
             --allStatic
           cp src/php-src/sapi/micro/micro.sfx src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro_static/
-          tar -zcvf micro_static.tar.gz ${GITHUB_WORKSPACE}/micro_static/
-          mv micro_static.tar.gz /
 
       - name: Upload artifact for micro static
         if: steps.micro_static.outcome == 'success'
@@ -297,8 +293,6 @@ jobs:
             --fakeCli
           cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli_shared/micro-cli.sfx
           cp src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro-cli_shared/micro-cli.sfx.debug
-          tar -zcvf micro-cli_shared.tar.gz ${GITHUB_WORKSPACE}/micro-cli_shared/
-          mv micro-cli_shared.tar.gz /
 
       - name: Upload artifact for micro-cli
         if: steps.micro-cli_shared.outcome == 'success'
@@ -328,8 +322,6 @@ jobs:
             --allStatic
           cp src/php-src/sapi/micro/micro.sfx       ${GITHUB_WORKSPACE}/micro-cli_static/micro-cli.sfx
           cp src/php-src/sapi/micro/micro.sfx.debug ${GITHUB_WORKSPACE}/micro-cli_static/micro-cli.sfx.debug
-          tar -zcvf micro-cli_static.tar.gz ${GITHUB_WORKSPACE}/micro-cli_static/
-          mv micro-cli_static.tar.gz /
 
       - name: Upload artifact for micro-cli static
         if: steps.micro-cli_static.outcome == 'success'
@@ -354,8 +346,6 @@ jobs:
             --cxx=${{ steps.prepare.outputs.cxx }} \
             --arch=${{ matrix.arch }}
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_shared/
-          tar -zcvf cli_shared.tar.gz ${GITHUB_WORKSPACE}/cli_shared/
-          mv cli_shared.tar.gz /
 
       - name: Upload artifact for cli
         if: steps.cli_shared.outcome == 'success'
@@ -383,8 +373,6 @@ jobs:
             --arch=${{ matrix.arch }} \
             --allStatic
           cp src/php-src/sapi/cli/php src/php-src/sapi/cli/php.debug ${GITHUB_WORKSPACE}/cli_static/
-          tar -zcvf cli_static.tar.gz ${GITHUB_WORKSPACE}/cli_static/
-          mv cli_static.tar.gz /
 
       - name: Upload artifact for cli static
         if: steps.cli_static.outcome == 'success'
