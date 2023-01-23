@@ -158,7 +158,7 @@ class MicroBuild
                 $ret
             );
             if ($ret !== 0 || trim(implode('', $output)) !== 'hello') {
-                throw new Exception("cli failed sanity check");
+                throw new Exception("micro failed sanity check");
             }
         }
 
