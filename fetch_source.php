@@ -336,7 +336,7 @@ function patch(string $majDotMin)
         default => [],
     });
     $patches = [];
-    $serial = ['80', '81', '82'];
+    $serial = ['80', '81', '82', '83'];
     foreach ($patchNames as $patchName) {
         if (file_exists("src/php-src/sapi/micro/patches/{$patchName}.patch")) {
             $patches[]="sapi/micro/patches/{$patchName}.patch";
@@ -390,12 +390,17 @@ function linkSwow()
 
 function latestPHP(string $majMin){
     $info = json_decode(fetch(url: "https://www.php.net/releases/index.php?json&version=$majMin"), true);
-    $version = $info['version'];
+    $version = $info['version'] ?? 'master';
+
+    if ($version !== 'master') {
+        Log::w("using master for unknown release PHP $majMin");
+        $version = "php-$version";
+    }
 
     return [
         'type'=> 'git',
         'path'=> 'php-src',
-        'rev'=> "php-$version",
+        'rev'=> $version,
         'url'=> 'https://github.com/php/php-src',
     ];
 }
