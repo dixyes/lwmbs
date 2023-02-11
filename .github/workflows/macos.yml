@@ -30,9 +30,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ["8.1", "8.0"]
+        php-version: ["8.2", "8.1", "8.0"]
         arch: ["x86_64", "arm64"]
-      max-parallel: 4
+      max-parallel: 6
     steps:
       - name: Checkout
         uses: actions/checkout@v2

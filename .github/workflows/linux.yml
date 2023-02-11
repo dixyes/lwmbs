@@ -31,10 +31,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ["8.1", "8.0"]
+        php-version: ["8.2", "8.1", "8.0"]
         libc: ["glibc", "musl"]
         arch: ["x86_64", "aarch64"]
-      max-parallel: 8
+      max-parallel: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v2
