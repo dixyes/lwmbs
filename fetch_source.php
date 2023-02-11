@@ -393,8 +393,10 @@ function latestPHP(string $majMin){
     $version = $info['version'] ?? 'master';
 
     if ($version !== 'master') {
-        Log::w("using master for unknown release PHP $majMin");
         $version = "php-$version";
+    } else {
+        Log::w("using master for unknown release PHP $majMin");
+        $version = "master";
     }
 
     return [
@@ -420,7 +422,7 @@ function mian($argv): int
             'shallowClone' => ['BOOL', false, false, 'use shallow clone'],
             'openssl11' => ['BOOL', false, false, 'use openssl 1.1'],
             'srcFile' => ['SRCFILE', false, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
-            'phpVer' => ['VERSION', false, '8.1', 'php version in major.minor format like 8.1'],
+            'phpVer' => ['VERSION', false, '8.2', 'php version in major.minor format like 8.2'],
         ],
     );
 
