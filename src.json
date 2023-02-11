@@ -168,7 +168,7 @@
             "url": "https:\/\/github.com\/swow\/swow",
             "license": {
                 "type": "file",
-                "path": "LICENSE"
+                "path": "LICENSES.full"
             }
         },
         "redis": {
