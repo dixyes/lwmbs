@@ -189,8 +189,8 @@ jobs:
               export LWMBS_CXX=g++
               ;;
           esac
-          echo "name=cc=$LWMBS_CC" >> $GITHUB_OUTPUT
-          echo "name=cxx=$LWMBS_CXX" >> $GITHUB_OUTPUT
+          echo "cc=$LWMBS_CC" >> $GITHUB_OUTPUT
+          echo "cxx=$LWMBS_CXX" >> $GITHUB_OUTPUT
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ${GITHUB_WORKSPACE}/fetch_source.php \
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
