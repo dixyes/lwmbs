@@ -108,17 +108,17 @@ jobs:
           }
           # TODO: filters
           
-          if ("${{ matrix.arch }}" -Eq "arm64") {
-            # https://github.com/openssl/openssl/issues/20234
-            Invoke-WebRequest -Uri https://patch-diff.githubusercontent.com/raw/openssl/openssl/pull/20244.patch `
-              -OutFile "win-openssl-aa64.patch"
-            Push-Location src\openssl
-              Get-Content ..\..\win-openssl-aa64.patch | & patch -p1
-              if (0 -Ne $lastexitcode) {
-                exit 1
-              }
-            Pop-Location
-          }
+          # if ("${{ matrix.arch }}" -Eq "arm64") {
+          #   # https://github.com/openssl/openssl/issues/20234
+          #   Invoke-WebRequest -Uri https://patch-diff.githubusercontent.com/raw/openssl/openssl/pull/20244.patch `
+          #     -OutFile "win-openssl-aa64.patch"
+          #   Push-Location src\openssl
+          #     Get-Content ..\..\win-openssl-aa64.patch | & patch -p1
+          #     if (0 -Ne $lastexitcode) {
+          #       exit 1
+          #     }
+          #   Pop-Location
+          # }
 
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'
