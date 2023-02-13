@@ -25,7 +25,8 @@ trait ExtensionDescTrait
         public array $libDeps = [],
         public array $extDeps = [],
         private ?string $extDir = null,
-        string $argType='enable',
+        public string $argType = 'enable',
+        public readonly bool $useCPP =false,
     ) {
         $_name = str_replace('_', '-', $name);
         $this->arg = match ($argType) {

@@ -183,6 +183,19 @@ final class Util
         }
     }
 
+    public static function chooseLibcxx(string $cc, string $cxx): CXXLib
+    {
+        Log::i('checking libc++');
+
+        if (str_ends_with($cxx, 'clang++')) {
+            Log::i("using libc++");
+            return CXXLib::LIBCXX;
+        } else {
+            Log::i("using libstdc++");
+            return CXXLib::LIBSTDCXX;
+        }
+    }
+
     public static function chooseCC(): string
     {
         Log::i('checking cc');

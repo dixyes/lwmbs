@@ -30,9 +30,15 @@ class ExternExtensionDesc extends \stdClass implements ExtensionDesc
                 'curl' => true,
             ],
             'libDeps' => [
-                'openssl' => false,
-                'curl' => false,
+                // swoole config.m4 flaw here
+                // zlib should not be required
+                'zlib' => false,
+                'brotli' => true,
+                'openssl' => true,
+                'curl' => true,
+                'libpq' => true,
             ],
+            'useCPP' => true,
         ],
         'swow' => [
             'extDir' => 'ext',

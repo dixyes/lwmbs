@@ -120,6 +120,11 @@ class CliBuild
             $extra_libs = "-Wl,--whole-archive $extra_libs -Wl,--no-whole-archive";
         }
 
+        $static_cpp = '';
+        if ($this->config->useCPP()) {
+            $static_cpp = $this->config->libcxx->staticArgs();
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
@@ -129,7 +134,7 @@ class CliBuild
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 "EXTRA_LDFLAGS_PROGRAM='$use_lld" .
                 ($this->config->allStatic ? ' -all-static' : '') .
-                "' " .
+                " $static_cpp' " .
                 'cli && ' .
                 'cd sapi/cli && ' .
                 "{$this->config->crossCompilePrefix}objcopy --only-keep-debug php php.debug && " .

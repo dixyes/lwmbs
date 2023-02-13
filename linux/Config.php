@@ -27,6 +27,7 @@ class Config extends CommonConfig
     public string $pkgconfEnv;
     public string $noteSection = "Je pense, donc je suis\0";
     public CLib $libc;
+    public CXXLib $libcxx;
     public string $cc;
     public string $cxx;
     public string $arch;
@@ -75,6 +76,7 @@ class Config extends CommonConfig
         Log::i('choose arch: ' . $this->arch);
 
         $this->libc = Util::chooseLibc($this->cc);
+        $this->libcxx = Util::chooseLibcxx($this->cc, $this->cxx);
         $this->concurrency = Util::getCpuCount();
         $this->archCFlags = Util::getArchCFlags($this->cc, $this->arch);
         $this->archCXXFlags = Util::getArchCFlags($this->cxx, $this->arch);

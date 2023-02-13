@@ -121,4 +121,8 @@ class CommonExtension
 
         return $deps;
     }
+    public function useCPP(): bool
+    {
+        return $this->desc->useCPP;
+    }
 }

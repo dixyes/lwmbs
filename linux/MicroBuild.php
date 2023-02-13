@@ -132,6 +132,11 @@ class MicroBuild
             }
         }
 
+        $static_cpp = '';
+        if ($this->config->useCPP()) {
+            $static_cpp = $this->config->libcxx->staticArgs();
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
@@ -142,7 +147,7 @@ class MicroBuild
                     ($fakeCli ? ' -DPHP_MICRO_FAKE_CLI' : '') .
                 '" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
-                "EXTRA_LDFLAGS_PROGRAM='$cflags $use_lld" .
+                "EXTRA_LDFLAGS_PROGRAM='$cflags $use_lld $static_cpp" .
                 ($this->config->allStatic ? ' -all-static' : '') .
                 "' " .
                 'POST_MICRO_BUILD_COMMANDS="sh -xc \'' .
