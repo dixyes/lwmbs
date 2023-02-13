@@ -97,12 +97,17 @@ class CliBuild
             );
         }
 
+        $lcpp = '';
+        if ($this->config->useCPP()) {
+            $lcpp = '-lc++';
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
                 "make -j{$this->config->concurrency} " .
                 'EXTRA_CFLAGS="-g -Os -fno-ident" ' .
-                "EXTRA_LIBS=\"$extra_libs -lresolv\" " .
+                "EXTRA_LIBS=\"$extra_libs -lresolv $lcpp\" " .
                 // TODO: comment things
                 'cli &&' .
                 'dsymutil -f sapi/cli/php'

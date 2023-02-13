@@ -109,6 +109,11 @@ class MicroBuild
             }
         }
 
+        $lcpp = '';
+        if ($this->config->useCPP()) {
+            $lcpp = '-lc++';
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
@@ -116,7 +121,7 @@ class MicroBuild
                 'EXTRA_CFLAGS="-g -Os -fno-ident' .
                     ($fakeCli ? ' -DPHP_MICRO_FAKE_CLI' : '') .
                 '" ' .
-                "EXTRA_LIBS=\"$extra_libs -lresolv\" " .
+                "EXTRA_LIBS=\"$extra_libs -lresolv $lcpp\" " .
                 "STRIP=\"dsymutil -f \" " .
                 // TODO: comment things
                 'micro',
