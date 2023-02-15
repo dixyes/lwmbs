@@ -58,6 +58,7 @@ class CommonConfig extends \stdClass
                 return true;
             }
         }
+        return false;
     }
 
     public function makeLibArray(): array
