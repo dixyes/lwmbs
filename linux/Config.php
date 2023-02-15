@@ -94,7 +94,7 @@ class Config extends CommonConfig
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(
             os: 'Linux',
             targetArch: $this->arch,
-            cflags: Util::getArchCFlags($this->cc, $this->arch),
+            cflags: $this->cFlags,
             cc: $this->cc,
             cxx: $this->cxx,
         );

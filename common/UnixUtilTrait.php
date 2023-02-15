@@ -61,6 +61,7 @@ $cxxLine
 SET(CMAKE_C_FLAGS "$cflags")
 SET(CMAKE_CXX_FLAGS "$cflags")
 SET(CMAKE_FIND_ROOT_PATH "$root")
+SET(CMAKE_THREAD_LIBS_INIT "-lpthread")
 CMAKE;
         file_put_contents('./toolchain.cmake', $toolchain);
         return realpath('./toolchain.cmake');

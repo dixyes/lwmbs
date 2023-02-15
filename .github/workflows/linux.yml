@@ -210,6 +210,16 @@ jobs:
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli_shared/licenses
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli_static/licenses
 
+          php <<EOF
+          <?php
+          preg_match("/project\\(libzip\\s+VERSION\\s+([^\\r\\n]+)/m", file_get_contents('src/libzip/CMakeLists.txt'), \$m);
+          if (version_compare(\$m[1], "1.9.2", "<=")) {
+              echo "patching libzip\n";
+              chdir('src/libzip');
+              passthru("curl -sfSL https://github.com/nih-at/libzip/pull/349.patch | patch -p1");
+          }
+          EOF
+
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'
         run: |

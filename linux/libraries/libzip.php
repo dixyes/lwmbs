@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -93,9 +94,20 @@ EOF,
         $openssl = '-DENABLE_OPENSSL=OFF ';
         $libopenssl = $this->config->getLib('openssl');
         if ($libopenssl) {
-            $openssl = '-DENABLE_ZSTD=ON ' .
-                '-DOpenSSL_LIBRARY="' . $libopenssl->getStaticLibFiles(style: 'cmake') . '" ' .
+            $cryptoOnly = implode(';', array_filter(
+                explode(";", $libopenssl->getStaticLibFiles(style: 'cmake')),
+                fn ($x) => str_ends_with($x, 'crypto.a')
+            ));
+            $openssl = '-DENABLE_OPENSSL=ON ' .
+                "-DOPENSSL_CRYPTO_LIBRARIES='$cryptoOnly;-lpthread;-ldl' " .
                 '-DOpenSSL_INCLUDE_DIR="' . realpath('include') . '" ';
+            $cmakelist = file_get_contents("{$this->sourceDir}/CMakeLists.txt");
+            $cmakelist = preg_replace(
+                '/if\s*\(\s*ENABLE_OPENSSL\s*\)\s*find_package\s*\(\s*OpenSSL\s*\)\s*endif\s*\(\s*\)/m',
+                "if(ENABLE_OPENSSL)\nfind_package(Threads REQUIRED)\nfind_package(OpenSSL REQUIRED)\nendif()",
+                $cmakelist
+            );
+            file_put_contents("{$this->sourceDir}/CMakeLists.txt", $cmakelist);
         }
 
         passthru(
@@ -108,7 +120,6 @@ EOF,
                 // '--debug-find ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DENABLE_GNUTLS=OFF ' .
-                '-DENABLE_OPENSSL=ON ' .
                 '-DENABLE_MBEDTLS=OFF ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DBUILD_DOC=OFF ' .
