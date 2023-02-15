@@ -72,7 +72,7 @@ class CliBuild
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
                 "--host={$this->config->gnuArch}-apple-darwin " .
-                "CFLAGS='{$this->config->archCFlags} -Werror=unknown-warning-option' " .
+                "CFLAGS='{$this->config->cFlags} -Werror=unknown-warning-option' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
