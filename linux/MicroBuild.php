@@ -46,13 +46,17 @@ class MicroBuild
         $envs = $this->config->pkgconfEnv . ' ' .
             "CC='{$this->config->cc}' " .
             "CXX='{$this->config->cxx}' ";
-        $cflags = $this->config->archCFlags;
+        $cflags = $this->config->cFlags;
+        $cxxflags = $this->config->cxxFlags;
         $use_lld = '';
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
             case CLib::GLIBC:
-                $cflags .= ' -static-libgcc -I"' . realpath('include') . '"';
+                if (Util::getCCType($this->config->cc) === 'gcc') {
+                    $cflags .= ' -static-libgcc';
+                }
+                $cflags .= ' -I"' . realpath('include') . '"';
                 break;
             case CLib::MUSL:
                 if (str_ends_with($this->config->cc, 'clang') && Util::findCommand('lld')) {
@@ -63,7 +67,7 @@ class MicroBuild
                 throw new Exception('not implemented');
         }
 
-        $envs = "$envs CFLAGS='$cflags' LIBS='-ldl -lpthread'";
+        $envs = "$envs CFLAGS='$cflags' CXXFLAGS='$cxxflags' LIBS='-ldl -lpthread'";
 
         passthru(
             $this->config->setX . ' && ' .
@@ -115,6 +119,11 @@ class MicroBuild
             );
         }
 
+        $static_cpp = '';
+        if ($this->config->useCPP()) {
+            $extra_libs .= $this->config->libcxx->staticLibs();
+        }
+
         if ($bloat) {
             Log::i('bloat linking');
             $extra_libs = "-Wl,--whole-archive $extra_libs -Wl,--no-whole-archive";
@@ -130,11 +139,6 @@ class MicroBuild
                 Log::e("failed to patch phar");
                 $pharPatched = false;
             }
-        }
-
-        $static_cpp = '';
-        if ($this->config->useCPP()) {
-            $static_cpp = $this->config->libcxx->staticArgs();
         }
 
         passthru(

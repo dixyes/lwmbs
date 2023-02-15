@@ -32,8 +32,8 @@ class Config extends CommonConfig
     public string $cxx;
     public string $arch;
     public string $gnuArch;
-    public string $archCFlags;
-    public string $archCXXFlags;
+    public string $cFlags;
+    public string $cxxFlags;
     public array $tuneCFlags;
     public string $cmakeToolchainFile;
 
@@ -78,8 +78,11 @@ class Config extends CommonConfig
         $this->libc = Util::chooseLibc($this->cc);
         $this->libcxx = Util::chooseLibcxx($this->cc, $this->cxx);
         $this->concurrency = Util::getCpuCount();
-        $this->archCFlags = Util::getArchCFlags($this->cc, $this->arch);
-        $this->archCXXFlags = Util::getArchCFlags($this->cxx, $this->arch);
+        $this->cFlags = Util::getArchCFlags($this->cc, $this->arch);
+        $this->cxxFlags = Util::getArchCFlags($this->cxx, $this->arch);
+        if (Util::getCCType($this->cxx) === 'clang') {
+            $this->cxxFlags .= ' -stdlib=libc++';
+        }
         $this->tuneCFlags = Util::checkCCFlags(util::getTuneCFlags($this->arch), $this->cc);
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(
             os: 'Linux',
@@ -97,7 +100,7 @@ class Config extends CommonConfig
             $this->pkgconfEnv . ' ' .
             "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
-            (php_uname('m') === $arch?'':"CFLAGS='{$this->archCFlags}'");
+            (php_uname('m') === $arch?'':"CFLAGS='{$this->cFlags}'");
         if (php_uname('m') !== $this->arch){
             $this->crossCompilePrefix =Util::getCrossCompilePrefix($this->cc, $this->arch);
             Log::i('using cross compile prefix ' . $this->crossCompilePrefix);

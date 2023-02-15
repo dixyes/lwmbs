@@ -125,16 +125,16 @@ CMAKE;
     }
     public static function getCCType(string $cc):string {
         switch(true) {
+            case $cc === 'clang++':
+            case $cc === 'clang':
+            case str_starts_with($cc, 'musl-clang'):
+                $ccType = 'clang';
+                break;
             case str_ends_with($cc, 'c++'):
             case str_ends_with($cc, 'cc'):
             case str_ends_with($cc, 'g++'):
             case str_ends_with($cc, 'gcc'):
                 $ccType = 'gcc';
-                break;
-            case $cc === 'clang++':
-            case $cc === 'clang':
-            case str_starts_with($cc, 'musl-clang'):
-                $ccType = 'clang';
                 break;
             default:
                 throw new Exception("unknown cc type: $cc");

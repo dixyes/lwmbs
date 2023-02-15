@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -18,17 +19,31 @@
 
 declare(strict_types=1);
 
+use PgSql\Lob;
+
 enum CXXLib
 {
     case LIBSTDCXX;
     case LIBCXX;
 
-    public function staticArgs(): string
+    public function staticLibs(bool|string $useLLD = false): string
     {
-        return match ($this) {
-            static::LIBSTDCXX => ' -static-libstdc++ -lstdc++ ',
-            static::LIBCXX => ' -lc++abi ',
+        $libs = match ($this) {
+            static::LIBSTDCXX => ' /usr/lib/libstdc++.a ',
+            static::LIBCXX => ' /usr/lib/libc++.a /usr/lib/libc++abi.a ',
         };
+
+        foreach (array_filter(explode(" ", $libs)) as $lib) {
+            $file = file_get_contents($lib);
+            if (preg_match('/gcc_/', $file)) {
+                Log::w("lib $lib contains gcc symbols, using -lgcc");
+                $libs .= " -Wl,-Bstatic,--start-group -lgcc -lgcc_eh -Wl,--end-group,-Bdynamic ";
+                break;
+            }
+        }
+
+        // return " -Wl,-Bstatic $libs -Wl,-Bdynamic ";
+        return $libs;
     }
 
     public function literalName(): string

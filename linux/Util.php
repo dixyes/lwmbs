@@ -157,7 +157,7 @@ final class Util
 
     public static function chooseLibc(string $cc): Clib
     {
-        Log::i('checking libc');
+        Log::i('checking c library');
         $self = file_get_contents('/proc/self/exe', length: 4096);
         preg_match('/' . CLib::MUSL->getLDInterpreter() . '/', $self, $matches);
         if ($matches) {
@@ -185,14 +185,19 @@ final class Util
 
     public static function chooseLibcxx(string $cc, string $cxx): CXXLib
     {
-        Log::i('checking libc++');
+        Log::i('checking c++ std library');
 
-        if (str_ends_with($cxx, 'clang++')) {
-            Log::i("using libc++");
-            return CXXLib::LIBCXX;
-        } else {
-            Log::i("using libstdc++");
-            return CXXLib::LIBSTDCXX;
+        switch (Util::getCCType($cxx)) {
+            case 'clang':
+                if (is_file('/usr/lib/libc++.a')) {
+                    Log::i("using libc++");
+                    return CXXLib::LIBCXX;
+                }
+            case 'gcc':
+                Log::i("using libstdc++");
+                return CXXLib::LIBSTDCXX;
+            default:
+                throw new Exception("unsupported cxx $cxx");
         }
     }
 

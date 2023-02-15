@@ -76,7 +76,7 @@ EOF,
         $ret = 0;
         $ex_lib = '-ldl -pthread';
         $env = $this->config->pkgconfEnv . ' ' .
-            "CFLAGS='{$this->config->archCFlags}'";
+            "CFLAGS='{$this->config->cFlags}'";
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
