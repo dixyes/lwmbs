@@ -321,8 +321,8 @@ final class Util
         }
         return match (static::getCCType($cc)) {
             'clang' => match ($arch) {
-                'x86_64' => '--target=x86_64-unknown-linux',
-                'arm64', 'aarch64' => '--target=arm64-unknown-linux',
+                'x86_64' => '--target=x86_64-unknown-linux -fuse-ld=lld',
+                'arm64', 'aarch64' => '--target=arm64-unknown-linux -fuse-ld=lld',
                 default => throw new Exception('unsupported arch: ' . $arch),
             },
             'gcc' => '',

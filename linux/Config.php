@@ -80,8 +80,15 @@ class Config extends CommonConfig
         $this->concurrency = Util::getCpuCount();
         $this->cFlags = Util::getArchCFlags($this->cc, $this->arch);
         $this->cxxFlags = Util::getArchCFlags($this->cxx, $this->arch);
-        if (Util::getCCType($this->cxx) === 'clang') {
-            $this->cxxFlags .= ' -stdlib=libc++';
+        switch (Util::getCCType($this->cxx)) {
+            case 'clang':
+                if ($this->libcxx == CXXLib::LIBCXX) {
+                    $this->cxxFlags .= ' -stdlib=libc++';
+                }
+                break;
+            case 'gcc':
+                // $this->cxxFlags .= ' -static-libstdc++ -static-libgcc';
+                break;
         }
         $this->tuneCFlags = Util::checkCCFlags(util::getTuneCFlags($this->arch), $this->cc);
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(

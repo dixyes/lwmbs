@@ -29,18 +29,11 @@ enum CXXLib
     public function staticLibs(bool|string $useLLD = false): string
     {
         $libs = match ($this) {
-            static::LIBSTDCXX => ' /usr/lib/libstdc++.a ',
-            static::LIBCXX => ' /usr/lib/libc++.a /usr/lib/libc++abi.a ',
+            static::LIBSTDCXX => '-lstdc++,-lgcc,-lgcc_eh',
+            static::LIBCXX => '-lc++,-lc++abi',
         };
 
-        foreach (array_filter(explode(" ", $libs)) as $lib) {
-            $file = file_get_contents($lib);
-            if (preg_match('/gcc_/', $file)) {
-                Log::w("lib $lib contains gcc symbols, using -lgcc");
-                $libs .= " -Wl,-Bstatic,--start-group -lgcc -lgcc_eh -Wl,--end-group,-Bdynamic ";
-                break;
-            }
-        }
+        $libs = " -Wl,-Bstatic,--start-group,$libs,--end-group,-Bdynamic ";
 
         // return " -Wl,-Bstatic $libs -Wl,-Bdynamic ";
         return $libs;
