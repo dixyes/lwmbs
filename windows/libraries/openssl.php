@@ -67,6 +67,7 @@ class Libopenssl extends Library
         $zlib = '';
         $libzlib = $this->config->getLib('zlib');
         //var_dump($libzlib);
+        $zlib_ldflags = " ";
         if ($libzlib) {
             Log::i("{$this->name} with zlib support");
             $zlib = "zlib";

@@ -354,7 +354,7 @@ function patch(string $majDotMin)
         default => [],
     });
     $patches = [];
-    $serial = ['80', '81', '82'];
+    $serial = ['80', '81', '82', '83'];
     foreach ($patchNames as $patchName) {
         if (file_exists("src/php-src/sapi/micro/patches/{$patchName}.patch")) {
             $patches[]="sapi/micro/patches/{$patchName}.patch";
@@ -408,12 +408,19 @@ function linkSwow()
 
 function latestPHP(string $majMin){
     $info = json_decode(fetch(url: "https://www.php.net/releases/index.php?json&version=$majMin"), true);
-    $version = $info['version'];
+    $version = $info['version'] ?? 'master';
+
+    if ($version !== 'master') {
+        $version = "php-$version";
+    } else {
+        Log::w("using master for unknown release PHP $majMin");
+        $version = "master";
+    }
 
     return [
         'type'=> 'git',
         'path'=> 'php-src',
-        'rev'=> "php-$version",
+        'rev'=> $version,
         'url'=> 'https://github.com/php/php-src',
     ];
 }
@@ -433,7 +440,7 @@ function mian($argv): int
             'shallowClone' => ['BOOL', false, false, 'use shallow clone'],
             'openssl11' => ['BOOL', false, false, 'use openssl 1.1'],
             'srcFile' => ['SRCFILE', false, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
-            'phpVer' => ['VERSION', false, '8.1', 'php version in major.minor format like 8.1'],
+            'phpVer' => ['VERSION', false, '8.2', 'php version in major.minor format like 8.2'],
         ],
     );
 

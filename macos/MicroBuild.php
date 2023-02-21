@@ -72,7 +72,7 @@ class MicroBuild
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
                 "--host={$this->config->gnuArch}-apple-darwin " .
-                "CFLAGS='{$this->config->archCFlags} -Werror=unknown-warning-option' " .
+                "CFLAGS='{$this->config->cFlags} -Werror=unknown-warning-option' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -109,6 +109,11 @@ class MicroBuild
             }
         }
 
+        $lcpp = '';
+        if ($this->config->useCPP()) {
+            $lcpp = '-lc++';
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
@@ -116,7 +121,7 @@ class MicroBuild
                 'EXTRA_CFLAGS="-g -Os -fno-ident' .
                     ($fakeCli ? ' -DPHP_MICRO_FAKE_CLI' : '') .
                 '" ' .
-                "EXTRA_LIBS=\"$extra_libs -lresolv\" " .
+                "EXTRA_LIBS=\"$extra_libs -lresolv $lcpp\" " .
                 "STRIP=\"dsymutil -f \" " .
                 // TODO: comment things
                 'micro',

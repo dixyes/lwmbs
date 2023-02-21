@@ -33,10 +33,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ["8.1", "8.0"]
+        php-version: ["8.2", "8.1", "8.0"]
         libc: ["glibc", "musl"]
         arch: ["x86_64", "aarch64"]
-      max-parallel: 8
+      max-parallel: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -107,12 +107,12 @@ jobs:
             "glibc-x86_64") export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH";;
             "glibc-aarch64") dnf install -yy php-cli;;
           esac
-          printf '::set-output name=hash::'
+          printf 'hash=' >> $GITHUB_OUTPUT
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php  \
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
             --phpVer=${{ matrix.php-version }} \
-            --hash
+            --hash >> $GITHUB_OUTPUT
           echo
 
       - name: Cache libraries
@@ -191,8 +191,8 @@ jobs:
               export LWMBS_CXX=g++
               ;;
           esac
-          echo "::set-output name=cc::$LWMBS_CC"
-          echo "::set-output name=cxx::$LWMBS_CXX"
+          echo "cc=$LWMBS_CC" >> $GITHUB_OUTPUT
+          echo "cxx=$LWMBS_CXX" >> $GITHUB_OUTPUT
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php ${GITHUB_WORKSPACE}/fetch_source.php \
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
@@ -211,6 +211,16 @@ jobs:
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/micro-cli_static/licenses
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli_shared/licenses
           php ${GITHUB_WORKSPACE}/dump_licenses.php ${GITHUB_WORKSPACE}/cli_static/licenses
+
+          php <<EOF
+          <?php
+          preg_match("/project\\(libzip\\s+VERSION\\s+([^\\r\\n]+)/m", file_get_contents('src/libzip/CMakeLists.txt'), \$m);
+          if (version_compare(\$m[1], "1.9.2", "<=")) {
+              echo "patching libzip\n";
+              chdir('src/libzip');
+              passthru("curl -sfSL https://github.com/nih-at/libzip/pull/349.patch | patch -p1");
+          }
+          EOF
 
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'

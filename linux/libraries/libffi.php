@@ -50,7 +50,7 @@ EOF
         Log::i("building {$this->name}");
         $ret = 0;
         $env = $this->config->pkgconfEnv . ' ' .
-            " CFLAGS='{$this->config->archCFlags}'";
+            " CFLAGS='{$this->config->cFlags}'";
 
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:

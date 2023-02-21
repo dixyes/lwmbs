@@ -6,7 +6,7 @@ on:
       libraries:
         description: "libraries"
         required: false
-        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,pthreads4w,libxml2"
+        default: "zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2"
       extensions:
         description: "extensions"
         required: false
@@ -22,7 +22,7 @@ on:
     - cron: "33 4 * * *"
 
 env:
-  LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,pthreads4w,libxml2
+  LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2
   LWMBS_EXTENSIONS: dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd
 
 jobs:
@@ -33,13 +33,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - php-version: "8.2"
+            arch: "x64"
           - php-version: "8.1"
             arch: "x64"
           - php-version: "8.0"
             arch: "x64"
-          - php-version: "8.1" # but 8.2 dev
+          - php-version: "8.2"
             arch: "arm64"
-      max-parallel: 3
+      max-parallel: 4
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -49,12 +51,12 @@ jobs:
         shell: pwsh
         run: |
           ${env:GITHUB_TOKEN} = "${{ secrets.GITHUB_TOKEN }}"
-          Write-Host -NoNewline "::set-output name=hash::"
+          Write-Output "hash=" | Out-File "${env:GITHUB_OUTPUT}" -Append -NoNewline
           php fetch_source.php `
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" `
             --phpVer=${{ matrix.php-version }} `
-            --hash
+            --hash | Out-File "${env:GITHUB_OUTPUT}" -Append -NoNewline
           Write-Host ""
 
       - name: Cache libraries
@@ -80,25 +82,45 @@ jobs:
           Invoke-WebRequest -Uri "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip" `
             -OutFile "nasm-2.15.05-win64.zip"
           unzip nasm-2.15.05-win64.zip
+          if (0 -Ne $lastexitcode) {
+            exit 1
+          }
           Move-Item nasm-2.15.05/*.exe C:\Windows\system32
           Move-Item nasm-2.15.05/rdoff/*.exe C:\Windows\system32
 
           # prepare binary sdk
           git clone --depth 1 --single-branch --branch master https://github.com/php/php-sdk-binary-tools C:\tools\php-sdk-binary-tools
+          if (0 -Ne $lastexitcode) {
+            exit 1
+          }
 
           # fetch source
-          if ("${{ matrix.arch }}" -Eq "arm64") {
-            # prepare master php source
-            git clone --depth 1 --single-branch --branch master  https://github.com/php/php-src src\php-src
-          }
           php ${env:GITHUB_WORKSPACE}/fetch_source.php `
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" `
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" `
             --phpVer=${{ matrix.php-version }} `
             --shallowClone
+          if (0 -Ne $lastexitcode) {
+            exit 1
+          }
           php ${env:GITHUB_WORKSPACE}/dump_licenses.php `
             ${env:GITHUB_WORKSPACE}\licenses
+          if (0 -Ne $lastexitcode) {
+            exit 1
+          }
           # TODO: filters
+          
+          # if ("${{ matrix.arch }}" -Eq "arm64") {
+          #   # https://github.com/openssl/openssl/issues/20234
+          #   Invoke-WebRequest -Uri https://patch-diff.githubusercontent.com/raw/openssl/openssl/pull/20244.patch `
+          #     -OutFile "win-openssl-aa64.patch"
+          #   Push-Location src\openssl
+          #     Get-Content ..\..\win-openssl-aa64.patch | & patch -p1
+          #     if (0 -Ne $lastexitcode) {
+          #       exit 1
+          #     }
+          #   Pop-Location
+          # }
 
       - name: Prepare libraries
         if: steps.cache.outputs.cache-hit != 'true'

@@ -32,9 +32,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ["8.1", "8.0"]
+        php-version: ["8.2", "8.1", "8.0"]
         arch: ["x86_64", "arm64"]
-      max-parallel: 4
+      max-parallel: 6
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -43,12 +43,12 @@ jobs:
         id: src_hash
         run: |
           set -xeo pipefail
-          printf '::set-output name=hash::'
+          printf 'hash=' >> $GITHUB_OUTPUT
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php  \
             "${{ (github.event.inputs && github.event.inputs.libraries) || env.LWMBS_LIBRARIES }}" \
             "${{ (github.event.inputs && github.event.inputs.extensions) || env.LWMBS_EXTENSIONS }}" \
             --phpVer=${{ matrix.php-version }} \
-            --hash
+            --hash >> $GITHUB_OUTPUT
           echo
 
       - name: Cache libraries

@@ -157,7 +157,7 @@ final class Util
 
     public static function chooseLibc(string $cc): Clib
     {
-        Log::i('checking libc');
+        Log::i('checking c library');
         $self = file_get_contents('/proc/self/exe', length: 4096);
         preg_match('/' . CLib::MUSL->getLDInterpreter() . '/', $self, $matches);
         if ($matches) {
@@ -180,6 +180,24 @@ final class Util
             }
             Log::i("using glibc");
             return CLib::GLIBC;
+        }
+    }
+
+    public static function chooseLibcxx(string $cc, string $cxx): CXXLib
+    {
+        Log::i('checking c++ std library');
+
+        switch (Util::getCCType($cxx)) {
+            case 'clang':
+                if (is_file('/usr/lib/libc++.a')) {
+                    Log::i("using libc++");
+                    return CXXLib::LIBCXX;
+                }
+            case 'gcc':
+                Log::i("using libstdc++");
+                return CXXLib::LIBSTDCXX;
+            default:
+                throw new Exception("unsupported cxx $cxx");
         }
     }
 
@@ -303,8 +321,8 @@ final class Util
         }
         return match (static::getCCType($cc)) {
             'clang' => match ($arch) {
-                'x86_64' => '--target=x86_64-unknown-linux',
-                'arm64', 'aarch64' => '--target=arm64-unknown-linux',
+                'x86_64' => '--target=x86_64-unknown-linux -fuse-ld=lld',
+                'arm64', 'aarch64' => '--target=arm64-unknown-linux -fuse-ld=lld',
                 default => throw new Exception('unsupported arch: ' . $arch),
             },
             'gcc' => '',

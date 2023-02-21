@@ -56,4 +56,17 @@ CMAKE;
         $config_w32 = preg_replace('/dllmain.c\s+/', '', $config_w32);
         file_put_contents('src\php-src\win32\build\config.w32', $config_w32);
     }
+    
+    public static function zstdAPCufix(bool $apcuEnabled = false) {
+        if ($apcuEnabled) {
+            // impossible
+            throw new Exception("why use apcu on cli/micro SAPI");
+            $replace = 'AC_DEFINE("HAVE_APCU_SUPPORT", 1, "APCu support");';
+        } else {
+            $replace = '';
+        }
+        $config_w32 = file_get_contents('src\php-src\ext\zstd\config.w32');
+        $config_w32 = preg_replace('/if\s*\([^{]+\)\s*{\s*AC_DEFINE\s*\(\s*"HAVE_APCU[^)]+\)\s*;\s*}/m', $replace, $config_w32);
+        file_put_contents('src\php-src\ext\zstd\config.w32', $config_w32);
+    }
 }

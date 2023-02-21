@@ -46,6 +46,21 @@ class CommonConfig extends \stdClass
         return $this->exts[$name] ?? null;
     }
 
+    public function useCPP(): bool
+    {
+        foreach ($this->exts as $ext) {
+            if ($ext->useCPP()) {
+                return true;
+            }
+        }
+        foreach ($this->libs as $lib) {
+            if ($lib->useCPP()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function makeLibArray(): array
     {
         $ret = [];

@@ -26,6 +26,7 @@ trait CommonLibraryTrait
         private Config $config,
         private ?string $sourceDir = null,
         private array $dependencies = [],
+        private readonly bool $useCPP = false,
     ) {
         $this->sourceDir = $sourceDir ?? ('src' . DIRECTORY_SEPARATOR . $this->name);
     }
@@ -95,5 +96,9 @@ trait CommonLibraryTrait
     public function getHeaders(): array
     {
         return $this->headers;
+    }
+    public function useCPP(): bool
+    {
+        return $this->useCPP;
     }
 }

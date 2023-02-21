@@ -31,8 +31,8 @@ class Config extends CommonConfig
     public string $cxx;
     public string $arch;
     public string $gnuArch;
-    public string $archCFlags;
-    public string $archCXXFlags;
+    public string $cFlags;
+    public string $cxxFlags;
     public string $cmakeToolchainFile;
 
     public const NEEDED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
@@ -72,8 +72,8 @@ class Config extends CommonConfig
         $this->gnuArch = Util::gnuArch($this->arch);
 
         $this->concurrency = Util::getCpuCount();
-        $this->archCFlags = Util::getArchCFlags($this->arch);
-        $this->archCXXFlags = Util::getArchCFlags($this->arch);
+        $this->cFlags = Util::getArchCFlags($this->arch);
+        $this->cxxFlags = Util::getArchCFlags($this->arch);
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(
             os: 'Darwin',
             targetArch: $this->arch,
@@ -84,7 +84,7 @@ class Config extends CommonConfig
             'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '" ' .
             "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
-            "CFLAGS='{$this->archCFlags}'";
+            "CFLAGS='{$this->cFlags}'";
     }
 
     public function makeAutoconfArgs(string $name, array $libSpecs): string

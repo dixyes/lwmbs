@@ -76,7 +76,7 @@ class Liblibzip extends Library
         $openssl = '-DENABLE_OPENSSL=OFF ';
         $libopenssl = $this->config->getLib('openssl');
         if ($libopenssl) {
-            $openssl = '-DENABLE_ZSTD=ON ' .
+            $openssl = '-DENABLE_OPENSSL=ON ' .
                 '-DOpenSSL_LIBRARY="' . $libopenssl->getStaticLibFiles(style: 'cmake') . '" ' .
                 '-DOpenSSL_INCLUDE_DIR="' . realpath('include') . '" ';
         }
@@ -91,7 +91,6 @@ class Liblibzip extends Library
                 // '--debug-find ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
                 '-DENABLE_GNUTLS=OFF ' .
-                '-DENABLE_OPENSSL=ON ' .
                 '-DENABLE_MBEDTLS=OFF ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
                 '-DBUILD_DOC=OFF ' .

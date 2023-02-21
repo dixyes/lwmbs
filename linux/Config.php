@@ -27,12 +27,13 @@ class Config extends CommonConfig
     public string $pkgconfEnv;
     public string $noteSection = "Je pense, donc je suis\0";
     public CLib $libc;
+    public CXXLib $libcxx;
     public string $cc;
     public string $cxx;
     public string $arch;
     public string $gnuArch;
-    public string $archCFlags;
-    public string $archCXXFlags;
+    public string $cFlags;
+    public string $cxxFlags;
     public array $tuneCFlags;
     public string $cmakeToolchainFile;
 
@@ -75,14 +76,25 @@ class Config extends CommonConfig
         Log::i('choose arch: ' . $this->arch);
 
         $this->libc = Util::chooseLibc($this->cc);
+        $this->libcxx = Util::chooseLibcxx($this->cc, $this->cxx);
         $this->concurrency = Util::getCpuCount();
-        $this->archCFlags = Util::getArchCFlags($this->cc, $this->arch);
-        $this->archCXXFlags = Util::getArchCFlags($this->cxx, $this->arch);
+        $this->cFlags = Util::getArchCFlags($this->cc, $this->arch);
+        $this->cxxFlags = Util::getArchCFlags($this->cxx, $this->arch);
+        switch (Util::getCCType($this->cxx)) {
+            case 'clang':
+                if ($this->libcxx == CXXLib::LIBCXX) {
+                    $this->cxxFlags .= ' -stdlib=libc++';
+                }
+                break;
+            case 'gcc':
+                // $this->cxxFlags .= ' -static-libstdc++ -static-libgcc';
+                break;
+        }
         $this->tuneCFlags = Util::checkCCFlags(util::getTuneCFlags($this->arch), $this->cc);
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile(
             os: 'Linux',
             targetArch: $this->arch,
-            cflags: Util::getArchCFlags($this->cc, $this->arch),
+            cflags: $this->cFlags,
             cc: $this->cc,
             cxx: $this->cxx,
         );
@@ -95,7 +107,7 @@ class Config extends CommonConfig
             $this->pkgconfEnv . ' ' .
             "CC='{$this->cc}' " .
             "CXX='{$this->cxx}' " .
-            (php_uname('m') === $arch?'':"CFLAGS='{$this->archCFlags}'");
+            (php_uname('m') === $arch?'':"CFLAGS='{$this->cFlags}'");
         if (php_uname('m') !== $this->arch){
             $this->crossCompilePrefix =Util::getCrossCompilePrefix($this->cc, $this->arch);
             Log::i('using cross compile prefix ' . $this->crossCompilePrefix);

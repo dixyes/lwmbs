@@ -72,7 +72,7 @@ class CliBuild
                 '--enable-shared=no ' .
                 '--enable-static=yes ' .
                 "--host={$this->config->gnuArch}-apple-darwin " .
-                "CFLAGS='{$this->config->archCFlags} -Werror=unknown-warning-option' " .
+                "CFLAGS='{$this->config->cFlags} -Werror=unknown-warning-option' " .
                 '--disable-all ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
@@ -97,12 +97,17 @@ class CliBuild
             );
         }
 
+        $lcpp = '';
+        if ($this->config->useCPP()) {
+            $lcpp = '-lc++';
+        }
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
                 "make -j{$this->config->concurrency} " .
                 'EXTRA_CFLAGS="-g -Os -fno-ident" ' .
-                "EXTRA_LIBS=\"$extra_libs -lresolv\" " .
+                "EXTRA_LIBS=\"$extra_libs -lresolv $lcpp\" " .
                 // TODO: comment things
                 'cli &&' .
                 'dsymutil -f sapi/cli/php'

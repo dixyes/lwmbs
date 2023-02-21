@@ -98,6 +98,19 @@ trait UnixExtensionTrait
                     $arg .= ' --enable-swow-curl';
                 }
                 break;
+            case 'swoole':
+                if ($this->config->getLib('libpq')) {
+                    $arg .= ' --enable-swoole-pgsql';
+                }
+                if ($this->config->getLib('brotli')) {
+                    $arg .= ' --enable-brotli';
+                } else {
+                    $arg .= ' --enable-brotli=no';
+                }
+                if ($this->config->getLib('curl')) {
+                    $arg .= ' --enable-swoole-curl';
+                }
+                break;
         }
         return $arg;
     }

@@ -1,9 +1,9 @@
 {
     "src": {
         "zlib": {
-            "type": "filelist",
-            "url": "https:\/\/zlib.net\/",
-            "regex": "\/href=\"(?<file>zlib-(?<version>[^\"]+)\\.tar\\.gz)\"\/i",
+            "type": "ghrel",
+            "repo": "madler/zlib",
+            "match": "zlib-.+\\.tar\\.gz",
             "license": {
                 "type": "text",
                 "text": "(C) 1995-2022 Jean-loup Gailly and Mark Adler\n\nThis software is provided 'as-is', without any express or implied\nwarranty.  In no event will the authors be held liable for any damages\narising from the use of this software.\n\nPermission is granted to anyone to use this software for any purpose,\nincluding commercial applications, and to alter it and redistribute it\nfreely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not\n claim that you wrote the original software. If you use this software\n in a product, an acknowledgment in the product documentation would be\n appreciated but is not required.\n2. Altered source versions must be plainly marked as such, and must not be\n misrepresented as being the original software.\n3. This notice may not be removed or altered from any source distribution.\n\nJean-loup Gailly        Mark Adler\njloup@gzip.org          madler@alumni.caltech.edu"
@@ -11,7 +11,7 @@
         },
         "libpng": {
             "type": "git",
-            "url": "https:\/\/git.code.sf.net\/p\/libpng\/code",
+            "url": "https://github.com/glennrp/libpng.git",
             "rev": "libpng16",
             "license": {
                 "type": "text",
@@ -37,9 +37,9 @@
             }
         },
         "xz": {
-            "type": "filelist",
-            "url": "https:\/\/tukaani.org\/xz\/",
-            "regex": "\/href=\"(?<file>xz-(?<version>[^\"]+)\\.tar\\.xz)\"\/",
+            "type": "ghrel",
+            "repo": "xz-mirror/xz",
+            "match": "xz-.+\\.tar\\.gz",
             "license": {
                 "type": "file",
                 "path": "COPYING"
@@ -168,7 +168,7 @@
             "url": "https:\/\/github.com\/swow\/swow",
             "license": {
                 "type": "file",
-                "path": "LICENSE"
+                "path": "LICENSES.full"
             }
         },
         "redis": {
