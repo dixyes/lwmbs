@@ -38,7 +38,7 @@ includedir=${prefix}/include
 
 Name: libffi
 Description: Library supporting Foreign Function Interfaces
-Version: 3.4.2
+Version: 3.4.4
 Libs: -L${toolexeclibdir} -lffi
 Cflags: -I${includedir}
 EOF
@@ -67,6 +67,59 @@ EOF
             default:
                 throw new Exception("unsupported libc: {$this->config->libc->name}");
         }
+
+        // https://github.com/libffi/libffi/pull/764
+        $patch = <<<'PATCH'
+        From cbfb9b436ab13e4b4aba867d061e11d7f89a351c Mon Sep 17 00:00:00 2001
+        From: serge-sans-paille <sguelton@mozilla.com>
+        Date: Wed, 1 Feb 2023 18:09:25 +0100
+        Subject: [PATCH] Forward declare open_temp_exec_file
+
+        It's defined in closures.c and used in tramp.c.
+        Also declare it as an hidden symbol, as it should be.
+        ---
+         include/ffi_common.h | 4 ++++
+         src/tramp.c          | 4 ++++
+         2 files changed, 8 insertions(+)
+
+        diff --git a/include/ffi_common.h b/include/ffi_common.h
+        index 2bd31b03d..c53a79493 100644
+        --- a/include/ffi_common.h
+        +++ b/include/ffi_common.h
+        @@ -128,6 +128,10 @@ void *ffi_data_to_code_pointer (void *data) FFI_HIDDEN;
+            static trampoline. */
+         int ffi_tramp_is_present (void *closure) FFI_HIDDEN;
+
+        +/* Return a file descriptor of a temporary zero-sized file in a
+        +   writable and executable filesystem. */
+        +int open_temp_exec_file(void) FFI_HIDDEN;
+        +
+         /* Extended cif, used in callback from assembly routine */
+         typedef struct
+         {
+        diff --git a/src/tramp.c b/src/tramp.c
+        index b9d273a1a..c3f4c9933 100644
+        --- a/src/tramp.c
+        +++ b/src/tramp.c
+        @@ -39,6 +39,10 @@
+         #ifdef __linux__
+         #define _GNU_SOURCE 1
+         #endif
+        +
+        +#include <ffi.h>
+        +#include <ffi_common.h>
+        +
+         #include <stdio.h>
+         #include <unistd.h>
+         #include <stdlib.h>
+        PATCH;
+        file_put_contents("{$this->sourceDir}/764.patch", $patch);
+        passthru(
+            "cd {$this->sourceDir} && " .
+                "patch -p1 < 764.patch",
+            $ret
+        );
+
 
         passthru(
             $this->config->setX . ' && ' .

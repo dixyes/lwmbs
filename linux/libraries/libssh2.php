@@ -39,7 +39,7 @@ includedir=${prefix}/include
 Name: libssh2
 URL: https://www.libssh2.org/
 Description: Library for SSH-based communication
-Version: 1.10.0
+Version: 1.11.0
 Requires.private: libssl libcrypto zlib
 Libs: -L${libdir} -lssh2
 Libs.private:
@@ -86,7 +86,7 @@ EOF
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '.. && ' .
-                "cmake --build . -j {$this->config->concurrency} --target libssh2 && " .
+                "cmake --build . -j {$this->config->concurrency} --target libssh2_static && " .
                 'make install DESTDIR="' . realpath('.') . '"' ,
             $ret
         );

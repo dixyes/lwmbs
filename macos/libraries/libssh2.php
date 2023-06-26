@@ -70,7 +70,7 @@ class Liblibssh2 extends Library
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '.. && ' .
-                "cmake --build . -j {$this->config->concurrency} --target libssh2 && " .
+                "cmake --build . -j {$this->config->concurrency} --target libssh2_static && " .
                 'make install DESTDIR="' . realpath('.') . '"' ,
             $ret
         );
