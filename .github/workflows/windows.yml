@@ -15,9 +15,9 @@ on:
         description: "build libraries only"
         required: false
         default: ""
-  push:
-  schedule:
-    - cron: "33 4 * * *"
+  # push:
+  # schedule:
+  #   - cron: "33 4 * * *"
 
 env:
   LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2

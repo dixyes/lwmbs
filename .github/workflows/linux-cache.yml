@@ -2,8 +2,8 @@ name: cache linux environments
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "33 2 * * *"
+  # schedule:
+  #   - cron: "33 2 * * *"
 
 jobs:
   centos7:
