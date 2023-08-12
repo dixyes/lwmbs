@@ -124,6 +124,14 @@ class SourceCode
         if ($ret != 0) {
             throw new Exception("failed to patch php");
         }
+
+        if ($majMin == '80') {
+            // openssl3 patch
+            Log::i('patching php for openssl 3');
+            $openssl_c = file_get_contents($this->path . '/ext/openssl/openssl.c');
+            $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
+            file_put_contents($this->path . '/ext/openssl/openssl.c', $openssl_c);
+        }
     }
 
     public function prepare(bool $shallowClone = false)
