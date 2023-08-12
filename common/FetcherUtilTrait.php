@@ -21,6 +21,22 @@ declare(strict_types=1);
 
 trait FetcherUtilTrait
 {
+
+    static function latestPHP(string $ver): string
+    {
+        $info = json_decode(static::fetch(url: "https://www.php.net/releases/index.php?json&version=$ver"), true);
+        $version = $info['version'] ?? null;
+
+        if ($version) {
+            $ref = "php-$version";
+        } else {
+            Log::w("using master for unknown release PHP $ver");
+            $ref = "master";
+        }
+
+        return $ref;
+    }
+
     static function githubHeader(): ?string
     {
         if (!getenv('GITHUB_TOKEN')) {

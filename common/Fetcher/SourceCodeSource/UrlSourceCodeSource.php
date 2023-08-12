@@ -39,7 +39,7 @@ class UrlSourceCodeSource extends SourceCodeSource
 
         return new SourceCode(
             source: $this,
-            path: $path,
+            filePath: $path,
         );
     }
 

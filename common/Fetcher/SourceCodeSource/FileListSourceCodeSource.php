@@ -87,7 +87,7 @@ class FileListSourceCodeSource extends SourceCodeSource
 
         return new SourceCode(
             source: $this,
-            path: $path,
+            filePath: $path,
         );
     }
 

@@ -88,7 +88,7 @@ class GithubAssetSourceCodeSource extends SourceCodeSource
 
         return new SourceCode(
             source: $this,
-            path: $path,
+            filePath: $path,
         );
     }
 

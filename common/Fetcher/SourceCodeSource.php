@@ -28,9 +28,9 @@ require_once __DIR__ . '/SourceCodeSource/GitSourceCodeSource.php';
 abstract class SourceCodeSource extends stdClass
 {
     /**
-     * github latest release file
+     * github latest release asset file
      */
-    const TYPE_GHREL = 'ghrel';
+    const TYPE_GHASSET = 'ghasset';
 
     /**
      * github latest release tarball
@@ -53,7 +53,7 @@ abstract class SourceCodeSource extends stdClass
     const TYPE_GIT = 'git';
 
     private static array $typeMap = [
-        self::TYPE_GHREL => 'GithubAssetSourceCodeSource',
+        self::TYPE_GHASSET => 'GithubAssetSourceCodeSource',
         self::TYPE_GHTAR => 'GithubTarballSourceCodeSource',
         self::TYPE_URL => 'UrlSourceCodeSource',
         self::TYPE_FILELIST => 'FileListSourceCodeSource',

@@ -60,10 +60,12 @@ class GitSourceCodeSource extends SourceCodeSource implements CloneInterface
     {
         if (!is_dir($dest)) {
             // clone if not exist
+            Log::i("git clone {$this->config['url']} {$this->config['ref']}");
 
             $args = "--branch {$this->config['ref']}";
-            $args .= $shallowClone ? ' --depth 1' : '';
+            $args .= $shallowClone ? ' --depth 1 --single-branch' : '';
             $args .= ' --recurse-submodules';
+            $args .= ' --config core.autocrlf=false';
 
             passthru("git clone {$args} {$this->config['url']} $dest", $ret);
             if ($ret !== 0) {
@@ -71,18 +73,28 @@ class GitSourceCodeSource extends SourceCodeSource implements CloneInterface
             }
         } else {
             // fetch if exist
+            Log::i("git fetch -C $dest");
 
             passthru("git -C $dest fetch origin {$this->config['ref']}", $ret);
             if ($ret !== 0) {
                 throw new Exception("git fetch failed");
             }
+
+            Log::i("git -C $dest checkout HEAD .");
+            passthru("git -C $dest checkout HEAD .", $ret);
+            if ($ret !== 0) {
+                throw new Exception("git checkout failed");
+            }
+
+            Log::i("git -C $dest checkout FETCH_HEAD");
+            passthru("git -C $dest checkout FETCH_HEAD", $ret);
+            if ($ret !== 0) {
+                throw new Exception("git checkout failed");
+            }
         }
 
-        passthru("git -C $dest checkout {$this->config['ref']}", $ret);
-        if ($ret !== 0) {
-            throw new Exception("git checkout failed");
-        }
 
+        Log::i("git -C $dest submodule update --init --recursive");
         passthru("git -C $dest submodule update --init --recursive", $ret);
         if ($ret !== 0) {
             throw new Exception("git submodule update failed");
