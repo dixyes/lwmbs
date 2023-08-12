@@ -419,6 +419,7 @@ function mian($argv): int
         ],
         namedKeys: [
             'hash' => ['BOOL', false, false, 'hash only'],
+            'hashFile' => ['PATH', false, null, 'hash only, then output to a file'],
             'shallowClone' => ['BOOL', false, false, 'use shallow clone'],
             'openssl11' => ['BOOL', false, false, 'use openssl 1.1'],
             'srcFile' => ['SRCFILE', false, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
@@ -471,7 +472,14 @@ function mian($argv): int
     $chosen = array_unique($chosen);
     $filter = fn($_, $name) => in_array($name, $chosen, true);
 
-    if ($cmdArgs['named']['hash']) {
+    $hashFd = STDOUT;
+    if ($cmdArgs['named']['hashFile']) {
+        $hashFd = fopen($cmdArgs['named']['hashFile'], 'w');
+    }
+
+    if (
+        $cmdArgs['named']['hash'] || $cmdArgs['named']['hashFile']
+    ) {
         $files = [];
         foreach (array_filter($data['src'], $filter, ARRAY_FILTER_USE_BOTH) as $name => $source) {
             switch ($source['type']) {
@@ -495,7 +503,9 @@ function mian($argv): int
             Log::i("found $name source: $filename");
             $files[] = $filename;
         }
-        echo hash('sha256', implode('|', $files)) . "\n";
+        $hashStr = hash('sha256', implode('|', $files));
+        fwrite($hashFd, $hashStr);
+        fclose($hashFd);
         return 0;
     }
     $shallowClone = (bool)$cmdArgs['named']['shallowClone'];
