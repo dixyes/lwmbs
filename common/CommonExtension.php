@@ -20,8 +20,6 @@ declare(strict_types=1);
 
 class CommonExtension
 {
-    use SourceTrait;
-
     private static ?array $allExtensionDescs = null;
 
     public static function getAllExtensionDescs(): array
