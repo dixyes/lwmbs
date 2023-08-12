@@ -74,20 +74,19 @@ class GitSourceCodeSource extends SourceCodeSource implements CloneInterface
         } else {
             // fetch if exist
             Log::i("git fetch -C $dest");
-
-            passthru("git -C $dest fetch origin {$this->config['ref']}", $ret);
+            passthru("cd $dest && git fetch origin {$this->config['ref']}", $ret);
             if ($ret !== 0) {
                 throw new Exception("git fetch failed");
             }
 
             Log::i("git -C $dest checkout HEAD .");
-            passthru("git -C $dest checkout HEAD .", $ret);
+            passthru("cd $dest && git checkout HEAD .", $ret);
             if ($ret !== 0) {
                 throw new Exception("git checkout failed");
             }
 
             Log::i("git -C $dest checkout FETCH_HEAD");
-            passthru("git -C $dest checkout FETCH_HEAD", $ret);
+            passthru("cd $dest && git checkout FETCH_HEAD", $ret);
             if ($ret !== 0) {
                 throw new Exception("git checkout failed");
             }
@@ -95,7 +94,7 @@ class GitSourceCodeSource extends SourceCodeSource implements CloneInterface
 
 
         Log::i("git -C $dest submodule update --init --recursive");
-        passthru("git -C $dest submodule update --init --recursive", $ret);
+        passthru("cd $dest && git submodule update --init --recursive", $ret);
         if ($ret !== 0) {
             throw new Exception("git submodule update failed");
         }
