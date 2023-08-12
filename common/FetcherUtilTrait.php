@@ -51,6 +51,7 @@ trait FetcherUtilTrait
         }
     }
 
+    static private ?string $_7zExe = null;
     static function extractSource(string $filename, string $path): void
     {
         $ret = 0;
@@ -84,34 +85,36 @@ trait FetcherUtilTrait
         } else {
             // find 7z
 
-            $paths = [];
-            // 7z zs
-            if ($path = shell_exec("reg query \"HKLM\\SOFTWARE\\7-Zip-Zstandard\" /v Path64")) {
-                preg_match('/Path64\s+REG_SZ\s+(.*)/', $path, $matches);
-                if ($matches) {
-                    // remove end /
-                    $paths[] = preg_replace('/\\\$/', '', $matches[1]);
+            if (!static::$_7zExe) {
+                $sevenzPaths = [];
+                // 7z zs
+                if ($sevenzPath = shell_exec("reg query \"HKLM\\SOFTWARE\\7-Zip-Zstandard\" /v Path64")) {
+                    preg_match('/Path64\s+REG_SZ\s+(.*)/', $sevenzPath, $matches);
+                    if ($matches) {
+                        $sevenzPaths[] = preg_replace('/\\\$/', '', $matches[1]);
+                    }
                 }
-            }
-            // Nanazip
-            $paths[] = getenv('LOCALAPPDATA') . 'Microsoft\WindowsApps';
-            // 7z origin
-            if ($path = shell_exec("reg query \"HKLM\\SOFTWARE\\7-Zip\" /v Path64")) {
-                preg_match('/Path64\s+REG_SZ\s+(.*)/', $path, $matches);
-                if ($matches) {
-                    $paths[] = preg_replace('/\\\$/', '', $matches[1]);
+                // Nanazip
+                $sevenzPaths[] = getenv('LOCALAPPDATA') . 'Microsoft\WindowsApps';
+                // 7z origin
+                if ($sevenzPath = shell_exec("reg query \"HKLM\\SOFTWARE\\7-Zip\" /v Path64")) {
+                    preg_match('/Path64\s+REG_SZ\s+(.*)/', $sevenzPath, $matches);
+                    if ($matches) {
+                        $sevenzPaths[] = preg_replace('/\\\$/', '', $matches[1]);
+                    }
+                }
+
+                static::$_7zExe = Util::findCommand('7z', $sevenzPaths);
+                if (!static::$_7zExe) {
+                    throw new Exception('needs 7z to extract on Windows');
                 }
             }
 
-            $_7zExe = Util::findCommand('7z', $paths);
-            if (!$_7zExe) {
-                throw new Exception('needs 7z to extract on Windows');
-            }
             @mkdir($path, recursive: true);
             switch (Util::extname($filename)) {
                 case 'zstd':
                 case 'zst':
-                    if (!str_contains($_7zExe, 'Zstandard') && !str_contains($_7zExe, 'WindowsApps')) {
+                    if (!str_contains(static::$_7zExe, 'Zstandard') && !str_contains(static::$_7zExe, 'WindowsApps')) {
                         throw new Exception("zstd is not supported: $filename");
                     }
                 case 'xz':
@@ -119,13 +122,13 @@ trait FetcherUtilTrait
                 case 'gz':
                 case 'tgz':
                 case 'bz2':
-                    passthru("\"$_7zExe\" x -so $filename | tar -f - -x -C $path --strip-components 1", $ret);
+                    passthru('"' . static::$_7zExe . "\" x -so $filename | tar -f - -x -C $path --strip-components 1", $ret);
                     break;
                 case 'tar':
                     passthru("tar -xf $filename -C $path --strip-components 1", $ret);
                     break;
                 case 'zip':
-                    passthru("\"$_7zExe\" x $filename -o$path", $ret);
+                    passthru('"' . static::$_7zExe . "\" x $filename -o$path", $ret);
                     break;
                 default:
                     throw new Exception("unknown archive format: $filename");
