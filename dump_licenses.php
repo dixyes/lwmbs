@@ -34,10 +34,11 @@ function mian($argv): int
         argv: $argv,
         positionalNames: [
             'destDir' => ['DESTDIR', true, null, 'destination path'],
+            'libraries' => ['LIBRARIES', false, '', 'libraries to generate, comma separated, empty for all'],
+            'extensions' => ['EXTENSIONS', false, '', 'extensions to generate, comma separated, empty for all'],
         ],
         namedKeys: [
             'srcFile' => ['SRCFILE', false, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
-            'libraries' => ['LIBRARIES', false, null, 'libraries to generate, comma separated'],
         ],
     );
 
@@ -47,20 +48,34 @@ function mian($argv): int
         mkdir($destDir);
     }
 
-    $filter = fn ($k) => true;
-    if ($cmdArgs['named']['libraries']) {
-        $names = array_map('trim', array_filter(explode(',', $cmdArgs['named']['libraries'])));
-        $filter = function ($k) use ($names) {
-            if (in_array($k, $names)) {
-                return true;
-            }
-            return false;
-        };
-    }
-
     $data = json_decode(file_get_contents($cmdArgs['named']['srcFile']), true);
 
-    foreach (array_filter($data['src'], $filter, ARRAY_FILTER_USE_KEY) as $name => $info) {
+    $chosen = [
+        'php',
+        'micro',
+    ];
+    $libraries = array_map('trim', array_filter(explode(',', $cmdArgs['positional']['libraries'])));
+    if ($libraries) {
+        foreach ($libraries as $lib) {
+            $srcName = $data['libs'][$lib]['source'];
+            $chosen[] = $srcName;
+        }
+    } else {
+        $chosen = [...$chosen, ...array_map(fn ($x) => $x['source'], array_values($data['libs']))];
+    }
+    $extensions = array_map('trim', array_filter(explode(',', $cmdArgs['positional']['extensions'])));
+    if ($extensions) {
+        foreach ($extensions as $lib) {
+            $srcName = $data['exts'][$lib]['source'];
+            $chosen[] = $srcName;
+        }
+    } else {
+        $chosen = [...$chosen, ...array_map(fn ($x) => $x['source'], array_values($data['exts']))];
+    }
+    $chosen = array_unique($chosen);
+    $filter = fn ($_, $name) => in_array($name, $chosen, true);
+
+    foreach (array_filter($data['src'], $filter, ARRAY_FILTER_USE_BOTH) as $name => $info) {
         $license = $info['license'];
         Log::i("dump license for $name");
         switch ($license['type']) {
@@ -79,7 +94,7 @@ function mian($argv): int
                 throw new Exception("unsupported license type {$license['type']}");
         }
     }
-    if ($filter('php')) {
+    if ($filter('', 'php')) {
         Log::i("dump license for php");
         copy("src/php-src/LICENSE", "{$destDir}/LICENSE.php");
     }
