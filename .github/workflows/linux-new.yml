@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       flavors:
-        description: "flavors, comma splited, empty for all, available: min, lite, max[-eventengine, like swow/swoole/libev], [WIP]custom"
+        description: "flavors, comma splited, empty for 'min,lite,max-swow', available: min, lite, max[-eventengine, like swow/swoole/libev], [WIP]custom"
         required: false
         default: ""
       archs:
@@ -56,7 +56,7 @@ jobs:
           {
               return array_filter(array_map("trim", explode(',', $arg)));
           }
-          
+
           $flavors = arg2arr(<<<'ARG'
           ${{ github.event.inputs.flavors }}
           ARG);
@@ -72,9 +72,9 @@ jobs:
           $phpVers = arg2arr(<<<'ARG'
           ${{ github.event.inputs.phpVers }}
           ARG);
-          
+
           if (!$flavors) {
-              $flavors = ['min', 'lite', 'max', 'max-swow', 'max-libev'];
+              $flavors = ['min', 'lite', 'max-swow'];
           }
           if (!$archs) {
               $archs = ['x86_64', 'aarch64'];
@@ -88,7 +88,7 @@ jobs:
           if (!$phpVers) {
               $phpVers = ['8.0', '8.1', '8.2'];
           }
-          
+
           $customExtensions = <<<'ARG'
           ${{ github.event.inputs.customExtensions }}
           ARG;
@@ -141,7 +141,7 @@ jobs:
                   }
               }
           }
-          
+
           $json = json_encode($jobs);
           file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
 
