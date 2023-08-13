@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       flavors:
-        description: "flavors, comma splited, empty for 'min,lite,max-swow', available: min, lite, max[-eventengine, like swow/swoole/libev], [WIP]custom"
+        description: "flavors, comma splited, empty for 'min,lite,max', available: min, lite, max[-eventengine, like swow/swoole/libev], [WIP]custom"
         required: false
         default: ""
       archs:
@@ -16,7 +16,7 @@ on:
         required: false
         default: ""
       libcs:
-        description: "libcs, comma splited, empty for all, available: musl_static, musl_shared, glibc_shared"
+        description: "libcs, comma splited, empty for all, available: musl, glibc"
         required: false
         default: ""
       phpVers:
@@ -74,7 +74,7 @@ jobs:
           ARG);
 
           if (!$flavors) {
-              $flavors = ['min', 'lite', 'max-swow'];
+              $flavors = ['min', 'lite', 'max'];
           }
           if (!$archs) {
               $archs = ['x86_64', 'aarch64'];
@@ -83,7 +83,7 @@ jobs:
               $sapis = ['micro', 'micro_cli', 'cli'];
           }
           if (!$libcs) {
-              $libcs = ['musl_static', 'musl_shared', 'glibc_shared'];
+              $libcs = ['musl', 'glibc'];
           }
           if (!$phpVers) {
               $phpVers = ['8.0', '8.1', '8.2'];
@@ -119,12 +119,7 @@ jobs:
                                   'max-libev' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,libev',
                                   'custom' => $customExtensions,
                               };
-                              $imageTag = match ($libc) {
-                                  'musl_static' => 'linux-musl',
-                                  'musl_shared' => 'linux-musl',
-                                  'glibc_shared' => 'linux-glibc',
-                              };
-                              $imageTag .= "-${arch}";
+                              $imageTag = "linux-${libc}-${arch}";
                               $job = [
                                   'flavor' => $flavor,
                                   'libraries' => $libraries,
@@ -155,8 +150,7 @@ jobs:
     strategy:
       max-parallel: 6
       fail-fast: false
-      matrix:
-        includes: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
+      matrix: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
     steps:
       - name: debug
         run: |
