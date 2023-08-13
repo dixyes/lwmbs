@@ -12,7 +12,7 @@ on:
         required: false
         default: ""
       sapis:
-        description: "SAPIs, comma splited, empty for all, available: micro, micro_cli, cli"
+        description: "SAPIs, comma splited, empty for all, available: micro, micro-cli, cli"
         required: false
         default: ""
       libcs:
@@ -31,7 +31,6 @@ on:
         description: "[WIP]custom libraries, used for custom flavor build"
         required: false
         default: ""
-        
 
   schedule:
     - cron: "33 4 * * *"
@@ -58,7 +57,7 @@ jobs:
           ${{ github.event.inputs.flavors }}
           ARG);
           $archs = arg2arr(<<<'ARG'
-          
+
           ARG);
           $sapis = arg2arr(<<<'ARG'
           ${{ github.event.inputs.sapis }}
@@ -77,7 +76,7 @@ jobs:
               $archs = ['x86_64', 'aarch64'];
           }
           if (!$sapis) {
-              $sapis = ['micro', 'micro_cli', 'cli'];
+              $sapis = ['micro', 'micro-cli', 'cli'];
           }
           if (!$libcs) {
               $libcs = ['musl', 'glibc'];
@@ -94,7 +93,7 @@ jobs:
           ARG;
           $customLibraries = trim($customLibraries);
           $customExtensions = trim($customExtensions);
-          
+
           foreach ($archs as $arch) {
               foreach ($libcs as $libc) {
                   foreach ($phpVers as $phpVer) {
@@ -116,6 +115,28 @@ jobs:
 
           $json = json_encode($jobs);
           file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
+          # $jsonDebug = <<<'JSON'
+          # [{
+          #   "flavors": [
+          #     "min",
+          #     "lite",
+          #     "max"
+          #   ],
+          #   "customLibraries": "",
+          #   "customExtensions": "",
+          #   "imageTag": "linux-glibc-x86_64-src",
+          #   "arch": "x86_64",
+          #   "sapis": [
+          #     "micro",
+          #     "micro-cli",
+          #     "cli"
+          #   ],
+          #   "libc": "musl",
+          #   "phpVer": "8.2"
+          # }]
+          # JSON;
+          # $json = json_encode(json_decode($jsonDebug, true));
+          # file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
 
 
   build:
@@ -130,29 +151,261 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
     steps:
-      - name: debug
+      - name: Make build commands
         shell: php {0}
         run: |
           <?php
-          
-          var_dump(<<<'EOF'
+
+          $matrix = <<<'EOF'
           ${{ toJson(matrix) }}
-          EOF);
+          EOF;
+
+          $matrix = json_decode($matrix, true);
+          $customLibraries = $matrix['customLibraries'];
+          $customExtensions = $matrix['customExtensions'];
+
+          $commands = [];
+
+          $output = fopen('/tmp/build.sh', 'w');
+
+          $writesh = function (...$args) use ($output) {
+              fwrite($output, sprintf(...$args));
+              fwrite(STDOUT, sprintf(...$args));
+          };
+
+          $writesh(<<<BASH
+          #!/bin/sh
+
+          set -xeo pipefail
+
+          # NOTE: to build these binaries on your machine, just use dixyes/prepared-lwmbs:{$matrix['imageTag']} image
+
+          # prepare source for specified php version
+          # you may select only libraries and extensions you will use
+          php /lwmbs/fetch_source.php \
+              "" \
+              "" \
+              --phpVer={$matrix['phpVer']}
+
+          BASH);
+
+          foreach ($matrix['flavors'] as $flavor) {
+              $libraries = match ($flavor) {
+                  'min' => 'libffi',
+                  'lite' => 'zstd,zlib,libffi,libzip,bzip2,xz,onig',
+                  'max', 'max-swow', 'max-libev' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2',
+                  'max-swoole' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libstdc++',
+                  'custom' => $customLibraries,
+              };
+              $extensions = match ($flavor) {
+                  'min' => 'posix,pcntl,ffi,filter,tokenizer,ctype',
+                  'lite' => 'opcache,posix,pcntl,ffi,filter,tokenizer,ctype,iconv,mbstring,mbregex,sockets,zip,zstd,zlib,bz2,phar,fileinfo',
+                  'max' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg',
+                  'max-swow' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swow',
+                  'max-swoole' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swoole',
+                  'max-libev' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,libev',
+                  'custom' => $customExtensions,
+              };
+
+              $writesh("\n\n");
+              $writesh(<<<BASH
+              # ----- "$flavor" flavor -----
+
+              # rebuild libs for this flavor to avoid cache
+              php /lwmbs/build_libs.php \
+                  "$libraries" \
+                  "--cc=\$LWMBS_CC" \
+                  "--cxx=\$LWMBS_CXX" \
+                  "--arch={$matrix['arch']}" \
+                  "--fresh"
+              BASH);
+              foreach ($matrix['sapis'] as $sapi) {
+                  $command = match ($sapi) {
+                      'micro' => 'build_micro.php',
+                      'micro-cli' => 'build_micro.php --fakeCli',
+                      'cli' => 'build_cli.php',
+                  };
+
+                  $targetBin = match ($sapi) {
+                      'micro' => '/src/php-src/sapi/micro/micro.sfx',
+                      'micro-cli' => '/src/php-src/sapi/micro/micro.sfx',
+                      'cli' => '/src/php-src/sapi/cli/php',
+                  };
+                  $binName = match ($sapi) {
+                      'micro' => "micro.sfx",
+                      'micro-cli' => "micro_cli.sfx",
+                      'cli' => "php",
+                  };
+
+                  // $writesh("\n");
+                  // $writesh("# cleam php build dir\n");
+
+                  $writesh("\n\n");
+                  $writesh(<<<BASH
+                  # {$matrix['libc']}_shared $sapi
+                  php /lwmbs/$command \
+                      "$libraries" \
+                      "$extensions" \
+                      "--cc=\$LWMBS_CC" \
+                      "--cxx=\$LWMBS_CXX" \
+                      "--arch={$matrix['arch']}"
+                  # copy the built bin out
+                  mkdir -p /out/{$flavor}_shared
+                  cp $targetBin /out/{$flavor}_shared/$binName
+                  cp $targetBin.debug /out/{$flavor}_shared/$binName.debug
+                  BASH);
+                  if ($matrix['libc'] == 'musl') {
+                      $writesh("\n\n");
+                      $writesh(<<<BASH
+                      # {$matrix['libc']}_static $sapi
+                      php /lwmbs/$command \
+                          "$libraries" \
+                          "$extensions" \
+                          "--cc=\$LWMBS_CC" \
+                          "--cxx=\$LWMBS_CXX" \
+                          "--arch={$matrix['arch']}" \
+                          "--allStatic"
+                      # copy the built bin out
+                      mkdir -p /out/{$flavor}_static
+                      cp $targetBin /out/{$flavor}_static/$binName
+                      cp $targetBin.debug /out/{$flavor}_static/$binName.debug
+                      BASH);
+                  }
+              }
+              $writesh("\n\n");
+              $writesh(<<<BASH
+              # dump licenses
+              php /lwmbs/dump_licenses.php \
+                  "/out/{$flavor}_shared/licenses" \
+                  "$libraries" \
+                  "$extensions"
+              php /lwmbs/dump_licenses.php \
+                  "/out/{$flavor}_static/licenses" \
+                  "$libraries" \
+                  "$extensions"
+              # copy versionFile
+              cp /versionFile "/out/{$flavor}_shared/versionFile"
+              cp /versionFile "/out/{$flavor}_static/versionFile"
+              BASH);
+          }
+
+          $writesh("\n");
+
+      - name: Build
+        shell: bash
+        working-directory: /
+        run: |
+          . /tmp/build.sh
+          # mkdir -p /out/min_shared
+          # touch /out/min_shared/micro.sfx
+          # php /lwmbs/dump_licenses.php \
+          #   "/out/min_shared/licenses" \
+          #   "libffi" \
+          #   "ffi"
+          # cp /versionFile "/out/min_shared/versionFile"
+
+      - name: Prepare node for artifact upload
+        if: always()
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          # cache: 'npm'
+
+      - name: Prepare gh actions for artifact upload
+        if: always()
+        run: |
+          npm i -g @actions/artifact @actions/core @actions/github
+          echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
+
+      - name: Expose GitHub Runtime
+        uses: crazy-max/ghaction-github-runtime@v2
+
+      - name: Upload artifacts
+        if: always()
+        shell: node {0}
+        run: |
           
-          # $libraries = match ($flavor) {
-          #   'min' => 'libffi',
-          #   'lite' => 'zstd,zlib,libffi,libzip,bzip2,xz,onig',
-          #   'max', 'max-swow', 'max-libev' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2',
-          #   'max-swoole' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libstdc++',
-          #   'custom' => $customLibraries,
-          # };
-          # $extensions = match ($flavor) {
-          #     'min' => 'posix,pcntl,ffi,filter,tokenizer,ctype',
-          #     'lite' => 'opcache,posix,pcntl,ffi,filter,tokenizer,ctype,iconv,mbstring,mbregex,sockets,zip,zstd,zlib,bz2,phar,fileinfo',
-          #     'max' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg',
-          #     'max-swow' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swow',
-          #     'max-swoole' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swoole',
-          #     'max-libev' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,libev',
-          #     'custom' => $customExtensions,
-          # };
+          const fs = require('fs/promises');
+
+          const core = require('@actions/core');
+          // const github = require('@actions/github');
+          const artifact = require('@actions/artifact');
+
+          const matrix = JSON.parse(`
+          ${{ toJson(matrix) }}
+          `)
+
+          const sapis = ['micro', 'micro_cli', 'cli'];
+          const flavors = ['min', 'lite', 'max', 'max_swow', 'max_swoole', 'max_libev']
+          const binFile = {
+            'micro': 'micro.sfx',
+            'micro-cli': 'micro_cli.sfx',
+            'cli': 'php',
+          }
+
+          async function main() {
+            let client = artifact.create()
+
+            let artifacts = {};
+            let results = {};
+
+            for (const flavor of flavors) {
+              let staticDir = `/out/${flavor}_static`;
+              let sharedDir = `/out/${flavor}_shared`;
+              for (const sapi of sapis) {
+                let staticFile = `${staticDir}/${binFile[sapi]}`;
+                let sharedFile = `${sharedDir}/${binFile[sapi]}`;
+                try {
+                  await fs.access(staticFile)
+                  let artifactName = `${sapi}_static_${flavor}`;
+                  artifacts[artifactName] = {
+                    'file': staticFile,
+                    'dir': staticDir,
+                  };
+                } catch (error) {
+                  console.log(`File ${staticFile} not found`);
+                }
+                try {
+                  await fs.access(sharedFile)
+                  let artifactName = `${sapi}_shared_${flavor}`;
+                  artifacts[artifactName] = {
+                    'file': sharedFile,
+                    'dir': sharedDir,
+                  };
+                } catch (error) {
+                  console.log(`File ${sharedFile} not found`);
+                }
+              }
+            }
+
+            for (const [name, info] of Object.entries(artifacts)) {
+              let fileList = [
+                info.file
+              ];
+              try {
+                for (const file of await fs.readdir(`${info.dir}/licenses`)) {
+                  fileList.push(`${info.dir}/licenses/${file}`);
+                }
+              } catch (error) {
+                console.log(`Directory ${info.dir}/licenses not found`);
+              }
+              fileList.push(`${info.dir}/versionFile`);
+
+              try {
+                console.log(`Uploading artifact ${name}`);
+                let uploadResponse = client.uploadArtifact(name, fileList, info.dir);
+                results[name] = uploadResponse;
+              } catch (error) {
+                core.setFailed(error.message);
+              }
+            }
+
+            for (const [name, result] of Object.entries(results)) {
+              let res = await result;
+              console.log(`Artifact ${name} uploaded: ${res.artifactName}`);
+            }
+          }
+
+          main().catch(err => core.setFailed(err.message));
+
 
