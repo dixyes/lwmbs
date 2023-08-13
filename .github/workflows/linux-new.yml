@@ -98,41 +98,37 @@ jobs:
           $customExtensions = trim($customExtensions);
           $customLibraries = trim($customLibraries);
           
-          foreach ($flavors as $flavor) {
-              foreach ($archs as $arch) {
-                  foreach ($sapis as $sapi) {
-                      foreach ($libcs as $libc) {
-                          foreach ($phpVers as $phpVer) {
-                              $libraries = match ($flavor) {
-                                  'min' => 'libffi',
-                                  'lite' => 'zstd,zlib,libffi,libzip,bzip2,xz,onig',
-                                  'max', 'max-swow', 'max-libev' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2',
-                                  'max-swoole' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libstdc++',
-                                  'custom' => $customLibraries,
-                              };
-                              $extensions = match ($flavor) {
-                                  'min' => 'posix,pcntl,ffi,filter,tokenizer,ctype',
-                                  'lite' => 'opcache,posix,pcntl,ffi,filter,tokenizer,ctype,iconv,mbstring,mbregex,sockets,zip,zstd,zlib,bz2,phar,fileinfo',
-                                  'max' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg',
-                                  'max-swow' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swow',
-                                  'max-swoole' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swoole',
-                                  'max-libev' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,libev',
-                                  'custom' => $customExtensions,
-                              };
-                              $imageTag = "linux-${libc}-${arch}";
-                              $job = [
-                                  'flavor' => $flavor,
-                                  'libraries' => $libraries,
-                                  'extensions' => $extensions,
-                                  'imageTag' => $imageTag,
-                                  'arch' => $arch,
-                                  'sapi' => $sapi,
-                                  'libc' => $libc,
-                                  'phpVer' => $phpVer,
-                              ];
-                              $jobs[] = $job;
-                          }
-                      }
+          foreach ($archs as $arch) {
+              foreach ($libcs as $libc) {
+                  foreach ($phpVers as $phpVer) {
+                      $libraries = match ($flavor) {
+                          'min' => 'libffi',
+                          'lite' => 'zstd,zlib,libffi,libzip,bzip2,xz,onig',
+                          'max', 'max-swow', 'max-libev' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2',
+                          'max-swoole' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libstdc++',
+                          'custom' => $customLibraries,
+                      };
+                      $extensions = match ($flavor) {
+                          'min' => 'posix,pcntl,ffi,filter,tokenizer,ctype',
+                          'lite' => 'opcache,posix,pcntl,ffi,filter,tokenizer,ctype,iconv,mbstring,mbregex,sockets,zip,zstd,zlib,bz2,phar,fileinfo',
+                          'max' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg',
+                          'max-swow' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swow',
+                          'max-swoole' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swoole',
+                          'max-libev' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,libev',
+                          'custom' => $customExtensions,
+                      };
+                      $imageTag = "linux-${libc}-${arch}";
+                      $job = [
+                          'flavors' => $flavors,
+                          'libraries' => $libraries,
+                          'extensions' => $extensions,
+                          'imageTag' => $imageTag,
+                          'arch' => $arch,
+                          'sapis' => $sapis,
+                          'libc' => $libc,
+                          'phpVer' => $phpVer,
+                      ];
+                      $jobs[] = $job;
                   }
               }
           }
@@ -142,7 +138,7 @@ jobs:
 
 
   build:
-    name: Build ${{ matrix.phpVer }} ${{ matrix.sapi }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ matrix.flavor }}
+    name: Build ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
     runs-on: ubuntu-latest
     container: '${{ github.env.srcImage }}:${{ matrix.imageTag }}'
     needs:
@@ -150,7 +146,8 @@ jobs:
     strategy:
       max-parallel: 6
       fail-fast: false
-      matrix: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
+      matrix:
+        include: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
     steps:
       - name: debug
         run: |
