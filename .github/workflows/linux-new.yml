@@ -1,0 +1,166 @@
+name: Linux build
+
+on:
+  workflow_dispatch:
+    inputs:
+      flavors:
+        description: "flavors, comma splited, empty for all, available: min, lite, max[-eventengine, like swow/swoole/libev], [WIP]custom"
+        required: false
+        default: ""
+      archs:
+        description: "archs, comma splited, empty for all, available: x86_64, aarch64"
+        required: false
+        default: ""
+      sapis:
+        description: "SAPIs, comma splited, empty for all, available: micro, micro_cli, cli"
+        required: false
+        default: ""
+      libcs:
+        description: "libcs, comma splited, empty for all, available: musl_static, musl_shared, glibc_shared"
+        required: false
+        default: ""
+      phpVers:
+        description: "PHP versions, empty for all, available: 8.0, 8.1, 8.2"
+        required: false
+        default: ""
+      customExtensions:
+        description: "[WIP]custom extensions, used for custom flavor build"
+        required: false
+        default: ""
+      customLibraries:
+        description: "[WIP]custom libraries, used for custom flavor build"
+        required: false
+        default: ""
+        
+
+  schedule:
+    - cron: "33 4 * * *"
+
+env:
+  srcImage: 'dixyes/prepared-lwmbs'
+
+jobs:
+  gen-jobs:
+    name: Generate jobs
+    runs-on: ubuntu-latest
+    outputs:
+      jobs: ${{ steps.gen-jobs.outputs.jobs }}
+    steps:
+      - name: Generate jobs
+        id: gen-jobs
+        shell: php
+        run: |
+          <?php
+
+          function arg2arr(string $arg): array
+          {
+              return array_filter(array_map("trim", explode(',', $arg)));
+          }
+          
+          $flavors = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.flavors }}
+          ARG);
+          $archs = arg2arr(<<<'ARG'
+          
+          ARG);
+          $sapis = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.sapis }}
+          ARG);
+          $libcs = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.libcs }}
+          ARG);
+          $phpVers = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.phpVers }}
+          ARG);
+          
+          if (!$flavors) {
+              $flavors = ['min', 'lite', 'max', 'max-swow', 'max-libev'];
+          }
+          if (!$archs) {
+              $archs = ['x86_64', 'aarch64'];
+          }
+          if (!$sapis) {
+              $sapis = ['micro', 'micro_cli', 'cli'];
+          }
+          if (!$libcs) {
+              $libcs = ['musl_static', 'musl_shared', 'glibc_shared'];
+          }
+          if (!$phpVers) {
+              $phpVers = ['8.0', '8.1', '8.2'];
+          }
+          
+          $customExtensions = <<<'ARG'
+          ${{ github.event.inputs.customExtensions }}
+          ARG;
+          $customLibraries = <<<'ARG'
+          ${{ github.event.inputs.customLibraries }}
+          ARG;
+          $customExtensions = trim($customExtensions);
+          $customLibraries = trim($customLibraries);
+          
+          foreach ($flavors as $flavor) {
+              foreach ($archs as $arch) {
+                  foreach ($sapis as $sapi) {
+                      foreach ($libcs as $libc) {
+                          foreach ($phpVers as $phpVer) {
+                              $libraries = match ($flavor) {
+                                  'min' => 'libffi',
+                                  'lite' => 'zstd,zlib,libffi,libzip,bzip2,xz,onig',
+                                  'max', 'max-swow', 'max-libev' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2',
+                                  'max-swoole' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libstdc++',
+                                  'custom' => $customLibraries,
+                              };
+                              $extensions = match ($flavor) {
+                                  'min' => 'posix,pcntl,ffi,filter,tokenizer,ctype',
+                                  'lite' => 'opcache,posix,pcntl,ffi,filter,tokenizer,ctype,iconv,mbstring,mbregex,sockets,zip,zstd,zlib,bz2,phar,fileinfo',
+                                  'max' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg',
+                                  'max-swow' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swow',
+                                  'max-swoole' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swoole',
+                                  'max-libev' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,libev',
+                                  'custom' => $customExtensions,
+                              };
+                              $imageTag = match ($libc) {
+                                  'musl_static' => 'linux-musl',
+                                  'musl_shared' => 'linux-musl',
+                                  'glibc_shared' => 'linux-glibc',
+                              };
+                              $imageTag .= "-${arch}";
+                              $job = [
+                                  'flavor' => $flavor,
+                                  'libraries' => $libraries,
+                                  'extensions' => $extensions,
+                                  'imageTag' => $imageTag,
+                                  'arch' => $arch,
+                                  'sapi' => $sapi,
+                                  'libc' => $libc,
+                                  'phpVer' => $phpVer,
+                              ];
+                              $jobs[] = $job;
+                          }
+                      }
+                  }
+              }
+          }
+          
+          $json = json_encode($jobs);
+          file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
+
+
+  build:
+    name: Build ${{ matrix.phpVer }} ${{ matrix.sapi }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ matrix.flavor }}
+    runs-on: ubuntu-latest
+    container: '${{ github.env.srcImage }}:${{ matrix.imageTag }}'
+    needs:
+      - gen-jobs
+    strategy:
+      max-parallel: 6
+      fail-fast: false
+      matrix:
+        includes: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
+    steps:
+      - name: debug
+        run: |
+          cat <<EOF
+          ${{ toJson(matrix) }}
+          EOF
+
