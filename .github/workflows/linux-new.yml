@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: Generate jobs
         id: gen-jobs
-        shell: php
+        shell: php {0}
         run: |
           <?php
 
