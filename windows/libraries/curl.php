@@ -103,7 +103,9 @@ class Libcurl extends Library
                 'cmake -B builddir ' .
                     "-A \"{$this->config->cmakeArch}\" " .
                     "-G \"{$this->config->cmakeGeneratorName}\" " .
+                    '-DBUILD_CURL_EXE=OFF ' .
                     '-DBUILD_SHARED_LIBS=OFF ' .
+                    '-DBUILD_STATIC_LIBS=ON ' .
                     (0 ? '-DBUILD_CURL_EXE=ON ' : '-DBUILD_CURL_EXE=OFF ') .
                     '-DCURL_STATIC_CRT=ON ' .
                     '-DENABLE_UNICODE=ON ' .
