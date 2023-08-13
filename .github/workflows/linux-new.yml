@@ -36,9 +36,6 @@ on:
   schedule:
     - cron: "33 4 * * *"
 
-env:
-  srcImage: 'dixyes/prepared-lwmbs'
-
 jobs:
   gen-jobs:
     name: Generate jobs
@@ -101,7 +98,7 @@ jobs:
           foreach ($archs as $arch) {
               foreach ($libcs as $libc) {
                   foreach ($phpVers as $phpVer) {
-                      $imageTag = "linux-${libc}-${arch}";
+                      $imageTag = "linux-${libc}-${arch}-src";
                       $job = [
                           'flavors' => $flavors,
                           'customLibraries' => $customLibraries,
@@ -124,7 +121,7 @@ jobs:
   build:
     name: Build ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
     runs-on: ubuntu-latest
-    container: '${{ github.env.srcImage }}:${{ matrix.imageTag }}'
+    container: 'dixyes/prepared-lwmbs:${{ matrix.imageTag }}'
     needs:
       - gen-jobs
     strategy:
