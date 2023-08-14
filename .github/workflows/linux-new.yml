@@ -346,12 +346,18 @@ jobs:
           #   "ffi"
           # cp /versionFile "/out/min_shared/versionFile"
 
-      - name: Prepare node for artifact upload
-        if: always()
+      - name: Prepare node for artifact upload - setup-node
+        if: always() && ${{ matrix.libc == 'glibc' }}
         uses: actions/setup-node@v3
         with:
           node-version: 16
           # cache: 'npm'
+
+      - name: Prepare node for artifact upload - apk add
+        if: always() && ${{ matrix.libc == 'glibc' }}
+        shell: sh {0}
+        run: |
+          apk add npm
 
       - name: Prepare gh actions for artifact upload
         if: always()
