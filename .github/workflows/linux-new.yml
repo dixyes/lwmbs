@@ -417,11 +417,11 @@ jobs:
                     };
                     let shaSum = crypto.createHash('sha256').update(await fs.readFile(binPath)).digest('hex')
                     console.log(`\x1b[37m;File ${binPath} sha256: ${shaSum}\x1b[0m;`)
-                    await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum} ${binFile[sapi]}\n`, { flag: 'a' })
+                    await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}\n`, { flag: 'a' })
                     try {
                       shaSum = crypto.createHash('sha256').update(await fs.readFile(`${binPath}.debug`)).digest('hex')
                       console.log(`\x1b[37m;File ${binPath}.debug sha256: ${shaSum}\x1b[0m;`)
-                      await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum} ${binFile[sapi]}.debug\n`, { flag: 'a' })
+                      await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}.debug\n`, { flag: 'a' })
                     } catch (error) {
                       // pass
                     }
