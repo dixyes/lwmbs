@@ -186,7 +186,8 @@ jobs:
           php /lwmbs/fetch_source.php \
               "" \
               "" \
-              --phpVer={$matrix['phpVer']}
+              --phpVer={$matrix['phpVer']} \
+              --versionFile=/versionFile
           ret="\$?"
           echo "::endgroup::"
 
