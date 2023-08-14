@@ -189,7 +189,7 @@ jobs:
               --phpVer={$matrix['phpVer']}
           ret="\$?"
           echo "::endgroup::"
-          
+
           if [ ! "\$ret" = "0" ]
           then
               echo "::error::fetch source failed"
@@ -223,7 +223,7 @@ jobs:
               $writesh("\n\n");
               $writesh(<<<BASH
               # ----- "$flavor" flavor -----
-              
+
               echo "::group::Build $flavor libs"
               # rebuild libs for this flavor to avoid cache
               php /lwmbs/build_libs.php \
@@ -234,7 +234,7 @@ jobs:
                   "--fresh"
               ret="\$?"
               echo "::endgroup::"
-              
+
               if [ ! "\$ret" = "0" ]
               then
                   echo "::error::failed build lib for $flavor"
@@ -367,7 +367,6 @@ jobs:
         if: always()
         shell: node {0}
         run: |
-          
           const fs = require('fs/promises');
           const crypto = require('crypto');
 
@@ -397,39 +396,39 @@ jobs:
             let srcHash = crypto.createHash('sha256').update(versionFile).digest('hex');
 
             for (const flavor of flavors) {
-              let staticDir = `/out/${flavor}_static`;
-              let sharedDir = `/out/${flavor}_shared`;
-              for (const sapi of sapis) {
-                let staticFile = `${staticDir}/${binFile[sapi]}`;
-                let sharedFile = `${sharedDir}/${binFile[sapi]}`;
-                try {
-                  await fs.access(staticFile)
-                  let artifactName = `${sapi}_static_${flavor}_${matrix.phpVer}_${matrix.libc}_${matrix.arch}_${srcHash}`;
-                  artifacts[artifactName] = {
-                    'file': staticFile,
-                    'dir': staticDir,
-                  };
-                  console.log(`Found ${staticFile}`);
-                } catch (error) {
-                  console.log(`File ${staticFile} not found`);
-                }
-                try {
-                  await fs.access(sharedFile)
-                  let artifactName = `${sapi}_shared_${flavor}_${matrix.phpVer}_${matrix.libc}_${matrix.arch}_${srcHash}`;
-                  artifacts[artifactName] = {
-                    'file': sharedFile,
-                    'dir': sharedDir,
-                  };
-                  console.log(`Found ${sharedFile}`);
-                } catch (error) {
-                  console.log(`File ${sharedFile} not found`);
+              for (const staticOrShared of ['static', 'shared']) {
+                let dir = `/out/${flavor}_${staticOrShared}`;
+                for (const sapi of sapis) {
+                  let binPath = `${dir}/${binFile[sapi]}`;
+                  try {
+                    await fs.access(binPath)
+                    console.log(`\x1b[37m;File ${binPath} found\x1b[0m;`)
+                    let artifactName = `${sapi}_${staticOrShared}_${flavor}_${matrix.phpVer}_${matrix.libc}_${matrix.arch}_${srcHash}`;
+                    artifacts[artifactName] = {
+                      'file': binPath,
+                      'dir': dir,
+                    };
+                    let shaSum = crypto.createHash('sha256').update(await fs.readFile(binPath)).digest('hex')
+                    console.log(`\x1b[37m;File ${binPath} sha256: ${shaSum}\x1b[0m;`)
+                    await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum} ${binFile[sapi]}\n`, { flag: 'a' })
+                    try {
+                      shaSum = crypto.createHash('sha256').update(await fs.readFile(`${binPath}.debug`)).digest('hex')
+                      console.log(`\x1b[37m;File ${binPath}.debug sha256: ${shaSum}\x1b[0m;`)
+                      await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum} ${binFile[sapi]}.debug\n`, { flag: 'a' })
+                    } catch (error) {
+                      // pass
+                    }
+                  } catch (error) {
+                    console.log(`\x1b[30m;File ${binPath} not found\x1b[0m;`)
+                  }
                 }
               }
             }
 
             for (const [name, info] of Object.entries(artifacts)) {
               let fileList = [
-                info.file
+                info.file,
+                `${info.dir}/sha256sums.txt`,
               ];
               try {
                 for (const file of await fs.readdir(`${info.dir}/licenses`)) {
