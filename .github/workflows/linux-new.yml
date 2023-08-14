@@ -140,7 +140,7 @@ jobs:
 
 
   build:
-    name: Build ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
+    name: ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
     runs-on: ubuntu-latest
     container: 'ghcr.io/dixyes/prepared-lwmbs:${{ matrix.imageTag }}'
     needs:
