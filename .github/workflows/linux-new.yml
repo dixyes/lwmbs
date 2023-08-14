@@ -322,6 +322,7 @@ jobs:
           echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
 
       - name: Expose GitHub Runtime
+        if: always()
         uses: crazy-max/ghaction-github-runtime@v2
 
       - name: Upload artifacts
@@ -340,7 +341,7 @@ jobs:
           ${{ toJson(matrix) }}
           `)
 
-          const sapis = ['micro', 'micro_cli', 'cli'];
+          const sapis = ['micro', 'micro-cli', 'cli'];
           const flavors = ['min', 'lite', 'max', 'max-swow', 'max-swoole', 'max-libev']
           const binFile = {
             'micro': 'micro.sfx',
@@ -370,6 +371,7 @@ jobs:
                     'file': staticFile,
                     'dir': staticDir,
                   };
+                  console.log(`Found ${staticFile}`);
                 } catch (error) {
                   console.log(`File ${staticFile} not found`);
                 }
@@ -380,6 +382,7 @@ jobs:
                     'file': sharedFile,
                     'dir': sharedDir,
                   };
+                  console.log(`Found ${sharedFile}`);
                 } catch (error) {
                   console.log(`File ${sharedFile} not found`);
                 }
