@@ -333,7 +333,7 @@ jobs:
           $writesh("\n");
 
       - name: Build
-        shell: bash
+        shell: sh {0}
         working-directory: /
         run: |
           set +e
