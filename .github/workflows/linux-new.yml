@@ -326,6 +326,7 @@ jobs:
         run: |
           
           const fs = require('fs/promises');
+          const crypto = require('crypto');
 
           const core = require('@actions/core');
           // const github = require('@actions/github');
@@ -349,6 +350,9 @@ jobs:
             let artifacts = {};
             let results = {};
 
+            let versionFile = await fs.readFile('/versionFile');
+            let srcHash = crypto.createHash('sha256').update(versionFile).digest('hex');
+
             for (const flavor of flavors) {
               let staticDir = `/out/${flavor}_static`;
               let sharedDir = `/out/${flavor}_shared`;
@@ -357,7 +361,7 @@ jobs:
                 let sharedFile = `${sharedDir}/${binFile[sapi]}`;
                 try {
                   await fs.access(staticFile)
-                  let artifactName = `${sapi}_static_${flavor}`;
+                  let artifactName = `${sapi}_static_${flavor}_${matrix.phpVer}_${matrix.libc}_${matrix.arch}_${srcHash}`;
                   artifacts[artifactName] = {
                     'file': staticFile,
                     'dir': staticDir,
@@ -367,7 +371,7 @@ jobs:
                 }
                 try {
                   await fs.access(sharedFile)
-                  let artifactName = `${sapi}_shared_${flavor}`;
+                  let artifactName = `${sapi}_shared_${flavor}_${matrix.phpVer}_${matrix.libc}_${matrix.arch}_${srcHash}`;
                   artifacts[artifactName] = {
                     'file': sharedFile,
                     'dir': sharedDir,
