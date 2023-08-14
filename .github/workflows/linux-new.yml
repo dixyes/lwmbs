@@ -189,21 +189,25 @@ jobs:
 
           BASH);
 
+          $maxLibraries = 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2';
+          $maxExtensions = 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg';
+
           foreach ($matrix['flavors'] as $flavor) {
               $libraries = match ($flavor) {
                   'min' => 'libffi',
                   'lite' => 'zstd,zlib,libffi,libzip,bzip2,xz,onig',
-                  'max', 'max-swow', 'max-libev' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2',
-                  'max-swoole' => 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libstdc++',
+                  'max', 'max-swow' => $maxLibraries,
+                  'max-libev' => "{$maxLibraries},libev",
+                  'max-swoole' => "{$maxLibraries},libstdc++",
                   'custom' => $customLibraries,
               };
               $extensions = match ($flavor) {
                   'min' => 'posix,pcntl,ffi,filter,tokenizer,ctype',
                   'lite' => 'opcache,posix,pcntl,ffi,filter,tokenizer,ctype,iconv,mbstring,mbregex,sockets,zip,zstd,zlib,bz2,phar,fileinfo',
-                  'max' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg',
-                  'max-swow' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swow',
-                  'max-swoole' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,swoole',
-                  'max-libev' => 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,libev',
+                  'max' => $maxExtensions,
+                  'max-swow' => "{$maxExtensions},swow",
+                  'max-swoole' => "{$maxExtensions},swoole",
+                  'max-libev' => "{$maxExtensions},libev",
                   'custom' => $customExtensions,
               };
 
