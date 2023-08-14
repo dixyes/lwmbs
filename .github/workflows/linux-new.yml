@@ -341,7 +341,7 @@ jobs:
           `)
 
           const sapis = ['micro', 'micro_cli', 'cli'];
-          const flavors = ['min', 'lite', 'max', 'max_swow', 'max_swoole', 'max_libev']
+          const flavors = ['min', 'lite', 'max', 'max-swow', 'max-swoole', 'max-libev']
           const binFile = {
             'micro': 'micro.sfx',
             'micro-cli': 'micro_cli.sfx',
