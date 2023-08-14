@@ -180,12 +180,20 @@ jobs:
 
           # NOTE: to build these binaries on your machine, just use dixyes/prepared-lwmbs:{$matrix['imageTag']} image
 
+          echo "::group::Prepare source"
           # prepare source for specified php version
           # you may select only libraries and extensions you will use
           php /lwmbs/fetch_source.php \
               "" \
               "" \
               --phpVer={$matrix['phpVer']}
+          
+          if [ ! "\$?" = "0" ]
+          then
+              echo "::error::fetch source failed"
+              exit 1
+          fi
+          echo "::endgroup::"
 
           BASH);
 
@@ -214,7 +222,8 @@ jobs:
               $writesh("\n\n");
               $writesh(<<<BASH
               # ----- "$flavor" flavor -----
-
+              
+              echo "::group::Build $flavor libs"
               # rebuild libs for this flavor to avoid cache
               php /lwmbs/build_libs.php \
                   "$libraries" \
@@ -222,6 +231,13 @@ jobs:
                   "--cxx=\$LWMBS_CXX" \
                   "--arch={$matrix['arch']}" \
                   "--fresh"
+              ret="\$?"
+              echo "::endgroup::"
+              
+              if [ ! "\$ret" = "0" ]
+              then
+                  echo "::error::failed build lib for $flavor"
+              else
               BASH);
               foreach ($matrix['sapis'] as $sapi) {
                   $command = match ($sapi) {
@@ -246,50 +262,58 @@ jobs:
 
                   $writesh("\n\n");
                   $writesh(<<<BASH
-                  # {$matrix['libc']}_shared $sapi
-                  php /lwmbs/$command \
-                      "$libraries" \
-                      "$extensions" \
-                      "--cc=\$LWMBS_CC" \
-                      "--cxx=\$LWMBS_CXX" \
-                      "--arch={$matrix['arch']}"
-                  # copy the built bin out
-                  mkdir -p /out/{$flavor}_shared
-                  cp $targetBin /out/{$flavor}_shared/$binName
-                  cp $targetBin.debug /out/{$flavor}_shared/$binName.debug
-                  BASH);
-                  if ($matrix['libc'] == 'musl') {
-                      $writesh("\n\n");
-                      $writesh(<<<BASH
-                      # {$matrix['libc']}_static $sapi
+                      echo "::group::Build $flavor shared $sapi"
+                      # {$matrix['libc']}_shared $sapi
                       php /lwmbs/$command \
                           "$libraries" \
                           "$extensions" \
                           "--cc=\$LWMBS_CC" \
                           "--cxx=\$LWMBS_CXX" \
-                          "--arch={$matrix['arch']}" \
-                          "--allStatic"
+                          "--arch={$matrix['arch']}"
                       # copy the built bin out
-                      mkdir -p /out/{$flavor}_static
-                      cp $targetBin /out/{$flavor}_static/$binName
-                      cp $targetBin.debug /out/{$flavor}_static/$binName.debug
+                      mkdir -p /out/{$flavor}_shared
+                      cp $targetBin /out/{$flavor}_shared/$binName
+                      cp $targetBin.debug /out/{$flavor}_shared/$binName.debug
+                      echo "::endgroup::"
+                  BASH);
+                  if ($matrix['libc'] == 'musl') {
+                      $writesh("\n\n");
+                      $writesh(<<<BASH
+                          echo "::group::Build $flavor static $sapi"
+                          # {$matrix['libc']}_static $sapi
+                          php /lwmbs/$command \
+                              "$libraries" \
+                              "$extensions" \
+                              "--cc=\$LWMBS_CC" \
+                              "--cxx=\$LWMBS_CXX" \
+                              "--arch={$matrix['arch']}" \
+                              "--allStatic"
+                          # copy the built bin out
+                          mkdir -p /out/{$flavor}_static
+                          cp $targetBin /out/{$flavor}_static/$binName
+                          cp $targetBin.debug /out/{$flavor}_static/$binName.debug
+                          echo "::endgroup::"
                       BASH);
                   }
               }
               $writesh("\n\n");
               $writesh(<<<BASH
-              # dump licenses
-              php /lwmbs/dump_licenses.php \
-                  "/out/{$flavor}_shared/licenses" \
-                  "$libraries" \
-                  "$extensions"
-              [ -d "/out/{$flavor}_static" ] && /php /lwmbs/dump_licenses.php \
-                  "/out/{$flavor}_static/licenses" \
-                  "$libraries" \
-                  "$extensions"
-              # copy versionFile
-              cp /versionFile "/out/{$flavor}_shared/versionFile"
-              [ -d "/out/{$flavor}_static" ] && cp /versionFile "/out/{$flavor}_static/versionFile"
+                  echo "::group::Dump $flavor licenses"
+                  # dump licenses
+                  php /lwmbs/dump_licenses.php \
+                      "/out/{$flavor}_shared/licenses" \
+                      "$libraries" \
+                      "$extensions"
+                  [ -d "/out/{$flavor}_static" ] && /php /lwmbs/dump_licenses.php \
+                      "/out/{$flavor}_static/licenses" \
+                      "$libraries" \
+                      "$extensions"
+                  # copy versionFile
+                  cp /versionFile "/out/{$flavor}_shared/versionFile"
+                  [ -d "/out/{$flavor}_static" ] && cp /versionFile "/out/{$flavor}_static/versionFile"
+                  echo "::endgroup::"
+
+              fi
               BASH);
           }
 
