@@ -176,7 +176,7 @@ jobs:
           $writesh(<<<BASH
           #!/bin/sh
 
-          set -xeo pipefail
+          #set -x
 
           # NOTE: to build these binaries on your machine, just use dixyes/prepared-lwmbs:{$matrix['imageTag']} image
 
@@ -187,13 +187,14 @@ jobs:
               "" \
               "" \
               --phpVer={$matrix['phpVer']}
+          ret="\$?"
+          echo "::endgroup::"
           
-          if [ ! "\$?" = "0" ]
+          if [ ! "\$ret" = "0" ]
           then
               echo "::error::fetch source failed"
               exit 1
           fi
-          echo "::endgroup::"
 
           BASH);
 
@@ -270,11 +271,17 @@ jobs:
                           "--cc=\$LWMBS_CC" \
                           "--cxx=\$LWMBS_CXX" \
                           "--arch={$matrix['arch']}"
-                      # copy the built bin out
-                      mkdir -p /out/{$flavor}_shared
-                      cp $targetBin /out/{$flavor}_shared/$binName
-                      cp $targetBin.debug /out/{$flavor}_shared/$binName.debug
+                      ret="\$?"
                       echo "::endgroup::"
+                      if [ ! "\$ret" = "0" ]
+                      then
+                          echo "::error::failed build $flavor shared $sapi"
+                      else
+                          # copy the built bin out
+                          mkdir -p /out/{$flavor}_shared
+                          cp $targetBin /out/{$flavor}_shared/$binName
+                          cp $targetBin.debug /out/{$flavor}_shared/$binName.debug
+                      fi
                   BASH);
                   if ($matrix['libc'] == 'musl') {
                       $writesh("\n\n");
@@ -288,11 +295,17 @@ jobs:
                               "--cxx=\$LWMBS_CXX" \
                               "--arch={$matrix['arch']}" \
                               "--allStatic"
-                          # copy the built bin out
-                          mkdir -p /out/{$flavor}_static
-                          cp $targetBin /out/{$flavor}_static/$binName
-                          cp $targetBin.debug /out/{$flavor}_static/$binName.debug
+                          ret="\$?"
                           echo "::endgroup::"
+                          if [ ! "\$ret" = "0" ]
+                          then
+                              echo "::error::failed build $flavor static $sapi"
+                          else
+                              # copy the built bin out
+                              mkdir -p /out/{$flavor}_static
+                              cp $targetBin /out/{$flavor}_static/$binName
+                              cp $targetBin.debug /out/{$flavor}_static/$binName.debug
+                          fi
                       BASH);
                   }
               }
