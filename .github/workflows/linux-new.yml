@@ -70,7 +70,7 @@ jobs:
           ARG);
 
           if (!$flavors) {
-              $flavors = ['min', 'lite', 'max'];
+              $flavors = ['min', 'lite', 'max', 'max-swow'];
           }
           if (!$archs) {
               $archs = ['x86_64', 'aarch64'];
