@@ -57,7 +57,7 @@ jobs:
           ${{ github.event.inputs.flavors }}
           ARG);
           $archs = arg2arr(<<<'ARG'
-
+          ${{ github.event.inputs.archs }}
           ARG);
           $sapis = arg2arr(<<<'ARG'
           ${{ github.event.inputs.sapis }}
