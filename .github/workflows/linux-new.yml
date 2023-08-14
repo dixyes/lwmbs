@@ -336,6 +336,7 @@ jobs:
         shell: bash
         working-directory: /
         run: |
+          set +e
           . /tmp/build.sh
           # mkdir -p /out/min_shared
           # touch /out/min_shared/micro.sfx
