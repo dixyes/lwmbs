@@ -279,13 +279,13 @@ jobs:
                   "/out/{$flavor}_shared/licenses" \
                   "$libraries" \
                   "$extensions"
-              php /lwmbs/dump_licenses.php \
+              [ -d "/out/{$flavor}_static" ] && /php /lwmbs/dump_licenses.php \
                   "/out/{$flavor}_static/licenses" \
                   "$libraries" \
                   "$extensions"
               # copy versionFile
               cp /versionFile "/out/{$flavor}_shared/versionFile"
-              cp /versionFile "/out/{$flavor}_static/versionFile"
+              [ -d "/out/{$flavor}_static" ] && cp /versionFile "/out/{$flavor}_static/versionFile"
               BASH);
           }
 
