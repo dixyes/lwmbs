@@ -104,10 +104,9 @@ function mian($argv): int
         "ref" => $phpRef,
     ]);
     $phpSC = $phpSCS->download();
+    fwrite($versionFile, "{$phpSCS->versionLine()}\n");
     if (!$cmdArgs['named']['hash']) {
         $phpSCS->clone('src/php-src', shallowClone: $shallowClone);
-    } else {
-        fwrite($versionFile, "{$phpSCS->versionLine()}\n");
     }
 
     ksort($data["src"]);
