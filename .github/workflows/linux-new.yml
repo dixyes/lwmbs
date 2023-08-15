@@ -347,22 +347,16 @@ jobs:
           #   "ffi"
           # cp /versionFile "/out/min_shared/versionFile"
 
-      - name: Prepare node for artifact upload - setup-node
-        if: always() && ${{ matrix.libc == 'glibc' }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          # cache: 'npm'
-
-      - name: Prepare node for artifact upload - apk add
-        if: always() && ${{ matrix.libc == 'glibc' }}
+      - name: Prepare node for artifact upload
+        if: always()
         shell: sh {0}
         run: |
-          apk add npm
-
-      - name: Prepare gh actions for artifact upload
-        if: always()
-        run: |
+          if [ '${{ matrix.libc }}' = 'glibc' ]
+          then
+              yum install npm
+          else
+              apk add npm
+          fi
           npm i -g @actions/artifact @actions/core @actions/github
           echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
 
