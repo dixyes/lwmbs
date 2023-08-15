@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       flavors:
-        description: "flavors, comma splited, empty for 'min,lite,max', available: min, lite, max[-eventengine, like swow/swoole/libev], [WIP]custom"
+        description: "flavors, comma splited, empty for 'min,lite,max-swow', available: min, lite, max[-eventengine, like swow/swoole/libev], [WIP]custom"
         required: false
         default: ""
       archs:
@@ -24,11 +24,11 @@ on:
         required: false
         default: ""
       customExtensions:
-        description: "[WIP]custom extensions, used for custom flavor build"
+        description: "custom extensions, used for custom flavor build"
         required: false
         default: ""
       customLibraries:
-        description: "[WIP]custom libraries, used for custom flavor build"
+        description: "custom libraries, used for custom flavor build"
         required: false
         default: ""
 
@@ -70,7 +70,7 @@ jobs:
           ARG);
 
           if (!$flavors) {
-              $flavors = ['min', 'lite', 'max', 'max-swow'];
+              $flavors = ['min', 'lite', 'max-swow'];
           }
           if (!$archs) {
               $archs = ['x86_64', 'aarch64'];
