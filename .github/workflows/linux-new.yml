@@ -353,7 +353,7 @@ jobs:
         run: |
           if [ '${{ matrix.libc }}' = 'glibc' ]
           then
-              yum install npm
+              yum install -yy npm
           else
               apk add npm
           fi
