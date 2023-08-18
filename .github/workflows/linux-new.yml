@@ -32,8 +32,8 @@ on:
         required: false
         default: ""
 
-  schedule:
-    - cron: "33 4 * * *"
+  # schedule:
+  #   - cron: "33 4 * * *"
 
 jobs:
   gen-jobs:
