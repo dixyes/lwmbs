@@ -197,6 +197,11 @@ jobs:
               exit 1
           fi
 
+          echo "::group::Show versions"
+          cat /versionFile
+          sha256sum /versionFile
+          echo "::endgroup::"
+
           BASH);
 
           $maxLibraries = 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2';
@@ -357,8 +362,8 @@ jobs:
           else
               apk add npm
           fi
-          npm i -g @actions/artifact @actions/core @actions/github
-          echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
+          /usr/bin/npm i -g @actions/artifact @actions/core @actions/github
+          echo "NODE_PATH=$(/usr/bin/npm root --quiet -g)" >> "$GITHUB_ENV"
 
       - name: Expose GitHub Runtime
         if: always()
@@ -366,7 +371,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        shell: node {0}
+        shell: /usr/bin/node {0}
         run: |
           const fs = require('fs/promises');
           const crypto = require('crypto');
