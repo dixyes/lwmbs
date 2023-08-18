@@ -362,7 +362,7 @@ jobs:
         if: always()
         shell: sh {0}
         run: |
-          if [ '${{ matrix.libc }}' = 'glibc' ]
+          if [ '${{ matrix.libc }}' = 'musl' ]
           then
               apk add gcompat libstdc++
           fi
