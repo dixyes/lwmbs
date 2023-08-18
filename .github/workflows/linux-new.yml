@@ -355,6 +355,8 @@ jobs:
       - name: Setup node
         if: always()
         uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
       - name: Prepare node for artifact upload
         if: always()
