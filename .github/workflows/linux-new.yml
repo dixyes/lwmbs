@@ -352,18 +352,20 @@ jobs:
           #   "ffi"
           # cp /versionFile "/out/min_shared/versionFile"
 
+      - name: Setup node
+        if: always()
+        uses: actions/setup-node@v3
+
       - name: Prepare node for artifact upload
         if: always()
         shell: sh {0}
         run: |
           if [ '${{ matrix.libc }}' = 'glibc' ]
           then
-              yum install -yy npm
-          else
-              apk add npm
+              apk add gcompat libstdc++
           fi
-          /usr/bin/npm i -g @actions/artifact @actions/core @actions/github
-          echo "NODE_PATH=$(/usr/bin/npm root --quiet -g)" >> "$GITHUB_ENV"
+          npm i -g @actions/artifact @actions/core @actions/github
+          echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
 
       - name: Expose GitHub Runtime
         if: always()
@@ -371,7 +373,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        shell: /usr/bin/node {0}
+        shell: node {0}
         run: |
           const fs = require('fs/promises');
           const crypto = require('crypto');
