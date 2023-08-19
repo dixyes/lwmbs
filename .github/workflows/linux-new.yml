@@ -323,7 +323,7 @@ jobs:
                       "/out/{$flavor}_shared/licenses" \
                       "$libraries" \
                       "$extensions"
-                  [ -d "/out/{$flavor}_static" ] && /php /lwmbs/dump_licenses.php \
+                  [ -d "/out/{$flavor}_static" ] && php /lwmbs/dump_licenses.php \
                       "/out/{$flavor}_static/licenses" \
                       "$libraries" \
                       "$extensions"
@@ -437,9 +437,15 @@ jobs:
 
             for (const [name, info] of Object.entries(artifacts)) {
               let fileList = [
-                info.file,
                 `${info.dir}/sha256sums.txt`,
+                info.file,
               ];
+              try {
+                await fs.access(`${info.file}.debug`);
+                fileList.push(`${info.file}.debug`);
+              } catch (error) {
+                // pass
+              }
               try {
                 for (const file of await fs.readdir(`${info.dir}/licenses`)) {
                   fileList.push(`${info.dir}/licenses/${file}`);
