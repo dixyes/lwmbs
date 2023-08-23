@@ -113,6 +113,11 @@ jobs:
               }
           }
 
+          if (!$jobs) {
+              echo "no jobs generated\n";
+              exit(1);
+          }
+
           $json = json_encode($jobs);
           file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
           # $jsonDebug = <<<'JSON'
