@@ -63,12 +63,12 @@ class Libbrotli extends Library
             throw new Exception("failed to build {$this->name}");
         }
 
-        unlink('deps/lib/brotlicommon.lib');
-        unlink('deps/lib/brotlidec.lib');
-        unlink('deps/lib/brotlienc.lib');
-        unlink('deps/bin/brotli.exe');
-        unlink('deps/bin/brotlicommon.dll');
-        unlink('deps/bin/brotlidec.dll');
-        unlink('deps/bin/brotlienc.dll');
+        @unlink('deps/lib/brotlicommon.lib');
+        @unlink('deps/lib/brotlidec.lib');
+        @unlink('deps/lib/brotlienc.lib');
+        @unlink('deps/bin/brotli.exe');
+        @unlink('deps/bin/brotlicommon.dll');
+        @unlink('deps/bin/brotlidec.dll');
+        @unlink('deps/bin/brotlienc.dll');
     }
 }
