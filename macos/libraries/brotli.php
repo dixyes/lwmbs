@@ -52,7 +52,10 @@ class Libbrotli extends Library
                 "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '.. && ' .
                 "cmake --build . -j {$this->config->concurrency} && " .
-                'make install DESTDIR=' . realpath('.'),
+                'make install DESTDIR=' . realpath('.') . " && " .
+                "mv lib/libbrotlidec.a lib/libbrotlidec-static.a && " .
+                "mv lib/libbrotlienc.a lib/libbrotlienc-static.a && " .
+                "mv lib/libbrotlicommon.a lib/libbrotlicommon-static.a",
             $ret
         );
         if ($ret !== 0) {
