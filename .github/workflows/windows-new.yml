@@ -110,22 +110,22 @@ jobs:
 
           $json = json_encode($jobs);
           file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
-          # $jsonDebug = <<<'JSON'
-          # [{
-          #   "flavors": [
-          #     "custom"
-          #   ],
-          #   "customLibraries": "",
-          #   "customExtensions": "swow",
-          #   "arch": "arm64",
-          #   "sapis": [
-          #     "micro"
-          #   ],
-          #   "phpVer": "8.2"
-          # }]
-          # JSON;
-          # $json = json_encode(json_decode($jsonDebug, true));
-          # file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
+          $jsonDebug = <<<'JSON'
+          [{
+            "flavors": [
+              "custom"
+            ],
+            "customLibraries": "",
+            "customExtensions": "swow",
+            "arch": "arm64",
+            "sapis": [
+              "micro"
+            ],
+            "phpVer": "8.2"
+          }]
+          JSON;
+          $json = json_encode(json_decode($jsonDebug, true));
+          file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
 
   build:
     name: ${{ matrix.phpVer }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
@@ -200,26 +200,32 @@ jobs:
             Move-Item nasm-2.15.05/*.exe C:\build\bin\
             Move-Item nasm-2.15.05/rdoff/*.exe C:\build\bin\
 
-            # download source
-            Set-Location C:\build
-            php C:\lwmbs\fetch_source.php `
-              "" `
-              "" `
-              "--phpVer=${{ matrix.phpVer }}" `
-              "--versionFile=C:\build\versionFile"
-            if (0 -Ne $lastexitcode) {
-              exit 1
-            }
+          }
+
+          # download source
+          Set-Location C:\build
+          php C:\lwmbs\fetch_source.php `
+            "" `
+            "" `
+            "--phpVer=${{ matrix.phpVer }}" `
+            "--versionFile=C:\build\versionFile"
+          if (0 -Ne $lastexitcode) {
+            exit 1
           }
 
           $srcHash = (Get-FileHash -Path C:\build\versionFile -Algorithm SHA256).Hash.ToLower()
-          Write-Output "srcHash=$srcHash" | Out-File -FilePath "${env:GITHUB_OUTPUT}" -Append
+
+          if ("${{ steps.cache-restore.outputs.cache-matched-key }}".Contains($srcHash)) {
+            Write-Output "srcHash=$srcHash" | Out-File -FilePath "${env:GITHUB_OUTPUT}" -Append
+          } else {
+            Write-Output "srcHash=" | Out-File -FilePath "${env:GITHUB_OUTPUT}" -Append
+          }
 
           Write-Output "PATH=${env:PATH};C:\build\bin" | Out-File -FilePath "${env:GITHUB_ENV}" -Append
 
       - name: Save tools and sources
         uses: actions/cache/save@v3
-        if: steps.cache-restore.outputs.cache-hit != 'true'
+        if: steps.prepare.outputs.srcHash != ''
         with:
           path: |
             C:\tools\php-sdk-binary-tools
@@ -404,6 +410,5 @@ jobs:
       - name: Build
         shell: pwsh
         run: |
-          # Get-Item C:\build\src\php-src\ext\swow
 
           . C:\build\build.ps1
