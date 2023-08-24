@@ -38,7 +38,7 @@ class SourceCode
 
     private function prepareSwow()
     {
-        if (is_file(static::$srcDir . '/php-src/ext/swow')) {
+        if (is_link(static::$srcDir . '/php-src/ext/swow')) {
             return;
         }
         Log::i('linking swow');
