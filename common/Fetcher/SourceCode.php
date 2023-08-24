@@ -38,6 +38,9 @@ class SourceCode
 
     private function prepareSwow()
     {
+        if (is_file(static::$srcDir . '/php-src/ext/swow')) {
+            return;
+        }
         Log::i('linking swow');
         $ret = 0;
         if (PHP_OS_FAMILY === 'Windows') {
