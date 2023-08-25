@@ -216,9 +216,9 @@ jobs:
           $srcHash = (Get-FileHash -Path C:\build\versionFile -Algorithm SHA256).Hash.ToLower()
 
           if ("${{ steps.cache-restore.outputs.cache-matched-key }}".Contains($srcHash)) {
-            Write-Output "srcHash=$srcHash" | Out-File -FilePath "${env:GITHUB_OUTPUT}" -Append
-          } else {
             Write-Output "srcHash=" | Out-File -FilePath "${env:GITHUB_OUTPUT}" -Append
+          } else {
+            Write-Output "srcHash=$srcHash" | Out-File -FilePath "${env:GITHUB_OUTPUT}" -Append
           }
 
           Write-Output "PATH=${env:PATH};C:\build\bin" | Out-File -FilePath "${env:GITHUB_ENV}" -Append
@@ -260,6 +260,7 @@ jobs:
 
           $writeps(<<<PWSH
 
+          # pwsh 7.3+ support this
           \$PSNativeCommandArgumentPassing = 'Standard'
 
           # NOTE: to build these binaries on your machine, you may require php8.1+, vs, git, cmake, 7z(-zstd/nanazip better), perl
@@ -406,9 +407,21 @@ jobs:
           }
 
           $writeps("\n");
+      
+      - name: Enable pwsh PSNativeCommandArgumentPassing
+        shell: pwsh
+        run: |
+          # github actions use pwsh 7.2, so we need to enable experimental feature
+          Enable-ExperimentalFeature -Name 'PSNativeCommandArgumentPassing'
+
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
 
       - name: Build
         shell: pwsh
         run: |
+          # fix swow source link
+          Remove-Item C:\build\src\php-src\ext\swow -Force
+          New-Item -ItemType SymbolicLink -Path "C:\build\src\php-src\ext\swow" -Target "C:\build\src\php-src\ext\swow-src\ext"
 
           . C:\build\build.ps1
