@@ -97,7 +97,7 @@ jobs:
           foreach ($archs as $arch) {
               foreach ($libcs as $libc) {
                   foreach ($phpVers as $phpVer) {
-                      $imageTag = "linux-${libc}-${arch}-src";
+                      $imageTag = "linux-${libc}-${arch}";
                       $job = [
                           'flavors' => $flavors,
                           'customLibraries' => $customLibraries,
@@ -156,6 +156,12 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
     steps:
+      - name: Checkout
+        run: |
+          cd /lwmbs
+          git fetch origin ${{ github.sha }}
+          git checkout ${{ github.sha }}
+
       - name: Make build commands
         shell: php {0}
         run: |
