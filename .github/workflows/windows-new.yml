@@ -110,22 +110,22 @@ jobs:
 
           $json = json_encode($jobs);
           file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
-          $jsonDebug = <<<'JSON'
-          [{
-            "flavors": [
-              "custom"
-            ],
-            "customLibraries": "",
-            "customExtensions": "swow",
-            "arch": "arm64",
-            "sapis": [
-              "micro"
-            ],
-            "phpVer": "8.2"
-          }]
-          JSON;
-          $json = json_encode(json_decode($jsonDebug, true));
-          file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
+          # $jsonDebug = <<<'JSON'
+          # [{
+          #   "flavors": [
+          #     "custom"
+          #   ],
+          #   "customLibraries": "",
+          #   "customExtensions": "swow",
+          #   "arch": "arm64",
+          #   "sapis": [
+          #     "micro"
+          #   ],
+          #   "phpVer": "8.2"
+          # }]
+          # JSON;
+          # $json = json_encode(json_decode($jsonDebug, true));
+          # file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
 
   build:
     name: ${{ matrix.phpVer }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
@@ -296,8 +296,8 @@ jobs:
 
           PWSH);
 
-          $maxLibraries = 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libpng';
-          $maxExtensions = 'dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,gd';
+          $maxLibraries = 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2';
+          $maxExtensions = 'dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd';
 
           foreach ($matrix['flavors'] as $flavor) {
               $libraries = match ($flavor) {
@@ -425,3 +425,130 @@ jobs:
           New-Item -ItemType SymbolicLink -Path "C:\build\src\php-src\ext\swow" -Target "C:\build\src\php-src\ext\swow-src\ext"
 
           . C:\build\build.ps1
+
+          # New-Item -Path C:\out\custom\licenses -ItemType Directory -Force
+          # Out-File -FilePath C:\out\custom\micro.sfx -Encoding Ascii -Force
+          # Out-File -FilePath C:\out\custom\micro.pdb -Encoding Ascii -Force
+          # Set-Location C:\build
+          # & php C:\lwmbs\dump_licenses.php `
+          #   "C:\out\custom\licenses" `
+          #   "libffi" `
+          #   "ffi"
+          # cp C:\build\versionFile C:\out\custom\versionFile
+
+      - name: Setup node
+        if: always()
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Prepare node for artifact upload
+        if: always()
+        run: |
+          & npm i -g '@actions/artifact' '@actions/core' '@actions/github'
+          $nodePath = & npm root --quiet -g
+          $nodePath = $nodePath.Trim()
+          Write-OutPut "NODE_PATH=$nodePath" | Out-File -FilePath "${env:GITHUB_ENV}" -Append
+
+      - name: Expose GitHub Runtime
+        if: always()
+        uses: crazy-max/ghaction-github-runtime@v2
+
+      - name: Upload artifacts
+        if: always()
+        shell: node {0}
+        run: |
+          const fs = require('fs/promises');
+          const crypto = require('crypto');
+
+          const core = require('@actions/core');
+          // const github = require('@actions/github');
+          const artifact = require('@actions/artifact');
+
+          const matrix = JSON.parse(`
+          ${{ toJson(matrix) }}
+          `)
+
+          const sapis = matrix.sapis
+          const flavors = matrix.flavors
+          const binFile = {
+            'micro': 'micro.sfx',
+            'micro-cli': 'micro_cli.sfx',
+            'cli': 'php.exe',
+          }
+
+          async function main() {
+            let client = artifact.create()
+
+            let artifacts = {};
+            let results = {};
+
+            let versionFile = await fs.readFile('C:\\build\\versionFile');
+            let srcHash = crypto.createHash('sha256').update(versionFile).digest('hex');
+
+            for (const flavor of flavors) {
+              let dir = `C:\\out\\${flavor}`;
+              for (const sapi of sapis) {
+                let binPath = `${dir}/${binFile[sapi]}`;
+                try {
+                  await fs.access(binPath)
+                  console.log(`\x1b[37m;File ${binPath} found\x1b[0m;`)
+                  let artifactName = `${sapi}_${flavor}_${matrix.phpVer}_${matrix.arch}_${srcHash}`;
+                  artifacts[artifactName] = {
+                    'file': binPath,
+                    'dir': dir,
+                  };
+                  let shaSum = crypto.createHash('sha256').update(await fs.readFile(binPath)).digest('hex')
+                  console.log(`\x1b[37m;File ${binPath} sha256: ${shaSum}\x1b[0m;`)
+                  await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}\n`, { flag: 'a' })
+                  try {
+                    debugFile = binFile[sapi].replace(/\..+?$/, '.pdb')
+                    shaSum = crypto.createHash('sha256').update(await fs.readFile(`${dir}/${debugFile}`)).digest('hex')
+                    console.log(`\x1b[37m;File ${binPath}.debug sha256: ${shaSum}\x1b[0m;`)
+                    await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${debugFile}\n`, { flag: 'a' })
+                  } catch (error) {
+                    // pass
+                  }
+                } catch (error) {
+                  console.log(`\x1b[30m;File ${binPath} not found\x1b[0m;`)
+                }
+              }
+            }
+
+            for (const [name, info] of Object.entries(artifacts)) {
+              let fileList = [
+                `${info.dir}/sha256sums.txt`,
+                info.file,
+              ];
+              try {
+                let debugFile = info.file.replace(/\..+?$/, '.pdb')
+                await fs.access(debugFile);
+                fileList.push(debugFile);
+              } catch (error) {
+                // pass
+              }
+              try {
+                for (const file of await fs.readdir(`${info.dir}/licenses`)) {
+                  fileList.push(`${info.dir}/licenses/${file}`);
+                }
+              } catch (error) {
+                console.log(`Directory ${info.dir}/licenses not found`);
+              }
+              fileList.push(`${info.dir}/versionFile`);
+
+              try {
+                console.log(`Uploading artifact ${name}`);
+                let uploadResponse = client.uploadArtifact(name, fileList, info.dir);
+                results[name] = uploadResponse;
+              } catch (error) {
+                core.setFailed(error.message);
+              }
+            }
+
+            for (const [name, result] of Object.entries(results)) {
+              let res = await result;
+              console.log(`Artifact ${name} uploaded: ${res.artifactName}`);
+            }
+          }
+
+          main().catch(err => core.setFailed(err.message));
