@@ -1,0 +1,121 @@
+name: macOS build
+
+on:
+  workflow_dispatch:
+    inputs:
+      flavors:
+        description: "flavors, comma splited, empty for 'min,lite,max-swow', available: min, lite, max[-eventengine, like swow/swoole/libev], custom"
+        required: false
+        default: ""
+      archs:
+        description: "archs, comma splited, empty for all, available: x86_64, arm64"
+        required: false
+        default: ""
+      sapis:
+        description: "SAPIs, comma splited, empty for all, available: micro, micro-cli, cli"
+        required: false
+        default: ""
+      phpVers:
+        description: "PHP versions, empty for all, available: 8.0, 8.1, 8.2"
+        required: false
+        default: ""
+      customExtensions:
+        description: "custom extensions, used for custom flavor build"
+        required: false
+        default: ""
+      customLibraries:
+        description: "custom libraries, used for custom flavor build"
+        required: false
+        default: ""
+
+jobs:
+  gen-jobs:
+    name: Generate jobs
+    runs-on: macos-latest
+    outputs:
+      jobs: ${{ steps.gen-jobs.outputs.jobs }}
+    steps:
+      - name: Generate jobs
+        id: gen-jobs
+        shell: php {0}
+        run: |
+          <?php
+
+          function arg2arr(string $arg): array
+          {
+              return array_filter(array_map("trim", explode(',', $arg)));
+          }
+
+          $flavors = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.flavors }}
+          ARG);
+          $archs = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.archs }}
+          ARG);
+          $sapis = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.sapis }}
+          ARG);
+          $phpVers = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.phpVers }}
+          ARG);
+
+          if (!$flavors) {
+              $flavors = ['min', 'lite', 'max-swow'];
+          }
+          if (!$archs) {
+              $archs = ['x86_64', 'arm64'];
+          }
+          if (!$sapis) {
+              $sapis = ['micro', 'micro-cli', 'cli'];
+          }
+          if (!$phpVers) {
+              $phpVers = ['8.0', '8.1', '8.2'];
+          }
+
+          $customLibraries = <<<'ARG'
+          ${{ github.event.inputs.customLibraries }}
+          ARG;
+          $customExtensions = <<<'ARG'
+          ${{ github.event.inputs.customExtensions }}
+          ARG;
+          $customLibraries = trim($customLibraries);
+          $customExtensions = trim($customExtensions);
+
+          foreach ($archs as $arch) {
+              foreach ($phpVers as $phpVer) {
+                  $job = [
+                      'flavors' => $flavors,
+                      'customLibraries' => $customLibraries,
+                      'customExtensions' => $customExtensions,
+                      'arch' => $arch,
+                      'sapis' => $sapis,
+                      'phpVer' => $phpVer,
+                  ];
+                  $jobs[] = $job;
+              }
+          }
+
+          if (!$jobs) {
+              echo "no jobs generated\n";
+              exit(1);
+          }
+
+          $json = json_encode($jobs);
+          file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
+          # $jsonDebug = <<<'JSON'
+          # [{
+          #   "flavors": [
+          #     "custom"
+          #   ],
+          #   "customLibraries": "",
+          #   "customExtensions": "swow",
+          #   "arch": "arm64",
+          #   "sapis": [
+          #     "micro"
+          #   ],
+          #   "phpVer": "8.2"
+          # }]
+          # JSON;
+          # $json = json_encode(json_decode($jsonDebug, true));
+          # file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
+
