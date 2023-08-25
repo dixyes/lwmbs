@@ -156,11 +156,53 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
     steps:
-      - name: Checkout
+      - name: Restore sources
+        uses: actions/cache/restore@v3
+        id: cache-restore
+        with:
+          path: |
+            /downloads
+            /src
+            /versionFile
+          key: ${{ runner.os }}-build-v1-${{ hashFiles('/versionFile') }}
+          restore-keys: |
+            ${{ runner.os }}-build-v1-
+
+      - name: Prepare lwmbs and sources
+        id: prepare
         run: |
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+
+          # prepare lwmbs
           cd /lwmbs
           git fetch origin ${{ github.sha }}
           git checkout ${{ github.sha }}
+
+          cd /
+          php /lwmbs/fetch_source.php \
+            "" \
+            "" \
+            "--phpVer=${{ matrix.phpVer }}" \
+            "--versionFile=/versionFile"
+
+          matched_key="${{ steps.cache-restore.outputs.cache-matched-key }}"
+          src_hash="$(sha256sum /versionFile | head -c 64)"
+          if [ "$matched_key" != "${matched_key##*${src_hash}}" ]
+          then
+            echo "srcHash=" >> "$GITHUB_OUTPUT"
+          else
+            echo "srcHash=${src_hash}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save sources
+        uses: actions/cache/save@v3
+        if: steps.prepare.outputs.srcHash != ''
+        with:
+          path: |
+            /downloads
+            /src
+            /versionFile
+          key: ${{ runner.os }}-build-v1-${{ steps.prepare.outputs.srcHash }}
 
       - name: Make build commands
         shell: php {0}
