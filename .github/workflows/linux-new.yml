@@ -393,8 +393,8 @@ jobs:
           ${{ toJson(matrix) }}
           `)
 
-          const sapis = ['micro', 'micro-cli', 'cli'];
-          const flavors = ['min', 'lite', 'max', 'max-swow', 'max-swoole', 'max-libev']
+          const sapis = matrix.sapis
+          const flavors = matrix.flavors
           const binFile = {
             'micro': 'micro.sfx',
             'micro-cli': 'micro_cli.sfx',
