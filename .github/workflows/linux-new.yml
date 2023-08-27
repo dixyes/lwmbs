@@ -325,6 +325,8 @@ jobs:
                   $writesh(<<<BASH
                       echo "::group::Build $flavor shared $sapi"
                       # {$matrix['libc']}_shared $sapi
+                      # rm php_micro.lo to avoid cache
+                      rm -f /src/php-src/sapi/micro/php_micro.lo
                       php /lwmbs/$command \
                           "$libraries" \
                           "$extensions" \
@@ -348,6 +350,8 @@ jobs:
                       $writesh(<<<BASH
                           echo "::group::Build $flavor static $sapi"
                           # {$matrix['libc']}_static $sapi
+                          # rm php_micro.lo to avoid cache
+                          rm -f /src/php-src/sapi/micro/php_micro.lo
                           php /lwmbs/$command \
                               "$libraries" \
                               "$extensions" \

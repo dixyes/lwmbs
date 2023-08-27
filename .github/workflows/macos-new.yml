@@ -138,7 +138,6 @@ jobs:
         id: cache-restore
         with:
           path: |
-            ~/Library/Caches/Homebrew
             build/downloads
             build/src
             build/versionFile
@@ -149,6 +148,7 @@ jobs:
       - name: Prepare tools and sources
         id: prepare
         run: |
+          set -x 
           export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
 
           mkdir -p build
@@ -156,7 +156,7 @@ jobs:
 
           brew install bison re2c automake autoconf
           brew link automake
-          echo "PATH=/usr/local/opt/bison/bin:$PATH" >> "$GITHUB_ENV"
+          echo "PATH=/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH" >> "$GITHUB_ENV"
 
           php ../fetch_source.php \
             "" \
@@ -165,7 +165,7 @@ jobs:
             "--versionFile=./versionFile"
 
           matched_key="${{ steps.cache-restore.outputs.cache-matched-key }}"
-          src_hash="$(sha256sum ./versionFile | head -c 64)"
+          src_hash="$(shasum -a 256 ./versionFile | head -c 64)"
           if [ "$matched_key" != "${matched_key##*${src_hash}}" ]
           then
             echo "srcHash=" >> "$GITHUB_OUTPUT"
@@ -178,7 +178,6 @@ jobs:
         if: steps.prepare.outputs.srcHash != ''
         with:
           path: |
-            ~/Library/Caches/Homebrew
             build/downloads
             build/src
             build/versionFile
@@ -300,6 +299,8 @@ jobs:
                   $writesh("\n\n");
                   $writesh(<<<BASH
                       echo "::group::Build $flavor $sapi"
+                      # rm php_micro.lo to avoid cache
+                      rm -f src/php-src/sapi/micro/php_micro.lo
                       # $sapi
                       php ../$command \
                           "$libraries" \
@@ -314,7 +315,7 @@ jobs:
                           # copy the built bin out
                           mkdir -p ./out/{$flavor}
                           cp $targetBin ./out/{$flavor}/$binName
-                          cp $targetBin.debug ./out/{$flavor}/$binName.debug
+                          cp $targetBin.dwarf ./out/{$flavor}/$binName.dwarf
                       fi
                   BASH);
               }
@@ -415,9 +416,9 @@ jobs:
                   console.log(`\x1b[37m;File ${binPath} sha256: ${shaSum}\x1b[0m;`)
                   await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}\n`, { flag: 'a' })
                   try {
-                    shaSum = crypto.createHash('sha256').update(await fs.readFile(`${binPath}.debug`)).digest('hex')
-                    console.log(`\x1b[37m;File ${binPath}.debug sha256: ${shaSum}\x1b[0m;`)
-                    await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}.debug\n`, { flag: 'a' })
+                    shaSum = crypto.createHash('sha256').update(await fs.readFile(`${binPath}.dwarf`)).digest('hex')
+                    console.log(`\x1b[37m;File ${binPath}.dwarf sha256: ${shaSum}\x1b[0m;`)
+                    await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}.dwarf\n`, { flag: 'a' })
                   } catch (error) {
                     // pass
                   }
@@ -433,8 +434,8 @@ jobs:
                 info.file,
               ];
               try {
-                await fs.access(`${info.file}.debug`);
-                fileList.push(`${info.file}.debug`);
+                await fs.access(`${info.file}.dwarf`);
+                fileList.push(`${info.file}.dwarf`);
               } catch (error) {
                 // pass
               }
