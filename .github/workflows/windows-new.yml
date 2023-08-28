@@ -371,6 +371,9 @@ jobs:
                   $writeps(<<<PWSH
                       Write-Host "::group::Build $flavor $sapi"
                       # $sapi
+                      # delete the built bin to avoid cache
+                      Remove-Item -ErrorAction SilentlyContinue -Force `
+                          src/php-src/{$matrix['arch']}/Release_TS/sapi/micro/php_micro.obj
                       & php \${lwmbsDir}\\$command `
                           "$libraries" `
                           "$extensions" `
