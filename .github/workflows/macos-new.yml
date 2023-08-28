@@ -141,9 +141,9 @@ jobs:
             build/downloads
             build/src
             build/versionFile
-          key: ${{ runner.os }}-build-v1-${{ hashFiles('/versionFile') }}
+          key: ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-${{ hashFiles('/versionFile') }}
           restore-keys: |
-            ${{ runner.os }}-build-v1-
+            ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-
 
       - name: Prepare tools and sources
         id: prepare
@@ -181,7 +181,7 @@ jobs:
             build/downloads
             build/src
             build/versionFile
-          key: ${{ runner.os }}-build-v1-${{ steps.prepare.outputs.srcHash }}
+          key: ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-${{ steps.prepare.outputs.srcHash }}
 
       - name: Make build commands
         shell: php {0}
