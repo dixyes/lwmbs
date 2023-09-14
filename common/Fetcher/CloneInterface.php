@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2022 Yun Dou <dixyes@gmail.com>
  *
@@ -18,6 +19,7 @@
 
 declare(strict_types=1);
 
-trait SourceTrait
+interface CloneInterface
 {
+    public function clone(string $dest, bool $shallowClone = false): void;
 }

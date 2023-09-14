@@ -91,12 +91,12 @@ EOF,
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '.. && ' .
-                "cmake --build . -j{$this->config->concurrency} --target=brotlicommon-static && " .
-                "cmake --build . -j{$this->config->concurrency} --target=brotlidec-static && " .
-                "cmake --build . -j{$this->config->concurrency} --target=brotlienc-static && " .
-                'cp libbrotlidec-static.a ' . realpath('./lib') . ' && ' .
-                'cp libbrotlienc-static.a ' . realpath('./lib') . ' && ' .
-                'cp libbrotlicommon-static.a ' . realpath('./lib') . ' && ' .
+                "cmake --build . -j{$this->config->concurrency} --target=brotlicommon && " .
+                "cmake --build . -j{$this->config->concurrency} --target=brotlidec && " .
+                "cmake --build . -j{$this->config->concurrency} --target=brotlienc && " .
+                'cp libbrotlidec.a ' . realpath('./lib') . '/libbrotlidec-static.a && ' .
+                'cp libbrotlienc.a ' . realpath('./lib') . '/libbrotlienc-static.a && ' .
+                'cp libbrotlicommon.a ' . realpath('./lib') . '/libbrotlicommon-static.a && ' .
                 'cp -r ../c/include/brotli ' . realpath('./include'),
             $ret
         );

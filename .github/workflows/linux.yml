@@ -21,6 +21,7 @@ on:
   schedule:
     - cron: "33 4 * * *"
 
+
 env:
   LWMBS_LIBRARIES: zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2
   LWMBS_EXTENSIONS: iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,swow,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg
@@ -102,10 +103,10 @@ jobs:
         run: |
           set -xeo pipefail
           case "${{ matrix.libc }}-${{ matrix.arch }}" in
-            "musl-x86_64") apk add php81 curl xz tar bzip2 zstd && ln -sf "$(which php81)" /usr/bin/php;;
-            "musl-aarch64") apk add php81 curl xz tar bzip2 zstd && ln -sf "$(which php81)" /usr/bin/php;;
-            "glibc-x86_64") export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH";;
-            "glibc-aarch64") dnf install -yy php-cli;;
+            "musl-x86_64") apk add php81 curl xz tar bzip2 zstd git && ln -sf "$(which php81)" /usr/bin/php;;
+            "musl-aarch64") apk add php81 curl xz tar bzip2 zstd git && ln -sf "$(which php81)" /usr/bin/php;;
+            "glibc-x86_64") yum install -yy git && export "PATH=/opt/php/bin:/opt/cmake/bin:$PATH";;
+            "glibc-aarch64") dnf install -yy php-cli git;;
           esac
           printf 'hash=' >> $GITHUB_OUTPUT
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} php fetch_source.php  \

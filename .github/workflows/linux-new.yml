@@ -1,0 +1,533 @@
+name: Linux build
+
+on:
+  workflow_dispatch:
+    inputs:
+      flavors:
+        description: "flavors, comma splited, empty for 'min,lite,max-swow', available: min, lite, max[-eventengine, like swow/swoole/libev], custom"
+        required: false
+        default: ""
+      archs:
+        description: "archs, comma splited, empty for all, available: x86_64, aarch64"
+        required: false
+        default: ""
+      sapis:
+        description: "SAPIs, comma splited, empty for all, available: micro, micro-cli, cli"
+        required: false
+        default: ""
+      libcs:
+        description: "libcs, comma splited, empty for all, available: musl, glibc"
+        required: false
+        default: ""
+      phpVers:
+        description: "PHP versions, empty for all, available: 8.0, 8.1, 8.2"
+        required: false
+        default: ""
+      customExtensions:
+        description: "custom extensions, used for custom flavor build"
+        required: false
+        default: ""
+      customLibraries:
+        description: "custom libraries, used for custom flavor build"
+        required: false
+        default: ""
+
+  # schedule:
+  #   - cron: "33 4 * * *"
+
+jobs:
+  gen-jobs:
+    name: Generate jobs
+    runs-on: ubuntu-latest
+    outputs:
+      jobs: ${{ steps.gen-jobs.outputs.jobs }}
+    steps:
+      - name: Generate jobs
+        id: gen-jobs
+        shell: php {0}
+        run: |
+          <?php
+
+          function arg2arr(string $arg): array
+          {
+              return array_filter(array_map("trim", explode(',', $arg)));
+          }
+
+          $flavors = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.flavors }}
+          ARG);
+          $archs = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.archs }}
+          ARG);
+          $sapis = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.sapis }}
+          ARG);
+          $libcs = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.libcs }}
+          ARG);
+          $phpVers = arg2arr(<<<'ARG'
+          ${{ github.event.inputs.phpVers }}
+          ARG);
+
+          if (!$flavors) {
+              $flavors = ['min', 'lite', 'max-swow'];
+          }
+          if (!$archs) {
+              $archs = ['x86_64', 'aarch64'];
+          }
+          if (!$sapis) {
+              $sapis = ['micro', 'micro-cli', 'cli'];
+          }
+          if (!$libcs) {
+              $libcs = ['musl', 'glibc'];
+          }
+          if (!$phpVers) {
+              $phpVers = ['8.0', '8.1', '8.2'];
+          }
+
+          $customLibraries = <<<'ARG'
+          ${{ github.event.inputs.customLibraries }}
+          ARG;
+          $customExtensions = <<<'ARG'
+          ${{ github.event.inputs.customExtensions }}
+          ARG;
+          $customLibraries = trim($customLibraries);
+          $customExtensions = trim($customExtensions);
+
+          foreach ($archs as $arch) {
+              foreach ($libcs as $libc) {
+                  foreach ($phpVers as $phpVer) {
+                      $imageTag = "linux-${libc}-${arch}";
+                      $job = [
+                          'flavors' => $flavors,
+                          'customLibraries' => $customLibraries,
+                          'customExtensions' => $customExtensions,
+                          'imageTag' => $imageTag,
+                          'arch' => $arch,
+                          'sapis' => $sapis,
+                          'libc' => $libc,
+                          'phpVer' => $phpVer,
+                      ];
+                      $jobs[] = $job;
+                  }
+              }
+          }
+
+          if (!$jobs) {
+              echo "no jobs generated\n";
+              exit(1);
+          }
+
+          $json = json_encode($jobs);
+          file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
+          # $jsonDebug = <<<'JSON'
+          # [{
+          #   "flavors": [
+          #     "min",
+          #     "lite",
+          #     "max"
+          #   ],
+          #   "customLibraries": "",
+          #   "customExtensions": "",
+          #   "imageTag": "linux-glibc-x86_64-src",
+          #   "arch": "x86_64",
+          #   "sapis": [
+          #     "micro",
+          #     "micro-cli",
+          #     "cli"
+          #   ],
+          #   "libc": "musl",
+          #   "phpVer": "8.2"
+          # }]
+          # JSON;
+          # $json = json_encode(json_decode($jsonDebug, true));
+          # file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
+
+
+  build:
+    name: ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
+    runs-on: ubuntu-latest
+    container: 'ghcr.io/dixyes/prepared-lwmbs:${{ matrix.imageTag }}'
+    needs:
+      - gen-jobs
+    strategy:
+      max-parallel: 6
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
+    steps:
+      - name: Restore sources
+        uses: actions/cache/restore@v3
+        id: cache-restore
+        with:
+          path: |
+            /downloads
+            /src
+            /versionFile
+          key: ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-${{ hashFiles('/versionFile') }}
+          restore-keys: |
+            ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-
+
+      - name: Prepare lwmbs and sources
+        id: prepare
+        run: |
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+
+          # prepare lwmbs
+          cd /lwmbs
+          git fetch origin ${{ github.sha }}
+          git checkout ${{ github.sha }}
+
+          cd /
+          php /lwmbs/fetch_source.php \
+            "" \
+            "" \
+            "--phpVer=${{ matrix.phpVer }}" \
+            "--versionFile=/versionFile"
+
+          matched_key="${{ steps.cache-restore.outputs.cache-matched-key }}"
+          src_hash="$(sha256sum /versionFile | head -c 64)"
+          if [ "$matched_key" != "${matched_key##*${src_hash}}" ]
+          then
+            echo "srcHash=" >> "$GITHUB_OUTPUT"
+          else
+            echo "srcHash=${src_hash}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save sources
+        uses: actions/cache/save@v3
+        if: steps.prepare.outputs.srcHash != ''
+        with:
+          path: |
+            /downloads
+            /src
+            /versionFile
+          key: ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-${{ steps.prepare.outputs.srcHash }}
+
+      - name: Make build commands
+        shell: php {0}
+        run: |
+          <?php
+
+          $matrix = <<<'EOF'
+          ${{ toJson(matrix) }}
+          EOF;
+
+          $matrix = json_decode($matrix, true);
+          $customLibraries = $matrix['customLibraries'];
+          $customExtensions = $matrix['customExtensions'];
+
+          $commands = [];
+
+          $output = fopen('/tmp/build.sh', 'w');
+
+          $writesh = function (...$args) use ($output) {
+              fwrite($output, sprintf(...$args));
+              fwrite(STDOUT, sprintf(...$args));
+          };
+
+          $writesh(<<<BASH
+          #!/bin/sh
+
+          #set -x
+
+          # NOTE: to build these binaries on your machine, just use dixyes/prepared-lwmbs:{$matrix['imageTag']} image
+
+          # cached in github actions
+          # echo "::group::Prepare source"
+          # # prepare source for specified php version
+          # # you may select only libraries and extensions you will use
+          # php /lwmbs/fetch_source.php \
+          #     "" \
+          #     "" \
+          #     --phpVer={$matrix['phpVer']} \
+          #     --versionFile=/versionFile
+          # ret="\$?"
+          # echo "::endgroup::"
+
+          # if [ ! "\$ret" = "0" ]
+          # then
+          #     echo "::error::fetch source failed"
+          #     exit 1
+          # fi
+
+          echo "::group::Show versions"
+          cat /versionFile
+          sha256sum /versionFile
+          echo "::endgroup::"
+
+          BASH);
+
+          $maxLibraries = 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libpng';
+          $maxExtensions = 'iconv,dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,posix,pcntl,sysvshm,sysvsem,sysvmsg,gd';
+
+          foreach ($matrix['flavors'] as $flavor) {
+              $libraries = match ($flavor) {
+                  'min' => 'libffi',
+                  'lite' => 'zstd,zlib,libffi,libzip,bzip2,xz,onig',
+                  'max', 'max-swow' => $maxLibraries,
+                  'max-libev' => "{$maxLibraries},libev",
+                  'max-swoole' => "{$maxLibraries},libstdc++",
+                  'custom' => $customLibraries,
+              };
+              $extensions = match ($flavor) {
+                  'min' => 'posix,pcntl,ffi,filter,tokenizer,ctype',
+                  'lite' => 'opcache,posix,pcntl,ffi,filter,tokenizer,ctype,iconv,mbstring,mbregex,sockets,zip,zstd,zlib,bz2,phar,fileinfo',
+                  'max' => $maxExtensions,
+                  'max-swow' => "{$maxExtensions},swow",
+                  'max-swoole' => "{$maxExtensions},swoole",
+                  'max-libev' => "{$maxExtensions},libev",
+                  'custom' => $customExtensions,
+              };
+
+              $writesh("\n\n");
+              $writesh(<<<BASH
+              # ----- "$flavor" flavor -----
+
+              echo "::group::Build $flavor libs"
+              # rebuild libs for this flavor to avoid cache
+              php /lwmbs/build_libs.php \
+                  "$libraries" \
+                  "--cc=\$LWMBS_CC" \
+                  "--cxx=\$LWMBS_CXX" \
+                  "--arch={$matrix['arch']}" \
+                  "--fresh"
+              ret="\$?"
+              echo "::endgroup::"
+
+              if [ ! "\$ret" = "0" ]
+              then
+                  echo "::error::failed build lib for $flavor"
+              else
+              BASH);
+              foreach ($matrix['sapis'] as $sapi) {
+                  $command = match ($sapi) {
+                      'micro' => 'build_micro.php',
+                      'micro-cli' => 'build_micro.php --fakeCli',
+                      'cli' => 'build_cli.php',
+                  };
+
+                  $targetBin = match ($sapi) {
+                      'micro' => '/src/php-src/sapi/micro/micro.sfx',
+                      'micro-cli' => '/src/php-src/sapi/micro/micro.sfx',
+                      'cli' => '/src/php-src/sapi/cli/php',
+                  };
+                  $binName = match ($sapi) {
+                      'micro' => "micro.sfx",
+                      'micro-cli' => "micro_cli.sfx",
+                      'cli' => "php",
+                  };
+
+                  // $writesh("\n");
+                  // $writesh("# cleam php build dir\n");
+
+                  $writesh("\n\n");
+                  $writesh(<<<BASH
+                      echo "::group::Build $flavor shared $sapi"
+                      # {$matrix['libc']}_shared $sapi
+                      # rm php_micro.lo to avoid cache
+                      rm -f /src/php-src/sapi/micro/php_micro.lo
+                      php /lwmbs/$command \
+                          "$libraries" \
+                          "$extensions" \
+                          "--cc=\$LWMBS_CC" \
+                          "--cxx=\$LWMBS_CXX" \
+                          "--arch={$matrix['arch']}"
+                      ret="\$?"
+                      echo "::endgroup::"
+                      if [ ! "\$ret" = "0" ]
+                      then
+                          echo "::error::failed build $flavor shared $sapi"
+                      else
+                          # copy the built bin out
+                          mkdir -p /out/{$flavor}_shared
+                          cp $targetBin /out/{$flavor}_shared/$binName
+                          cp $targetBin.debug /out/{$flavor}_shared/$binName.debug
+                      fi
+                  BASH);
+                  if ($matrix['libc'] == 'musl') {
+                      $writesh("\n\n");
+                      $writesh(<<<BASH
+                          echo "::group::Build $flavor static $sapi"
+                          # {$matrix['libc']}_static $sapi
+                          # rm php_micro.lo to avoid cache
+                          rm -f /src/php-src/sapi/micro/php_micro.lo
+                          php /lwmbs/$command \
+                              "$libraries" \
+                              "$extensions" \
+                              "--cc=\$LWMBS_CC" \
+                              "--cxx=\$LWMBS_CXX" \
+                              "--arch={$matrix['arch']}" \
+                              "--allStatic"
+                          ret="\$?"
+                          echo "::endgroup::"
+                          if [ ! "\$ret" = "0" ]
+                          then
+                              echo "::error::failed build $flavor static $sapi"
+                          else
+                              # copy the built bin out
+                              mkdir -p /out/{$flavor}_static
+                              cp $targetBin /out/{$flavor}_static/$binName
+                              cp $targetBin.debug /out/{$flavor}_static/$binName.debug
+                          fi
+                      BASH);
+                  }
+              }
+              $writesh("\n\n");
+              $writesh(<<<BASH
+                  echo "::group::Dump $flavor licenses"
+                  # dump licenses
+                  php /lwmbs/dump_licenses.php \
+                      "/out/{$flavor}_shared/licenses" \
+                      "$libraries" \
+                      "$extensions"
+                  [ -d "/out/{$flavor}_static" ] && php /lwmbs/dump_licenses.php \
+                      "/out/{$flavor}_static/licenses" \
+                      "$libraries" \
+                      "$extensions"
+                  # copy versionFile
+                  cp /versionFile "/out/{$flavor}_shared/versionFile"
+                  [ -d "/out/{$flavor}_static" ] && cp /versionFile "/out/{$flavor}_static/versionFile"
+                  echo "::endgroup::"
+
+              fi
+              BASH);
+          }
+
+          $writesh("\n");
+
+      - name: Build
+        shell: sh {0}
+        working-directory: /
+        run: |
+          set +e
+          . /tmp/build.sh
+          # mkdir -p /out/min_shared
+          # touch /out/min_shared/micro.sfx
+          # php /lwmbs/dump_licenses.php \
+          #   "/out/min_shared/licenses" \
+          #   "libffi" \
+          #   "ffi"
+          # cp /versionFile "/out/min_shared/versionFile"
+
+      - name: Setup node
+        if: always()
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Prepare node for artifact upload
+        if: always()
+        shell: sh {0}
+        run: |
+          if [ '${{ matrix.libc }}' = 'musl' ]
+          then
+              apk add gcompat libstdc++
+          fi
+          npm i -g @actions/artifact @actions/core @actions/github
+          echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
+
+      - name: Expose GitHub Runtime
+        if: always()
+        uses: crazy-max/ghaction-github-runtime@v2
+
+      - name: Upload artifacts
+        if: always()
+        shell: node {0}
+        run: |
+          const fs = require('fs/promises');
+          const crypto = require('crypto');
+
+          const core = require('@actions/core');
+          // const github = require('@actions/github');
+          const artifact = require('@actions/artifact');
+
+          const matrix = JSON.parse(`
+          ${{ toJson(matrix) }}
+          `)
+
+          const sapis = matrix.sapis
+          const flavors = matrix.flavors
+          const binFile = {
+            'micro': 'micro.sfx',
+            'micro-cli': 'micro_cli.sfx',
+            'cli': 'php',
+          }
+
+          async function main() {
+            let client = artifact.create()
+
+            let artifacts = {};
+            let results = {};
+
+            let versionFile = await fs.readFile('/versionFile');
+            let srcHash = crypto.createHash('sha256').update(versionFile).digest('hex');
+
+            for (const flavor of flavors) {
+              for (const staticOrShared of ['static', 'shared']) {
+                let dir = `/out/${flavor}_${staticOrShared}`;
+                for (const sapi of sapis) {
+                  let binPath = `${dir}/${binFile[sapi]}`;
+                  try {
+                    await fs.access(binPath)
+                    console.log(`\x1b[37m;File ${binPath} found\x1b[0m;`)
+                    let artifactName = `${sapi}_${staticOrShared}_${flavor}_${matrix.phpVer}_${matrix.libc}_${matrix.arch}_${srcHash}`;
+                    artifacts[artifactName] = {
+                      'file': binPath,
+                      'dir': dir,
+                    };
+                    let shaSum = crypto.createHash('sha256').update(await fs.readFile(binPath)).digest('hex')
+                    console.log(`\x1b[37m;File ${binPath} sha256: ${shaSum}\x1b[0m;`)
+                    await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}\n`, { flag: 'a' })
+                    try {
+                      shaSum = crypto.createHash('sha256').update(await fs.readFile(`${binPath}.debug`)).digest('hex')
+                      console.log(`\x1b[37m;File ${binPath}.debug sha256: ${shaSum}\x1b[0m;`)
+                      await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}.debug\n`, { flag: 'a' })
+                    } catch (error) {
+                      // pass
+                    }
+                  } catch (error) {
+                    console.log(`\x1b[30m;File ${binPath} not found\x1b[0m;`)
+                  }
+                }
+              }
+            }
+
+            for (const [name, info] of Object.entries(artifacts)) {
+              let fileList = [
+                `${info.dir}/sha256sums.txt`,
+                info.file,
+              ];
+              try {
+                await fs.access(`${info.file}.debug`);
+                fileList.push(`${info.file}.debug`);
+              } catch (error) {
+                // pass
+              }
+              try {
+                for (const file of await fs.readdir(`${info.dir}/licenses`)) {
+                  fileList.push(`${info.dir}/licenses/${file}`);
+                }
+              } catch (error) {
+                console.log(`Directory ${info.dir}/licenses not found`);
+              }
+              fileList.push(`${info.dir}/versionFile`);
+
+              try {
+                console.log(`Uploading artifact ${name}`);
+                let uploadResponse = client.uploadArtifact(name, fileList, info.dir);
+                results[name] = uploadResponse;
+              } catch (error) {
+                core.setFailed(error.message);
+              }
+            }
+
+            for (const [name, result] of Object.entries(results)) {
+              let res = await result;
+              console.log(`Artifact ${name} uploaded: ${res.artifactName}`);
+            }
+          }
+
+          main().catch(err => core.setFailed(err.message));
+
+

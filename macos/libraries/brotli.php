@@ -55,6 +55,10 @@ class Libbrotli extends Library
                 'make install DESTDIR=' . realpath('.'),
             $ret
         );
+
+        rename("lib/libbrotlicommon.a", "lib/libbrotlicommon-static.a");
+        rename("lib/libbrotlienc.a", "lib/libbrotlienc-static.a");
+        rename("lib/libbrotlidec.a", "lib/libbrotlidec-static.a");
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }

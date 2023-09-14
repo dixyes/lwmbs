@@ -20,8 +20,6 @@ declare(strict_types=1);
 
 trait CommonLibraryTrait
 {
-    use SourceTrait;
-
     public function __construct(
         private Config $config,
         private ?string $sourceDir = null,
