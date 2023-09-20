@@ -150,5 +150,9 @@ if (PHP_GD != "no") {
 JS;
 
     file_put_contents('src\php-src\ext\gd\config.w32', $config_w32);
+
+    $gd_interpolation_c = file_get_contents('src\php-src\ext\gd\libgd\gd_interpolation.c');
+    $gd_interpolation_c = preg_replace('/#\s*include\s*<emmintrin.h>\s*/', '', $gd_interpolation_c);
+    file_put_contents('src\php-src\ext\gd\libgd\gd_interpolation.c', $gd_interpolation_c);
     }
 }
