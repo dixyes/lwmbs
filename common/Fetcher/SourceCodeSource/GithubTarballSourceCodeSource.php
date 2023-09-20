@@ -55,7 +55,7 @@ class GithubTarballSourceCodeSource extends SourceCodeSource
             if ($data[$i]['prerelease']) {
                 continue;
             }
-            $prefer = $i;
+            $prefer = $data[$i];
         }
 
         $this->url = $prefer['tarball_url'];

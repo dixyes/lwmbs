@@ -59,7 +59,7 @@ class GithubAssetSourceCodeSource extends SourceCodeSource
             if ($data[$i]['prerelease']) {
                 continue;
             }
-            $prefer = $i;
+            $prefer = $data[$i];
         }
 
         $this->tagName = $prefer['tag_name'];
