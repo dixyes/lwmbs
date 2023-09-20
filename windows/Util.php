@@ -34,6 +34,7 @@ final class Util
         Log::i("making cmake tool chain file for $targetArch with CFLAGS='$cflags'");
         $root = str_replace('\\', '\\\\', realpath('deps'));
         $toolchain = <<<CMAKE
+set(CMAKE_SYSTEM_NAME Windows)
 SET(CMAKE_SYSTEM_PROCESSOR $targetArch)
 SET(CMAKE_C_FLAGS "$cflags")
 SET(CMAKE_C_FLAGS_DEBUG "$cflags")
