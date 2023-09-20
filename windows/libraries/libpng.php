@@ -75,6 +75,6 @@ class Liblibpng extends Library
         // );
         // file_put_contents('deps\include\pngconf.h', $pngconf_h);
 
-        copy('deps/lib/libpng16_static.lib', 'libpng_a.lib');
+        copy('deps/lib/libpng16_static.lib', 'deps/lib/libpng_a.lib');
     }
 }
