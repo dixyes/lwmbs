@@ -53,9 +53,18 @@ class GithubAssetSourceCodeSource extends SourceCodeSource
             url: "https://api.github.com/repos/{$this->config['repo']}/releases",
             headers: $headers ?? [],
         ), true);
-        $this->tagName = $data[0]['tag_name'];
+
+        $prefer = $data[0];
+        for ($i = count($data) - 1; $i >= 0; $i--) {
+            if ($data[$i]['prerelease']) {
+                continue;
+            }
+            $prefer = $i;
+        }
+
+        $this->tagName = $prefer['tag_name'];
         $url = null;
-        foreach ($data[0]['assets'] as $asset) {
+        foreach ($prefer['assets'] as $asset) {
             if (preg_match('|' . $this->config['match'] . '|', $asset['name'])) {
                 $url = $asset['browser_download_url'];
                 break;

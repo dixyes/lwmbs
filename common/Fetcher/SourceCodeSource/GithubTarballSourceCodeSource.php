@@ -49,8 +49,17 @@ class GithubTarballSourceCodeSource extends SourceCodeSource
             url: "https://api.github.com/repos/{$this->config['repo']}/releases",
             headers: $headers ?? [],
         ), true);
-        $this->url = $data[0]['tarball_url'];
-        $this->tagName = $data[0]['tag_name'];
+
+        $prefer = $data[0];
+        for ($i = count($data) - 1; $i >= 0; $i--) {
+            if ($data[$i]['prerelease']) {
+                continue;
+            }
+            $prefer = $i;
+        }
+
+        $this->url = $prefer['tarball_url'];
+        $this->tagName = $prefer['tag_name'];
 
         $headers = Util::fetch(
             url: $this->url,
