@@ -296,8 +296,8 @@ jobs:
 
           PWSH);
 
-          $maxLibraries = 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2';
-          $maxExtensions = 'dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,pdo,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd';
+          $maxLibraries = 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libpng';
+          $maxExtensions = 'dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,gd';
 
           foreach ($matrix['flavors'] as $flavor) {
               $libraries = match ($flavor) {
