@@ -318,25 +318,14 @@
         "gd": {
             "source": "php",
             "libDeps": {
-                "gd": true,
                 "zlib": false,
                 "libpng": false,
-                "libavif": true,
-                "libwebp": true,
+                "libiconv": true,
                 "libjpeg": true,
+                "libfreetype": true,
                 "xpm": true,
-                "libfreetype": true
-            },
-            "libDepsWin": {
-                "gd": true,
-                "libiconv": false,
-                "libfreetype": false,
-                "libjpeg": false,
-                "zlib": false,
-                "libpng": false,
                 "libavif": true,
-                "libwebp": true,
-                "xpm": false
+                "libwebp": true
             }
         },
         "gettext": {

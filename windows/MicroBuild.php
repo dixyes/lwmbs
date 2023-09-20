@@ -36,6 +36,7 @@ class MicroBuild
         if ($this->config->getExt('zstd')) {
             Util::zstdAPCufix();
         }
+        Util::patchGD();
 
         passthru(
             "cd src\\php-src && {$this->config->phpBinarySDKCmd} -t buildconf.bat",
