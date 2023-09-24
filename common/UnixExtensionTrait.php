@@ -59,6 +59,12 @@ trait UnixExtensionTrait
                         'JPEG_LIBS="' . $this->getStaticLibFiles() . '" ';
                     $arg .= ' --with-jpeg ';
                 }
+                if ($this->config->getLib('freetype')) {
+                    $arg .= ' ' .
+                        'FREETYPE2_CFLAGS=-I"' . realpath('include') . '/freetype2" ' .
+                        'FREETYPE2_LIBS="' . $this->getStaticLibFiles() . '" ';
+                    $arg .= ' --with-freetype ';
+                }
                 // TODO: other libraries
             case 'phar':
             case 'zlib':
