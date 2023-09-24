@@ -27,9 +27,9 @@
             }
         },
         "freetype": {
-            "type": "git",
-            "url": "https:\/\/github.com\/freetype\/freetype.git",
-            "ref": "VER-2-13-2",
+            "type": "ghtag",
+            "repo": "freetype\/freetype",
+            "match": "\/VER-(?<version>\\d+(?:-\\d+)+)\/",
             "license": {
                 "type": "file",
                 "path": "LICENSE.TXT"
