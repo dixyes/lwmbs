@@ -154,5 +154,10 @@ JS;
     $gd_interpolation_c = file_get_contents('src\php-src\ext\gd\libgd\gd_interpolation.c');
     $gd_interpolation_c = preg_replace('/#\s*include\s*<emmintrin.h>\s*/', '', $gd_interpolation_c);
     file_put_contents('src\php-src\ext\gd\libgd\gd_interpolation.c', $gd_interpolation_c);
+
+	// for php older than 82: https://github.com/php/php-src/commit/243966177e39eb71822935042c3f13fa6c5b9eed
+	$gdft_c = file_get_contents('src\php-src\ext\gd\libgd\gdft.c');
+	$gdft_c = str_replace('MSWIN32', '_WIN32', $gdft_c);
+	file_put_contents('src\php-src\ext\gd\libgd\gdft.c', $gdft_c);
     }
 }
