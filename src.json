@@ -26,6 +26,15 @@
                 "path": "LICENSE.md"
             }
         },
+        "freetype": {
+            "type": "filelist",
+            "url": "https:\/\/download.savannah.gnu.org\/releases\/freetype\/",
+            "match": "\/href=\"(?<file>freetype-(?<version>[^\"]+)\\.tar\\.gz)\"\/",
+            "license": {
+                "type": "file",
+                "path": "LICENSE.md"
+            }
+        },
         "openssl": {
             "type": "filelist",
             "url": "https:\/\/www.openssl.org\/source\/",
@@ -331,7 +340,7 @@
                 "libiconv": true,
                 "libjpeg": true,
                 "libjpegturbo": true,
-                "libfreetype": true,
+                "freetype": true,
                 "xpm": true,
                 "libavif": true,
                 "libwebp": true
@@ -569,6 +578,16 @@
         }
     },
     "libs": {
+        "freetype": {
+            "source": "freetype",
+            "libDeps": {
+                "zlib": false,
+                "bzip2": true,
+                "libpng": true,
+                "harfbuzz": true,
+                "brotli": true
+            }
+        },
         "libjpegturbo": {
             "source": "libjpegturbo",
             "libDeps": []
