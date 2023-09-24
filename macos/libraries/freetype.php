@@ -67,13 +67,13 @@ class Libfreetype extends Library
         if ($this->config->getLib('brotli')) {
             $brotli = '-DFT_DISABLE_BROTLI=OFF ' .
                 '-DFT_REQUIRE_BROTLI=ON ' .
-                '-DBROTLIDEC_LIBRARIES="' . realpath('deps/lib/brotlidec-static.lib') . ';' . realpath('deps/lib/brotlicommon-static.lib') . '" ' .
-                '-DBROTLIDEC_INCLUDE_DIRS="' . realpath('deps/include') . '" ';
+                '-DBROTLIDEC_LIBRARIES="' . realpath('lib/libbrotlidec-static.a') . ';' . realpath('lib/libbrotlicommon-static.a') . '" ' .
+                '-DBROTLIDEC_INCLUDE_DIRS="' . realpath('include') . '" ';
         }
 
         passthru(
             "cd {$this->sourceDir} && " .
-                "{$this->config->configureEnv} " . ' cmake -B builddir ' .
+                "{$this->config->configureEnv} " . 'cmake -B builddir ' .
                     '-DBUILD_SHARED_LIBS=OFF ' .
                     $bzip2 . ' ' .
                     $harfbuzz . ' ' .
