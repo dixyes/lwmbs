@@ -260,7 +260,7 @@ jobs:
 
           $maxLibraries = [
             // compression
-            'zlib','zstd','bzip2''xz','brotli','libzip',
+            'zlib','zstd','bzip2','xz','brotli','libzip',
             // curl and its deps
             'nghttp2','libssh2','curl',
             'libffi',
@@ -294,7 +294,7 @@ jobs:
             'yaml',
             'posix','pcntl',
             'sysvshm','sysvsem','sysvmsg',
-            'gd'
+            'gd',
           ];
           $maxExtensions = implode(',', $maxExtensions);
 
