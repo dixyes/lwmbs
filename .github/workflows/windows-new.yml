@@ -296,8 +296,42 @@ jobs:
 
           PWSH);
 
-          $maxLibraries = 'zstd,libssh2,curl,zlib,brotli,libffi,openssl,libzip,bzip2,nghttp2,onig,libyaml,xz,libxml2,libpng';
-          $maxExtensions = 'dom,xml,simplexml,xmlwriter,xmlreader,opcache,bcmath,phar,mysqlnd,mysqli,pdo,pdo_mysql,mbstring,mbregex,session,ctype,fileinfo,filter,tokenizer,curl,ffi,redis,sockets,openssl,zip,zlib,bz2,yaml,zstd,gd';
+          $maxLibraries = [
+            // compression
+            'zlib','zstd','bzip2''xz','brotli','libzip',
+            // curl and its deps
+            'nghttp2','libssh2','curl',
+            'libffi',
+            'openssl',
+            'onig',
+            'libyaml',
+            'libxml2',
+            // gd deps
+            'libpng', 'libjpegturbo',
+          ];
+          $maxLibraries = implode(',', $maxLibraries);
+          $maxExtensions = [
+            // xml things
+            'dom','xml','simplexml','xmlwriter','xmlreader',
+            'opcache',
+            'bcmath',
+            'phar','zip','zlib','bz2','zstd',
+            'mysqlnd','mysqli','pdo','pdo_mysql',
+            'mbstring','mbregex',
+            'session',
+            'ctype',
+            'fileinfo',
+            'filter',
+            'tokenizer',
+            'curl',
+            'ffi',
+            'redis',
+            'sockets',
+            'openssl',
+            'yaml',
+            'gd'
+          ];
+          $maxExtensions = implode(',', $maxExtensions);
 
           foreach ($matrix['flavors'] as $flavor) {
               $libraries = match ($flavor) {
