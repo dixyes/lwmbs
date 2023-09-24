@@ -65,6 +65,12 @@ trait UnixExtensionTrait
                         'FREETYPE2_LIBS="' . $this->getStaticLibFiles() . '" ';
                     $arg .= ' --with-freetype ';
                 }
+                if ($this->config->getLib('libwebp')) {
+                    $arg .= ' ' .
+                        'WEBP_CFLAGS=-I"' . realpath('include') . '" ' .
+                        'WEBP_LIBS="' . $this->getStaticLibFiles() . '" ';
+                    $arg .= ' --with-webp ';
+                }
                 // TODO: other libraries
             case 'phar':
             case 'zlib':
