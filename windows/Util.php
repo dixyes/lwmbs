@@ -72,7 +72,11 @@ CMAKE;
     }
 
     public static function patchGD() {
-        $config_w32 = <<<'JS'
+		$avif = "";
+		if (file_exists('src\php-src\ext\gd\libgd\gd_avif.c')) {
+			$avif = 'gd_avif.c';
+		}
+        $config_w32 = <<<"JS"
 // vim:ft=javascript
 
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
@@ -131,7 +135,7 @@ if (PHP_GD != "no") {
 		gdft.c gd_gd2.c gd_gd.c gd_gif_in.c gd_gif_out.c gdhelpers.c gd_io.c gd_io_dp.c \
 		gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_png.c gd_ss.c \
 		gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
-		gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c gd_avif.c \
+		gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c {$avif} \
 		gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
 	AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
 	AC_DEFINE('HAVE_GD_BUNDLED', 1, "Bundled GD");
