@@ -35,6 +35,15 @@
                 "path": "LICENSE.TXT"
             }
         },
+        "libwebp": {
+            "type": "ghtag",
+            "repo": "webmproject\/libwebp",
+            "match": "\/v(?<version>\\d+(?:\\.\\d+)+)\/",
+            "license": {
+                "type": "file",
+                "path": "COPYING"
+            }
+        },
         "openssl": {
             "type": "filelist",
             "url": "https:\/\/www.openssl.org\/source\/",
@@ -578,6 +587,10 @@
         }
     },
     "libs": {
+        "libwebp": {
+            "source": "libwebp",
+            "libDeps": []
+        },
         "freetype": {
             "source": "freetype",
             "libDeps": {
