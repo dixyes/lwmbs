@@ -33,7 +33,7 @@ class Liblibjpegturbo extends Library
         'libjpeg.pc' => <<<'EOF'
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
-includedir=${prefix}/include\
+includedir=${prefix}/include
 
 Name: libjpeg
 Description: A SIMD-accelerated JPEG codec that provides the libjpeg API
