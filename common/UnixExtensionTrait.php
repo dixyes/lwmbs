@@ -53,6 +53,12 @@ trait UnixExtensionTrait
                 $arg .= ' ' .
                     'PNG_CFLAGS=-I"' . realpath('include') . '" ' .
                     'PNG_LIBS="' . $this->getStaticLibFiles() . '" ';
+                if ($this->config->getLib('libjpegturbo')) {
+                    $arg .= ' ' .
+                        'JPEG_CFLAGS=-I"' . realpath('include') . '" ' .
+                        'JPEG_LIBS="' . $this->getStaticLibFiles() . '" ';
+                    $arg .= ' --with-jpeg ';
+                }
                 // TODO: other libraries
             case 'phar':
             case 'zlib':
