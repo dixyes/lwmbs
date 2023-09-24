@@ -50,8 +50,8 @@ EOF
         Log::i("building {$this->name}");
         
         $ret = 0;
-        if (is_dir("{$this->sourceDir}\\builddir")) {
-            exec("rmdir /s /q \"{$this->sourceDir}\\builddir\"", result_code: $ret);
+        if (is_dir("{$this->sourceDir}/builddir")) {
+            exec("rm -rf \"{$this->sourceDir}/builddir\"", result_code: $ret);
             if ($ret !== 0) {
                 throw new Exception("failed to clean up {$this->name}");
             }
