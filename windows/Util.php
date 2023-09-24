@@ -76,7 +76,7 @@ CMAKE;
 		if (file_exists('src\php-src\ext\gd\libgd\gd_avif.c')) {
 			$avif = 'gd_avif.c';
 		}
-        $config_w32 = <<<"JS"
+        $config_w32 = <<<'JS'
 // vim:ft=javascript
 
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
@@ -152,7 +152,7 @@ if (PHP_GD != "no") {
 	PHP_INSTALL_HEADERS("", "ext/gd ext/gd/libgd" );
 }
 JS;
-
+	$config_w32 = str_replace('{$avif}', $avif, $config_w32);
     file_put_contents('src\php-src\ext\gd\config.w32', $config_w32);
 
     $gd_interpolation_c = file_get_contents('src\php-src\ext\gd\libgd\gd_interpolation.c');
