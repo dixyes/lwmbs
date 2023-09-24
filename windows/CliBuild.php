@@ -105,6 +105,9 @@ class CliBuild
         if ($this->config->getLib('curl')) {
             $extra_libs .= ' wldap32.lib normaliz.lib';
         }
+        if ($this->config->getLib('libwebp')) {
+            $extra_libs .= ' libsharpyuv.lib';
+        }
 
         file_put_contents('src\php-src\nmake_wrapper.bat',
             'nmake /nologo LIBS_CLI="' . $extra_libs . ' ws2_32.lib shell32.lib" EXTRA_LD_FLAGS_PROGRAM= %*');

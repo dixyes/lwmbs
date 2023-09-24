@@ -107,6 +107,9 @@ class MicroBuild
         if ($this->config->getLib('curl')) {
             $extra_libs .= ' wldap32.lib';
         }
+        if ($this->config->getLib('libwebp')) {
+            $extra_libs .= ' libsharpyuv.lib';
+        }
 
         $nmake_wrapper_bat_contents =
             'nmake /nologo LIBS_MICRO="' . $extra_libs . ' ws2_32.lib shell32.lib"'.
