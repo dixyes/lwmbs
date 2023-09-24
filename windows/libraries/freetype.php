@@ -58,7 +58,10 @@ class Libfreetype extends Library
             $libpng = '-DFT_DISABLE_PNG=OFF -DFT_REQUIRE_PNG=ON ';
         }
 
-        // TODO: harfbuzz
+        $harfbuzz = '-DFT_DISABLE_HARFBUZZ=ON ';
+        if ($this->config->getLib('harfbuzz')) {
+            $harfbuzz = '-DFT_DISABLE_HARFBUZZ=OFF -DFT_REQUIRE_HARFBUZZ=ON ';
+        }
 
         $brotli = '-DFT_DISABLE_BROTLI=ON ';
         if ($this->config->getLib('brotli')) {
@@ -75,6 +78,7 @@ class Libfreetype extends Library
                     "-G \"{$this->config->cmakeGeneratorName}\" " .
                     '-DBUILD_SHARED_LIBS=OFF ' .
                     $bzip2 . ' ' .
+                    $harfbuzz . ' ' .
                     $libpng . ' ' .
                     $brotli . ' ' .
                     '-DCMAKE_INSTALL_PREFIX="' . realpath('deps') . '" ' .
