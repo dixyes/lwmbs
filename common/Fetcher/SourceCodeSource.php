@@ -21,6 +21,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/SourceCodeSource/GithubAssetSourceCodeSource.php';
 require_once __DIR__ . '/SourceCodeSource/GithubTarballSourceCodeSource.php';
+require_once __DIR__ . '/SourceCodeSource/GithubTagSourceCodeSource.php';
 require_once __DIR__ . '/SourceCodeSource/UrlSourceCodeSource.php';
 require_once __DIR__ . '/SourceCodeSource/FileListSourceCodeSource.php';
 require_once __DIR__ . '/SourceCodeSource/GitSourceCodeSource.php';
@@ -36,6 +37,11 @@ abstract class SourceCodeSource extends stdClass
      * github latest release tarball
      */
     const TYPE_GHTAR = 'ghtar';
+
+    /**
+     * github latest tag tarball
+     */
+    const TYPE_GHTAG = 'ghtag';
 
     /**
      * single url, this cannot be auto updated
@@ -55,6 +61,7 @@ abstract class SourceCodeSource extends stdClass
     private static array $typeMap = [
         self::TYPE_GHASSET => 'GithubAssetSourceCodeSource',
         self::TYPE_GHTAR => 'GithubTarballSourceCodeSource',
+        self::TYPE_GHTAG => 'GithubTagSourceCodeSource',
         self::TYPE_URL => 'UrlSourceCodeSource',
         self::TYPE_FILELIST => 'FileListSourceCodeSource',
         self::TYPE_GIT => 'GitSourceCodeSource',
