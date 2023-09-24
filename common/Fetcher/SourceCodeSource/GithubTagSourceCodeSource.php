@@ -78,11 +78,13 @@ class GithubTagSourceCodeSource extends SourceCodeSource
         $tags = array_filter($tags);
         usort(
             $tags,
-            fn ($a, $b) => version_compare(
-                static::normalizeTagVersion($a['version']),
-                static::normalizeTagVersion($b['version']),
-                '<'
-            )
+            function ($a, $b) {
+                return (version_compare(
+                    static::normalizeTagVersion($a['version']),
+                    static::normalizeTagVersion($b['version']),
+                    '<'
+                )) ? 1 : -1;
+            }
         );
 
         if (!$tags) {
