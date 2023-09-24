@@ -27,12 +27,12 @@
             }
         },
         "freetype": {
-            "type": "filelist",
-            "url": "https:\/\/download.savannah.gnu.org\/releases\/freetype\/",
-            "match": "\/href=\"(?<file>freetype-(?<version>[^\"]+)\\.tar\\.gz)\"\/",
+            "type": "git",
+            "url": "https:\/\/github.com\/freetype\/freetype.git",
+            "ref": "VER-2-13-2",
             "license": {
                 "type": "file",
-                "path": "LICENSE.md"
+                "path": "LICENSE.TXT"
             }
         },
         "openssl": {
