@@ -78,6 +78,14 @@ on:
         required: false
         type: boolean
         default: false
+      workflowRepo:
+        description: "repository of workflow to call"
+        required: true
+        type: string
+      workflowRev:
+        description: "revision of workflow to call"
+        required: true
+        type: string
 
 jobs:
   gen-jobs:
@@ -85,6 +93,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       jobs: ${{ steps.gen-jobs.outputs.jobs }}
+    permissions:
+      contents: write
     steps:
       - name: Generate jobs
         id: gen-jobs
@@ -96,7 +106,7 @@ jobs:
               throw new ErrorException($message, 0, $severity, $file, $line);
           });
 
-          if (${{ github.event.inputs.uploadRelease }}) {
+          if (${{ inputs.uploadRelease }}) {
               # create github release
               echo "create release\n";
 
@@ -128,19 +138,19 @@ jobs:
           }
 
           $flavors = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.flavors }}
+          ${{ inputs.flavors }}
           ARG);
           $archs = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.archs }}
+          ${{ inputs.archs }}
           ARG);
           $sapis = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.sapis }}
+          ${{ inputs.sapis }}
           ARG);
           $libcs = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.libcs }}
+          ${{ inputs.libcs }}
           ARG);
           $phpVers = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.phpVers }}
+          ${{ inputs.phpVers }}
           ARG);
 
           if (!$flavors) {
@@ -160,10 +170,10 @@ jobs:
           }
 
           $customLibraries = <<<'ARG'
-          ${{ github.event.inputs.customLibraries }}
+          ${{ inputs.customLibraries }}
           ARG;
           $customExtensions = <<<'ARG'
-          ${{ github.event.inputs.customExtensions }}
+          ${{ inputs.customExtensions }}
           ARG;
           $customLibraries = trim($customLibraries);
           $customExtensions = trim($customExtensions);
@@ -224,6 +234,8 @@ jobs:
     container: 'ghcr.io/dixyes/prepared-lwmbs:${{ matrix.imageTag }}'
     needs:
       - gen-jobs
+    permissions:
+      contents: write
     strategy:
       max-parallel: 6
       fail-fast: false
@@ -248,13 +260,10 @@ jobs:
           export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
 
           # prepare lwmbs
-          remote="${{ github.repositoryUrl }}"
-          # git: is not available in actions
-          remote="https:${remote#git:}"
           cd /lwmbs
-          git remote set-url origin "$remote"
-          git fetch origin ${{ github.sha }}
-          git checkout ${{ github.sha }}
+          git remote set-url origin "https://github.com/${{ inputs.workflowRepo || github.repository }}"
+          git fetch origin ${{ inputs.workflowRev || github.sha }}
+          git checkout ${{ inputs.workflowRev || github.sha }}
 
           cd /
           php /lwmbs/fetch_source.php \

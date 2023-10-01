@@ -69,6 +69,14 @@ on:
         required: false
         type: boolean
         default: false
+      workflowRepo:
+        description: "repository of workflow to call"
+        required: true
+        type: string
+      workflowRev:
+        description: "revision of workflow to call"
+        required: true
+        type: string
 
 jobs:
   gen-jobs:
@@ -76,6 +84,8 @@ jobs:
     runs-on: macos-latest
     outputs:
       jobs: ${{ steps.gen-jobs.outputs.jobs }}
+    permissions:
+      contents: write
     steps:
       - name: Generate jobs
         id: gen-jobs
@@ -87,7 +97,7 @@ jobs:
               throw new ErrorException($message, 0, $severity, $file, $line);
           });
 
-          if (${{ github.event.inputs.uploadRelease }}) {
+          if (${{ inputs.uploadRelease }}) {
               # create github release
               echo "create release\n";
 
@@ -119,16 +129,16 @@ jobs:
           }
 
           $flavors = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.flavors }}
+          ${{ inputs.flavors }}
           ARG);
           $archs = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.archs }}
+          ${{ inputs.archs }}
           ARG);
           $sapis = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.sapis }}
+          ${{ inputs.sapis }}
           ARG);
           $phpVers = arg2arr(<<<'ARG'
-          ${{ github.event.inputs.phpVers }}
+          ${{ inputs.phpVers }}
           ARG);
 
           if (!$flavors) {
@@ -145,10 +155,10 @@ jobs:
           }
 
           $customLibraries = <<<'ARG'
-          ${{ github.event.inputs.customLibraries }}
+          ${{ inputs.customLibraries }}
           ARG;
           $customExtensions = <<<'ARG'
-          ${{ github.event.inputs.customExtensions }}
+          ${{ inputs.customExtensions }}
           ARG;
           $customLibraries = trim($customLibraries);
           $customExtensions = trim($customExtensions);
@@ -196,6 +206,8 @@ jobs:
     runs-on: macos-latest
     needs:
       - gen-jobs
+    permissions:
+      contents: write
     strategy:
       max-parallel: 3
       fail-fast: false
@@ -204,6 +216,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.workflowRepo || github.repository }}
+          ref: ${{ inputs.workflowRev || github.sha }}
 
       - name: Restore sources
         uses: actions/cache/restore@v3
