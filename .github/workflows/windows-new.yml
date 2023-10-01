@@ -31,6 +31,43 @@ on:
         description: "upload binaries to releases, otherwise only upload via artifact"
         required: false
         default: ""
+  workflow_call:
+    inputs:
+      flavors:
+        description: "flavors, comma splited, empty for 'min,lite,max-swow', available: min, lite, max[-eventengine, like swow/swoole/libev], custom"
+        required: false
+        type: string
+        default: ""
+      archs:
+        description: "archs, comma splited, empty for all, available: x64, arm64"
+        required: false
+        type: string
+        default: ""
+      sapis:
+        description: "SAPIs, comma splited, empty for all, available: micro, micro-cli, cli"
+        required: false
+        type: string
+        default: ""
+      phpVers:
+        description: "PHP versions, empty for all, available: 8.0, 8.1, 8.2"
+        required: false
+        type: string
+        default: ""
+      customExtensions:
+        description: "custom extensions, used for custom flavor build"
+        required: false
+        type: string
+        default: ""
+      customLibraries:
+        description: "custom libraries, used for custom flavor build"
+        required: false
+        type: string
+        default: ""
+      uploadRelease:
+        description: "upload binaries to releases, otherwise only upload via artifact"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   gen-jobs:
