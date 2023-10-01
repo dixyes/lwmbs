@@ -40,7 +40,19 @@ async function main(token, osName, context) {
   let artifacts = {};
   let results = {};
 
-  let versionFile = await fs.readFile('/versionFile');
+  let versionFilePath
+  switch (osName) {
+    case 'linux':
+      versionFilePath = '/versionFile'
+      break;
+    case 'windows':
+      versionFilePath = 'C:\\build\\versionFile'
+      break;
+    case 'macos':
+      versionFilePath = 'build/versionFile'
+      break;
+  }
+  let versionFile = await fs.readFile(versionFilePath);
   let srcHash = crypto.createHash('sha256').update(versionFile).digest('hex');
 
   let tagName

@@ -32,7 +32,7 @@ on:
         required: false
         default: ""
       uploadRelease:
-        description: "upload binaries via release, otherwise upload via artifact"
+        description: "upload binaries to releases, otherwise only upload via artifact"
         required: false
         default: ""
 
@@ -81,7 +81,6 @@ jobs:
               ]);
               file_get_contents('https://api.github.com/repos/${{ github.repository }}/releases', context: $context);
           }
-
 
           function arg2arr(string $arg): array
           {
