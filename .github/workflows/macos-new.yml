@@ -30,7 +30,8 @@ on:
       uploadRelease:
         description: "upload binaries to releases, otherwise only upload via artifact"
         required: false
-        default: ""
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       flavors:
@@ -66,8 +67,8 @@ on:
       uploadRelease:
         description: "upload binaries to releases, otherwise only upload via artifact"
         required: false
-        type: string
-        default: ""
+        type: boolean
+        default: false
 
 jobs:
   gen-jobs:
@@ -86,7 +87,7 @@ jobs:
               throw new ErrorException($message, 0, $severity, $file, $line);
           });
 
-          if (!!'${{ github.event.inputs.uploadRelease }}') {
+          if (${{ github.event.inputs.uploadRelease }}) {
               # create github release
               echo "create release\n";
 
