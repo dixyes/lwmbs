@@ -262,7 +262,7 @@ jobs:
           # prepare lwmbs
           cd /lwmbs
           git remote set-url origin "https://github.com/${{ inputs.workflowRepo || github.repository }}"
-          git fetch --depth 1 origin ${{ inputs.workflowRev || github.sha }}
+          git fetch origin ${{ inputs.workflowRev || github.sha }}
           git checkout FETCH_HEAD
 
           cd /
