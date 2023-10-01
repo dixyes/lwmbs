@@ -27,9 +27,10 @@ on:
         description: "custom libraries, used for custom flavor build"
         required: false
         default: ""
-
-  # schedule:
-  #   - cron: "33 4 * * *"
+      uploadRelease:
+        description: "upload binaries to releases, otherwise only upload via artifact"
+        required: false
+        default: ""
 
 jobs:
   gen-jobs:
@@ -43,6 +44,36 @@ jobs:
         shell: php {0}
         run: |
           <?php
+
+          set_error_handler(function ($severity, $message, $file, $line) {
+              throw new ErrorException($message, 0, $severity, $file, $line);
+          });
+
+          if (!!'${{ github.event.inputs.uploadRelease }}') {
+              # create github release
+              echo "create release\n";
+
+              $tagName = date('Ymd') . '-windows-${{ github.run_id }}';
+
+              $context = stream_context_create([
+                  'http' => [
+                      'method' => 'POST',
+                      'header' => implode("\r\n", [
+                          'Content-Type: application/json',
+                          'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}',
+                          'User-Agent: file_get_contents/0',
+                      ]),
+                      'content' => json_encode([
+                          'tag_name' => $tagName,
+                          'name' => $tagName,
+                          'body' => "automatic release\n\nworkflow run: [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+                          #'draft' => true,
+                          #'prerelease' => true,
+                      ]),
+                  ],
+              ]);
+              file_get_contents('https://api.github.com/repos/${{ github.repository }}/releases', context: $context);
+          }
 
           function arg2arr(string $arg): array
           {
@@ -482,7 +513,11 @@ jobs:
       - name: Prepare node for artifact upload
         if: always()
         run: |
-          & npm i -g '@actions/artifact' '@actions/core' '@actions/github'
+          & npm i -g `
+            '@actions/core' `
+            '@actions/github' `
+            '@actions/artifact' `
+            '@actions/exec'
           $nodePath = & npm root --quiet -g
           $nodePath = $nodePath.Trim()
           Write-OutPut "NODE_PATH=$nodePath" | Out-File -FilePath "${env:GITHUB_ENV}" -Append
@@ -495,97 +530,12 @@ jobs:
         if: always()
         shell: node {0}
         run: |
-          const fs = require('fs/promises');
-          const crypto = require('crypto');
-
+          const context = {
+            matrix: ${{ toJson(matrix) }},
+            github: ${{ toJson(github) }},
+            inputs: ${{ toJson(inputs) }},
+          }
           const core = require('@actions/core');
-          // const github = require('@actions/github');
-          const artifact = require('@actions/artifact');
 
-          const matrix = JSON.parse(`
-          ${{ toJson(matrix) }}
-          `)
-
-          const sapis = matrix.sapis
-          const flavors = matrix.flavors
-          const binFile = {
-            'micro': 'micro.sfx',
-            'micro-cli': 'micro_cli.sfx',
-            'cli': 'php.exe',
-          }
-
-          async function main() {
-            let client = artifact.create()
-
-            let artifacts = {};
-            let results = {};
-
-            let versionFile = await fs.readFile('C:\\build\\versionFile');
-            let srcHash = crypto.createHash('sha256').update(versionFile).digest('hex');
-
-            for (const flavor of flavors) {
-              let dir = `C:\\out\\${flavor}`;
-              for (const sapi of sapis) {
-                let binPath = `${dir}/${binFile[sapi]}`;
-                try {
-                  await fs.access(binPath)
-                  console.log(`\x1b[37m;File ${binPath} found\x1b[0m;`)
-                  let artifactName = `${sapi}_${flavor}_${matrix.phpVer}_${matrix.arch}_${srcHash}`;
-                  artifacts[artifactName] = {
-                    'file': binPath,
-                    'dir': dir,
-                  };
-                  let shaSum = crypto.createHash('sha256').update(await fs.readFile(binPath)).digest('hex')
-                  console.log(`\x1b[37m;File ${binPath} sha256: ${shaSum}\x1b[0m;`)
-                  await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${binFile[sapi]}\n`, { flag: 'a' })
-                  try {
-                    debugFile = binFile[sapi].replace(/\..+?$/, '.pdb')
-                    shaSum = crypto.createHash('sha256').update(await fs.readFile(`${dir}/${debugFile}`)).digest('hex')
-                    console.log(`\x1b[37m;File ${binPath}.debug sha256: ${shaSum}\x1b[0m;`)
-                    await fs.writeFile(`${dir}/sha256sums.txt`, `${shaSum}  ${debugFile}\n`, { flag: 'a' })
-                  } catch (error) {
-                    // pass
-                  }
-                } catch (error) {
-                  console.log(`\x1b[30m;File ${binPath} not found\x1b[0m;`)
-                }
-              }
-            }
-
-            for (const [name, info] of Object.entries(artifacts)) {
-              let fileList = [
-                `${info.dir}/sha256sums.txt`,
-                info.file,
-              ];
-              try {
-                let debugFile = info.file.replace(/\..+?$/, '.pdb')
-                await fs.access(debugFile);
-                fileList.push(debugFile);
-              } catch (error) {
-                // pass
-              }
-              try {
-                for (const file of await fs.readdir(`${info.dir}/licenses`)) {
-                  fileList.push(`${info.dir}/licenses/${file}`);
-                }
-              } catch (error) {
-                console.log(`Directory ${info.dir}/licenses not found`);
-              }
-              fileList.push(`${info.dir}/versionFile`);
-
-              try {
-                console.log(`Uploading artifact ${name}`);
-                let uploadResponse = client.uploadArtifact(name, fileList, info.dir);
-                results[name] = uploadResponse;
-              } catch (error) {
-                core.setFailed(error.message);
-              }
-            }
-
-            for (const [name, result] of Object.entries(results)) {
-              let res = await result;
-              console.log(`Artifact ${name} uploaded: ${res.artifactName}`);
-            }
-          }
-
-          main().catch(err => core.setFailed(err.message));
+          const { main } = require('C:\\lwmbs\\.github\\workflows\\upload.js')
+          main('${{ secrets.GITHUB_TOKEN }}', 'windows', context).catch(err => core.setFailed(err.message))

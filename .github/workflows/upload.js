@@ -140,7 +140,7 @@ async function main(token, osName, context) {
           // pass
         }
       } catch (error) {
-        console.log(`\x1b[30mFile ${filePath} not found\x1b[0m`)
+        console.log(`\x1b[33mFile ${filePath} not found\x1b[0m`)
       }
     }
   }
@@ -174,7 +174,7 @@ async function main(token, osName, context) {
         if (osName !== 'windows') {
           await exec.exec('tar', ['-cjvf', filePath, ...fileList], { cwd: info.dir });
         } else {
-          await exec.exec(`zip`, [filePath, ...fileList], { cwd: info.dir });
+          await exec.exec('"C:\\Program Files\\7-Zip\\7z.exe"', ['a', '-tzip', filePath, ...fileList], { cwd: info.dir });
         }
         let { data: releaseAsset } = await octokit.rest.repos.uploadReleaseAsset({
           owner: owner,
