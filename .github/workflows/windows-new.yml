@@ -256,7 +256,7 @@ jobs:
           if (0 -Ne $lastexitcode) {
             exit 1
           }
-          git checkout ${{ inputs.workflowRev || github.sha }}
+          git checkout FETCH_HEAD
           if (0 -Ne $lastexitcode) {
             exit 1
           }
