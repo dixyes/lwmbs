@@ -726,6 +726,10 @@
         "zstd": {
             "source": "zstd",
             "libDeps": []
+        },
+        "webview": {
+            "source": "webview",
+            "libDeps": []
         }
     },
     "size": {

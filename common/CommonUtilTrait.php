@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 trait CommonUtilTrait
 {
+    use FetcherUtilTrait;
+
     private function __construct()
     {
     }
