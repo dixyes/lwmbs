@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ["8.2", "8.1", "8.0"]
+        php-version: ["8.3", "8.2", "8.1"]
         arch: ["x86_64", "arm64"]
       max-parallel: 6
     steps:

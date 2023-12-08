@@ -20,7 +20,7 @@ on:
         required: false
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.0, 8.1, 8.2"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3"
         required: false
         default: ""
       customExtensions:
@@ -59,7 +59,7 @@ on:
         type: string
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.0, 8.1, 8.2"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3"
         required: false
         type: string
         default: ""
@@ -166,7 +166,7 @@ jobs:
               $libcs = ['musl', 'glibc'];
           }
           if (!$phpVers) {
-              $phpVers = ['8.0', '8.1', '8.2'];
+              $phpVers = ['8.1', '8.2', '8.3'];
           }
 
           $customLibraries = <<<'ARG'
