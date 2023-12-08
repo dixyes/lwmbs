@@ -100,6 +100,9 @@ class MicroBuild
             if ($this->config->getLib('brotli')) {
                 $extra_libs .= ' brotlidec-static.lib brotlicommon-static.lib';
             }
+            if ($this->config->getLib('webview')) {
+                $extra_libs .= ' /WHOLEARCHIVE:webview_static.lib WebView2LoaderStatic.lib';
+            }
         }
         if ($this->config->getLib('openssl')) {
             $extra_libs .= ' crypt32.lib';
