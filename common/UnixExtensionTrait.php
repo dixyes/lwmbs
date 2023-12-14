@@ -111,9 +111,18 @@ trait UnixExtensionTrait
             case 'swow':
                 if ($this->config->getLib('openssl')) {
                     $arg .= ' --enable-swow-ssl';
+                } else {
+                    $arg .= ' --enable-swow-ssl=no';
                 }
                 if ($this->config->getLib('curl')) {
                     $arg .= ' --enable-swow-curl';
+                } else {
+                    $arg .= ' --enable-swow-curl=no';
+                }
+                if ($this->config->getLib('libpq')) {
+                    $arg .= ' --enable-swow-pdo-pgsql';
+                } else {
+                    $arg .= ' --enable-swow-pdo-pgsql=no';
                 }
                 break;
             case 'swoole':
