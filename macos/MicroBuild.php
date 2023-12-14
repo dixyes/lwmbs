@@ -62,6 +62,9 @@ class MicroBuild
         ) {
             $extra_libs .= ' -liconv';
         }
+        if ($this->config->getLib('webview')) {
+            $extra_libs = preg_replace('/[^ ]+webview_static\.a/', '-Wl,-force_load,\0', $extra_libs);
+        }
 
         passthru(
             $this->config->setX . ' && ' .
