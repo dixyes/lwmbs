@@ -19,8 +19,8 @@
 
 require __DIR__ . '/common/Log.php';
 require __DIR__ . '/common/LogType.php';
-require __DIR__ . '/common/CommonUtilTrait.php';
 require __DIR__ . '/common/FetcherUtilTrait.php';
+require __DIR__ . '/common/CommonUtilTrait.php';
 require __DIR__ . '/common/Fetcher/SourceCode.php';
 require __DIR__ . '/common/Fetcher/SourceCodeSource.php';
 
