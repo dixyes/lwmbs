@@ -68,6 +68,10 @@ cd build
 
 # CI
 
-There will be a macro micro binary with some common extensions built in ci routines.
+There are some flavors of micro binaries built in actions:
+
+- min: minimal build, almost only ffi, you can use ffi to call other things
+- lite: min and some common compressions, phar etc.
+- max-swow: almost all supported extensions and swow
 
 # Nothin else

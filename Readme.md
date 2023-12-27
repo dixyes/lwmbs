@@ -68,6 +68,10 @@ cd build
 
 # CI
 
-ci中构建了一个巨大的（20M+）micro，含部分常用扩展
+actions中构建了若干风味的二进制
+
+- min：最小化构建，只有ffi之类的东西，你可以用ffi去调用别的东西
+- lite：比min多了一些常见压缩，phar之类的
+- max-swow：基本上所有支持的扩展和swow
 
 # 没了
