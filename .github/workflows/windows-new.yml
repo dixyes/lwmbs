@@ -389,6 +389,7 @@ jobs:
             'libxml2',
             // gd deps
             'libpng', 'libjpegturbo', 'freetype', 'libwebp',
+            'webview',
           ];
           $maxLibraries = implode(',', $maxLibraries);
           $maxExtensions = [
