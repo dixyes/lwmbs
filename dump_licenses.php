@@ -19,6 +19,7 @@
 
 require __DIR__ . '/common/Log.php';
 require __DIR__ . '/common/LogType.php';
+require __DIR__ . '/common/FetcherUtilTrait.php';
 require __DIR__ . '/common/CommonUtilTrait.php';
 
 class Util
@@ -86,7 +87,7 @@ function mian($argv): int
                 $srcPath = $info['path'] ?? $name;
                 if (!is_file("src/{$srcPath}/{$license['path']}")) {
                     Log::w("license file not found: src/{$srcPath}/{$license['path']}");
-                    continue;
+                    break;
                 }
                 copy("src/{$srcPath}/{$license['path']}", "{$destDir}/LICENSE.$name");
                 break;
