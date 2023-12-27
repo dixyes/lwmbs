@@ -6,7 +6,7 @@ const github = require('@actions/github');
 const artifact = require('@actions/artifact');
 const exec = require('@actions/exec');
 
-const artifactClient = artifact.create()
+const artifactClient = new artifact.DefaultArtifactClient()
 
 async function main(token, osName, context) {
 
