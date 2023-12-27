@@ -162,7 +162,7 @@
         },
         "libxml2": {
             "type": "url",
-            "url": "https:\/\/gitlab.gnome.org\/GNOME\/libxml2\/-\/archive\/v2.9.14\/libxml2-v2.9.14.tar.gz",
+            "url": "https:\/\/gitlab.gnome.org\/GNOME\/libxml2\/-\/archive\/v2.12.3\/libxml2-v2.12.3.tar.gz",
             "license": {
                 "type": "file",
                 "path": "Copyright"
