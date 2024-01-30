@@ -78,6 +78,8 @@ class MicroBuild
         $makefile = file_get_contents('src\php-src\Makefile');
         if ($this->config->arch !== 'arm64' && str_contains($makefile, 'FIBER_ASM_ARCH')) {
             $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj' . "\r\n\r\n";
+        } else if ($this->config->arch !== 'arm64' && str_contains($makefile, 'FIBER_ASM_ABI')) {
+            $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ABI).obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ABI).obj' . "\r\n\r\n";
         }
         file_put_contents('src\php-src\Makefile', $makefile);
 
