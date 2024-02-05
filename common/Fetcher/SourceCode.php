@@ -92,6 +92,7 @@ class SourceCode
         $patchNames = array_merge($patchNames, match (PHP_OS_FAMILY) {
             'Windows' => [
                 'cli_static',
+                'comctl32',
             ],
             'Darwin' => [
                 'macos_iconv',
