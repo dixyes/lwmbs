@@ -129,12 +129,28 @@ class SourceCode
             throw new Exception("failed to patch php");
         }
 
-        if ($majMin == '80') {
-            // openssl3 patch
-            Log::i('patching php for openssl 3');
-            $openssl_c = file_get_contents($this->path . '/ext/openssl/openssl.c');
-            $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
-            file_put_contents($this->path . '/ext/openssl/openssl.c', $openssl_c);
+        switch ($majMin) {
+            case '80':
+                // openssl3 patch
+                Log::i('patching php for openssl 3');
+                $openssl_c = file_get_contents($this->path . '/ext/openssl/openssl.c');
+                $openssl_c = preg_replace('/REGISTER_LONG_CONSTANT\s*\(\s*"OPENSSL_SSLV23_PADDING"\s*.+;/', '', $openssl_c);
+                file_put_contents($this->path . '/ext/openssl/openssl.c', $openssl_c);
+                break;
+            case '81':
+                // libxml new ver
+                Log::i('patching php for libxml2');
+                $patch = 'https://github.com/dixyes/php-src/commit/a9f172466d2a7ddda192d116b4a5a2b1577a45cc.diff';
+                $ret = 0;
+                passthru(
+                    'cd ' . $this->path . ' && ' .
+                        'curl -L ' . $patch . ' | patch -p1',
+                    $ret
+                );
+                if ($ret != 0) {
+                    Log::w("failed to patch php 8.1 for libxml new ver");
+                }
+                break;
         }
     }
 
