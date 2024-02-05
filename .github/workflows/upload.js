@@ -149,12 +149,17 @@ async function main(token, osName, context) {
     let fileList = [
       'sha256sums.txt',
       'versionFile',
-      'licenses',
       info.file,
     ];
     try {
       await fs.access(`${info.dir}${sep}${info.debug}`);
       fileList.push(`${info.debug}`);
+    } catch (error) {
+      // pass
+    }
+    try {
+      dir = await fs.readdir(`${info.dir}${sep}licenses`)
+      fileList.push(...dir.map(x => `licenses${sep}${x}`))
     } catch (error) {
       // pass
     }
