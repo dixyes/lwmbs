@@ -527,11 +527,11 @@ jobs:
 
           $writeps("\n");
       
-      - name: Enable pwsh PSNativeCommandArgumentPassing
-        shell: pwsh
-        run: |
-          # github actions use pwsh 7.2, so we need to enable experimental feature
-          Enable-ExperimentalFeature -Name 'PSNativeCommandArgumentPassing'
+      # - name: Enable pwsh PSNativeCommandArgumentPassing
+      #   shell: pwsh
+      #   run: |
+      #     # github actions use pwsh 7.2, so we need to enable experimental feature
+      #     Enable-ExperimentalFeature -Name 'PSNativeCommandArgumentPassing'
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v3
