@@ -106,8 +106,7 @@ class Liblibffi extends Library
             '@HAVE_LONG_DOUBLE@' => '_M_ARM64',
             '@FFI_EXEC_TRAMPOLINE_TABLE@' => '0',
             // for static lib
-            'defined FFI_BUILDING_DLL' => '0',
-            '!defined FFI_BUILDING' => '0',
+            '__declspec\(dllimport\)' => '',
         ] as $macro => $value) {
             $ffi_h = preg_replace("/$macro/", $value, $ffi_h);
         }
