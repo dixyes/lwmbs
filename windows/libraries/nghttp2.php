@@ -63,6 +63,7 @@ class Libnghttp2 extends Library
                     "-G \"{$this->config->cmakeGeneratorName}\" " .
                     '-DCMAKE_BUILD_TYPE=Release ' .
                     '-DBUILD_SHARED_LIBS=OFF ' .
+                    '-DBUILD_STATIC_LIBS=ON ' .
                     '-DENABLE_STATIC_LIB=ON ' .
                     '-DENABLE_SHARED_LIB=OFF ' .
                     '-DENABLE_STATIC_CRT=ON ' .
