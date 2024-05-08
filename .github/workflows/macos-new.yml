@@ -81,7 +81,7 @@ on:
 jobs:
   gen-jobs:
     name: Generate jobs
-    runs-on: macos-latest
+    runs-on: macos-13
     outputs:
       jobs: ${{ steps.gen-jobs.outputs.jobs }}
     permissions:
