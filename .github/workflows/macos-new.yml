@@ -203,7 +203,7 @@ jobs:
 
   build:
     name: ${{ matrix.phpVer }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
-    runs-on: macos-latest
+    runs-on: macos-13
     needs:
       - gen-jobs
     permissions:
