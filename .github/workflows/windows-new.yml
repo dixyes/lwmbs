@@ -222,7 +222,7 @@ jobs:
         include: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
     steps:
       - name: Restore tools and sources
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: cache-restore
         with:
           path: |
@@ -305,7 +305,7 @@ jobs:
           Write-Output "PATH=${env:PATH};C:\build\bin" | Out-File -FilePath "${env:GITHUB_ENV}" -Append
 
       - name: Save tools and sources
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         if: steps.prepare.outputs.srcHash != ''
         with:
           path: |
@@ -555,11 +555,11 @@ jobs:
           #   "ffi"
           # cp C:\build\versionFile C:\out\custom\versionFile
 
-      - name: Setup node
-        if: always()
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+      # - name: Setup node
+      #   if: always()
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '16'
 
       - name: Prepare node for artifact upload
         if: always()
@@ -575,7 +575,7 @@ jobs:
 
       - name: Expose GitHub Runtime
         if: always()
-        uses: crazy-max/ghaction-github-runtime@v2
+        uses: crazy-max/ghaction-github-runtime@v3
 
       - name: Upload artifacts
         if: always()
