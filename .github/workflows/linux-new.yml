@@ -191,7 +191,14 @@ jobs:
                           'sapis' => $sapis,
                           'libc' => $libc,
                           'phpVer' => $phpVer,
+                          'volumes' => [],
                       ];
+                      if ($imageTag === "linux-glibc-x86_64") {
+                        $job['volumes'] = [
+                          '/node20217:/node20217:rw,rshared',
+                          '/node20217:/__e/node20:ro,rshared',
+                        ];
+                      }
                       $jobs[] = $job;
                   }
               }
@@ -231,7 +238,9 @@ jobs:
   build:
     name: ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
     runs-on: ubuntu-latest
-    container: 'ghcr.io/dixyes/prepared-lwmbs:${{ matrix.imageTag }}'
+    container:
+      image: 'ghcr.io/dixyes/prepared-lwmbs:${{ matrix.imageTag }}'
+      volumes: ${{ matrix.volumes }}
     needs:
       - gen-jobs
     permissions:
@@ -242,6 +251,14 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
     steps:
+
+      # https://github.com/actions/runner/issues/2906
+      - name: Setup node 20 for centos:7
+        if: matrix.imageTag == 'linux-glibc-x86_64'
+        shell: bash
+        run: |
+          cp -r /opt/nodejs/* /node20217
+
       - name: Restore sources
         uses: actions/cache/restore@v4
         id: cache-restore
