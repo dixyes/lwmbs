@@ -152,7 +152,7 @@ class MicroBuild
                 '" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 "EXTRA_LDFLAGS_PROGRAM='$cflags $use_lld $static_cpp" .
-                ($this->config->allStatic ? ' -all-static' : '') . " && " .
+                ($this->config->allStatic ? ' -all-static' : '') . "' && " .
                 'cd sapi/micro && ' .
                 "{$this->config->crossCompilePrefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug && " .
                 'elfedit --output-osabi linux micro.sfx && ' .
