@@ -145,24 +145,20 @@ class MicroBuild
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
                 'sed -i "s|//lib|/lib|g" Makefile && ' .
-                "make -j{$this->config->concurrency} " .
+                "make -j{$this->config->concurrency} micro " .
                 'EXTRA_CFLAGS="-g -Os -fno-ident ' .
                     Util::libtoolCCFlags($this->config->tuneCFlags) .
                     ($fakeCli ? ' -DPHP_MICRO_FAKE_CLI' : '') .
                 '" ' .
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 "EXTRA_LDFLAGS_PROGRAM='$cflags $use_lld $static_cpp" .
-                ($this->config->allStatic ? ' -all-static' : '') .
-                "' " .
-                'POST_MICRO_BUILD_COMMANDS="sh -xc \'' .
+                ($this->config->allStatic ? ' -all-static' : '') . " && " .
                 'cd sapi/micro && ' .
                 "{$this->config->crossCompilePrefix}objcopy --only-keep-debug micro.sfx micro.sfx.debug && " .
                 'elfedit --output-osabi linux micro.sfx && ' .
                 "{$this->config->crossCompilePrefix}strip --strip-all micro.sfx && " .
-                "{$this->config->crossCompilePrefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx'" .
-                '" ' .
-                'micro',
-            $ret
+                "{$this->config->crossCompilePrefix}objcopy --update-section .comment=/tmp/comment --add-gnu-debuglink=micro.sfx.debug --remove-section=.note micro.sfx"
+            , $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to build micro");

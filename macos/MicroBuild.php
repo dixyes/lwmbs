@@ -120,15 +120,14 @@ class MicroBuild
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .
-                "make -j{$this->config->concurrency} " .
+                "make -j{$this->config->concurrency} micro " .
                 'EXTRA_CFLAGS="-g -Os -fno-ident' .
                     ($fakeCli ? ' -DPHP_MICRO_FAKE_CLI' : '') .
                 '" ' .
-                "EXTRA_LIBS=\"$extra_libs -lresolv $lcpp\" " .
-                "STRIP=\"dsymutil -f \" " .
+                "EXTRA_LIBS=\"$extra_libs -lresolv $lcpp\" && " .
                 // TODO: comment things
-                'micro',
-            $ret
+                "dsymutil -f sapi/micro/micro.sfx"
+            , $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to build micro");
