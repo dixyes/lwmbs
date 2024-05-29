@@ -74,14 +74,15 @@ class MicroBuild
         //     file_put_contents('src\php-src\Zend\zend_atomic.h', $zend_atomic);
         // }
 
-        // workaround for fiber
         $makefile = file_get_contents('src\php-src\Makefile');
-        if ($this->config->arch !== 'arm64' && str_contains($makefile, 'FIBER_ASM_ARCH')) {
-            $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj' . "\r\n\r\n";
-        } else if ($this->config->arch !== 'arm64' && str_contains($makefile, 'FIBER_ASM_ABI')) {
-            $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ABI).obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ABI).obj' . "\r\n\r\n";
-        }
-        file_put_contents('src\php-src\Makefile', $makefile);
+
+        // workaround for fiber
+        // if ($this->config->arch !== 'arm64' && str_contains($makefile, 'FIBER_ASM_ARCH')) {
+        //     $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ARCH)_ms_pe_masm.obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ARCH)_ms_pe_masm.obj' . "\r\n\r\n";
+        // } else if ($this->config->arch !== 'arm64' && str_contains($makefile, 'FIBER_ASM_ABI')) {
+        //     $makefile .= "\r\n" . '$(MICRO_SFX): $(BUILD_DIR)\Zend\jump_$(FIBER_ASM_ABI).obj $(BUILD_DIR)\Zend\make_$(FIBER_ASM_ABI).obj' . "\r\n\r\n";
+        // }
+        // file_put_contents('src\php-src\Makefile', $makefile);
 
         // add extra libs
         $extra_libs = '';
