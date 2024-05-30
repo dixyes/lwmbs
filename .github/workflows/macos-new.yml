@@ -266,7 +266,7 @@ jobs:
         with:
           path: |
             build/downloads
-            build/src
+            #build/src
             build/versionFile
           key: ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-${{ steps.prepare.outputs.srcHash }}
 
