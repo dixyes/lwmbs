@@ -265,7 +265,7 @@ jobs:
         with:
           path: |
             /downloads
-            /src
+            #/src
             /versionFile
           key: ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-${{ hashFiles('/versionFile') }}
           restore-keys: |

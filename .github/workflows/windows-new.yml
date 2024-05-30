@@ -229,7 +229,7 @@ jobs:
             C:\tools\php-sdk-binary-tools
             C:\build\bin
             C:\build\downloads
-            C:\build\src
+            #C:\build\src
             C:\build\versionFile
           key: ${{ runner.os }}-build-v1-${{ matrix.phpVer }}-${{ hashFiles('C:\build\versionFile') }}
           restore-keys: |
