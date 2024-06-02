@@ -125,7 +125,9 @@ class CliBuild
                 $ret
             );
         }
-    
+
+        Util::unpatchPhar();
+
         passthru(
             "cd src\\php-src && {$this->config->phpBinarySDKCmd} " .
                 '-t nmake_wrapper.bat ' . 

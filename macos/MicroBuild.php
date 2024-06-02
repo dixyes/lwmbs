@@ -101,15 +101,7 @@ class MicroBuild
         }
 
         if ($this->config->getExt('phar')) {
-            $pharPatched = true;
-            passthru(
-                "cd src/php-src && patch -p1 < sapi/micro/patches/phar.patch",
-                $ret
-            );
-            if ($ret !== 0) {
-                Log::e("failed to patch phar");
-                $pharPatched = false;
-            }
+            Util::patchPhar();
         }
 
         $lcpp = '';
@@ -138,14 +130,8 @@ class MicroBuild
             Util::sapiNameCheck(!$fakeCli ? 'micro' : 'cli');
         }
 
-        if ($this->config->getExt('phar') && $pharPatched) {
-            passthru(
-                "cd src/php-src && patch -p1 -R < sapi/micro/patches/phar.patch",
-                $ret
-            );
-            if ($ret !== 0) {
-                throw new Exception("failed to recover phar patch");
-            }
+        if ($this->config->getExt('phar')) {
+            Util::unpatchPhar();
         }
     }
 }

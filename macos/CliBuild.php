@@ -102,6 +102,8 @@ class CliBuild
             $lcpp = '-lc++';
         }
 
+        Util::unpatchPhar();
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .

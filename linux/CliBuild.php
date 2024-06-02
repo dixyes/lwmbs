@@ -129,6 +129,8 @@ class CliBuild
             $extra_libs = "-Wl,--whole-archive $extra_libs -Wl,--no-whole-archive";
         }
 
+        Util::unpatchPhar();
+
         passthru(
             $this->config->setX . ' && ' .
                 'cd src/php-src && ' .

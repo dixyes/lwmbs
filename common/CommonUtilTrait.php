@@ -282,4 +282,78 @@ trait CommonUtilTrait
 
         return [$cmdArgs, $config];
     }
+
+    public static function patchPhar(): bool
+    {
+        $phar_c = file_get_contents("src/php-src/ext/phar/phar.c");
+        $pharPatched = strpos($phar_c, 'char *micro_get_filename(void);') !== false;
+        if ($pharPatched) {
+            Log::i('phar already patched');
+            return true;
+        } else {
+            Log::i('patching phar.c');
+            $count = -1;
+            $phar_c = preg_replace(
+                '/\n[ \t]*static\s+zend_op_array\s*\*\s*phar_compile_file\s*\(\s*zend_file_handle\s*\*\s*file_handle\s*,\s*int\s+type\s*\)/',
+                "\nchar *micro_get_filename(void);\n\\0",
+                $phar_c,
+                count: $count,
+            );
+            if ($count !== 1) {
+                Log::e('failed to patch phar.c');
+                return false;
+            }
+
+            $phar_c = preg_replace(
+                '/strstr\s*\(\s*(ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename)\s*,\s*"\.phar"\s*\)/',
+                '(strstr($1, micro_get_filename()) || $0)',
+                $phar_c,
+                count: $count,
+            );
+            if ($count !== 1) {
+                Log::e('failed to patch phar.c');
+                return false;
+            }
+
+            file_put_contents("src/php-src/ext/phar/phar.c", $phar_c);
+            return true;
+        }
+    }
+
+    public static function unpatchPhar(): bool
+    {
+        $phar_c = file_get_contents("src/php-src/ext/phar/phar.c");
+        $pharPatched = strpos($phar_c, 'char *micro_get_filename(void);') !== false;
+        if (!$pharPatched) {
+            Log::i('phar is not patched');
+            return true;
+        } else {
+            Log::i('recovering phar.c');
+            $count = -1;
+            $phar_c = preg_replace(
+                '/\nchar \*micro_get_filename\(void\);\n/',
+                "",
+                $phar_c,
+                count: $count,
+            );
+            if ($count !== 1) {
+                Log::e('failed to recover phar.c');
+                return false;
+            }
+
+            $phar_c = preg_replace(
+                '/\(strstr\((ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename), micro_get_filename\(\)\) \|\| (strstr\s*\(\s*(ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename)\s*,\s*"\.phar"\s*\))\)/',
+                '$2',
+                $phar_c,
+                count: $count,
+            );
+            if ($count !== 1) {
+                Log::e('failed to recover phar.c');
+                return false;
+            }
+
+            file_put_contents("src/php-src/ext/phar/phar.c", $phar_c);
+            return true;
+        }
+    }
 }
