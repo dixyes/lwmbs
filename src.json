@@ -47,7 +47,7 @@
         "openssl": {
             "type": "filelist",
             "url": "https:\/\/www.openssl.org\/source\/",
-            "match": "\/href=\"(?<file>openssl-(?<version>[^\"]+)\\.tar\\.gz)\"\/",
+            "match": "\/href=\"(?<file>[^\"]*openssl-(?<version>[^\"]+)\\.tar\\.gz)\"\/",
             "license": {
                 "type": "file",
                 "path": "LICENSE.txt"
