@@ -64,12 +64,31 @@ class FileListSourceCodeSource extends SourceCodeSource
                     continue 2;
                 }
             }
-            $versions[$version] = $matches['file'][$i];
+            if (!isset($versions[$version])) {
+                $versions[$version] = [];
+            }
+            if (isset($matches['file'][$i])) {
+                $versions[$version]['file'] = $matches['file'][$i];
+            }
+            if (isset($matches['url'][$i])) {
+                $versions[$version]['url'] = $matches['url'][$i];
+            }
         }
         uksort($versions, 'version_compare');
 
-        $this->url = $this->config['url'] . end($versions);
-        $this->fileName = end($versions);
+        $version = end($versions);
+        if (isset($version['url'])) {
+            $this->url = $version['url'];
+            $parsed = parse_url($this->url);
+            $this->fileName = basename($parsed['path']);
+        } else if (str_starts_with($version['file'], 'http') || str_starts_with($version['file'], 'ftp')) {
+            $this->url = $version['file'];
+            $parsed = parse_url($this->url);
+            $this->fileName = basename($parsed['path']);
+        } else {
+            $this->url = $this->config['url'] . $version['file'];
+            $this->fileName = $version['file'];
+        }
 
         return $this->url;
     }
