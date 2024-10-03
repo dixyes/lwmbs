@@ -62,7 +62,8 @@ class Libwebview extends Library
                 '/c /MT /std:c++17 /EHsc ' .
                 '/D "WEBVIEW_API=__declspec(dllexport)" ' .
                 '/I "webview2\build\native\include" ' .
-                'webview.cc ' .
+                '/I "core\include" ' .
+                'core/src/webview.cc ' .
                 '/Fo:webview_static.obj &&' .
             'lib /nologo webview_static.obj /OUT:webview_static.lib ');
         $ret = 0;
