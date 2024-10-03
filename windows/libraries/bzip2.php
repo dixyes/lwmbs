@@ -34,23 +34,29 @@ class Libbzip2 extends Library
     protected function build(): void
     {
         Log::i("building {$this->name}");
-        
-        file_put_contents('src/bzip2/nmake_wrapper.bat', 'nmake /nologo /f Makefile.msc CFLAGS="-DWIN32 -MT -Ox -D_FILE_OFFSET_BITS=64 -nologo" %*');
 
         $ret = 0;
         passthru(
             "cd {$this->sourceDir} && " .
-            "{$this->config->phpBinarySDKCmd} -t nmake_wrapper.bat --task-args clean && " .
-            "{$this->config->phpBinarySDKCmd} -t nmake_wrapper.bat --task-args lib"
-            ,
+                'cmake -B builddir ' .
+                    "-A \"{$this->config->cmakeArch}\" " .
+                    "-G \"{$this->config->cmakeGeneratorName}\" " .
+                    "-D ENABLE_LIB_ONLY=ON " .
+                    "-D ENABLE_TESTS=OFF " .
+                    "-D ENABLE_DOCS=OFF " .
+                    "-D ENABLE_SHARED_LIB=OFF " .
+                    "-D ENABLE_STATIC_LIB=ON " .
+                    '-DCMAKE_INSTALL_PREFIX="' . realpath('deps') . '" ' .
+                    "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
+                    '&& ' .
+                "cmake --build builddir --config RelWithDebInfo --target install -j {$this->config->concurrency}",
             $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }
 
-        copy('src/bzip2/libbz2.lib', 'deps/lib/libbz2.lib');
-        copy('src/bzip2/libbz2.lib', 'deps/lib/libbz2_a.lib');
-        copy('src/bzip2/bzlib.h', 'deps/include/bzlib.h');
+        copy('deps/lib/bz2_static.lib', 'deps/lib/libbz2.lib');
+        copy('deps/lib/bz2_static.lib', 'deps/lib/libbz2_a.lib');
     }
 }
