@@ -37,15 +37,26 @@ class Libbzip2 extends Library
         passthru(
             $this->config->setX . ' && ' .
                 "cd {$this->sourceDir} && " .
-                "make {$this->config->configureEnv} PREFIX='" . realpath('.') . "' clean" . ' && ' .
-                "make -j{$this->config->concurrency} {$this->config->configureEnv} PREFIX='" . realpath('.') . "' libbz2.a" . ' && ' .
-                // make install may fail when cross-compiling, so we copy files.
-                'cp libbz2.a ' . realpath('./lib') . '  && ' .
-                'cp bzlib.h ' . realpath('./include'),
+                'echo > man/CMakeLists.txt && ' .
+                'rm -rf builddir && ' .
+                "{$this->config->configureEnv} " . ' cmake -B builddir ' .
+                    '-D ENABLE_LIB_ONLY=ON ' .
+                    '-D ENABLE_TESTS=OFF ' .
+                    '-D ENABLE_DOCS=OFF ' .
+                    '-D ENABLE_SHARED_LIB=OFF ' .
+                    '-D ENABLE_STATIC_LIB=ON ' .
+                    '-DCMAKE_INSTALL_PREFIX=/ ' .
+                    '-DCMAKE_INSTALL_LIBDIR=/lib ' .
+                    '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
+                    "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
+                '&& ' .
+                "cmake --build builddir --config RelWithDebInfo -j {$this->config->concurrency} && " .
+                'make -C builddir install DESTDIR="' . realpath('.') . '"',
             $ret
         );
         if ($ret !== 0) {
             throw new Exception("failed to build {$this->name}");
         }
+        copy('lib/libbz2_static.a', 'lib/libbz2.a');
     }
 }
