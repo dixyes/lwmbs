@@ -83,6 +83,7 @@ class Liblibzip extends Library
                     '-DBUILD_EXAMPLES=OFF ' .
                     '-DBUILD_REGRESS=OFF ' .
                     '-DBUILD_TOOLS=OFF ' .
+                    '-DBUILD_OSSFUZZ=OFF ' .
                     //'-DCMAKE_C_FLAGS_MINSIZEREL="/MT /O1 /Ob1 /DNDEBUG" ' .
                     '-DCMAKE_INSTALL_PREFIX="' . realpath('deps') . '" ' . 
                     "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .

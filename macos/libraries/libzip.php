@@ -97,6 +97,7 @@ class Liblibzip extends Library
                 '-DBUILD_EXAMPLES=OFF ' .
                 '-DBUILD_REGRESS=OFF ' .
                 '-DBUILD_TOOLS=OFF ' .
+                '-DBUILD_OSSFUZZ=OFF ' .
                 $bzip2 .
                 $xz .
                 $zstd .
