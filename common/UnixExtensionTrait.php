@@ -24,6 +24,11 @@ trait UnixExtensionTrait
     {
         $arg = $this->desc->getArg();
         switch ($this->name) {
+            case 'mysqlnd':
+                if ($this->config->getLib('openssl')) {
+                    $arg .= ' --with-mysqlnd-ssl ';
+                }
+                $arg .= ' --enable-mysqlnd-compression-support ';
             case 'redis':
                 $arg = '--enable-redis';
                 if ($this->config->getLib('zstd')) {
