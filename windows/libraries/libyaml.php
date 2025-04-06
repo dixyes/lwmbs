@@ -86,6 +86,7 @@ EOF);
                     //'-DCMAKE_C_FLAGS_MINSIZEREL="/MT /O1 /Ob1 /DNDEBUG" ' .
                     '-DCMAKE_INSTALL_PREFIX="' . realpath('deps') . '" ' .
                     "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
+                    '-DCMAKE_POLICY_VERSION_MINIMUM=3.5 ' .
                 '&& ' .
                 //--config MinSizeRel 
                 "cmake --build builddir --config RelWithDebInfo --target install -j {$this->config->concurrency}",

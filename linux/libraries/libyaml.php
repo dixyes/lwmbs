@@ -96,6 +96,7 @@ EOF);
                 '-DCMAKE_INSTALL_PREFIX=/ ' .
                 '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                 '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
+                '-DCMAKE_POLICY_VERSION_MINIMUM=3.5 ' .
                 "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '.. && ' .
                 "make -j{$this->config->concurrency} && " .
