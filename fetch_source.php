@@ -45,7 +45,7 @@ function mian($argv): int
             'versionFile' => ['PATH', false, null, 'output versions to a file'],
             'shallowClone' => ['BOOL', false, false, 'use shallow clone'],
             'srcFile' => ['SRCFILE', false, __DIR__ . DIRECTORY_SEPARATOR . 'src.json', 'src.json path'],
-            'phpVer' => ['VERSION', false, '8.3', 'php version in major.minor format like 8.3'],
+            'phpVer' => ['VERSION', false, '8.4', 'php version in major.minor format like 8.4'],
         ],
     );
 
