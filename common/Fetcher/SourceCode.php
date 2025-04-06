@@ -100,7 +100,7 @@ class SourceCode
             default => [],
         });
         $patches = [];
-        $serial = ['80', '81', '82', '83'];
+        $serial = ['80', '81', '82', '83', '84'];
         foreach ($patchNames as $patchName) {
             if (file_exists($this->path . "/sapi/micro/patches/{$patchName}.patch")) {
                 $patches[] = "sapi/micro/patches/{$patchName}.patch";
