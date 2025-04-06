@@ -16,7 +16,7 @@ on:
         required: false
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4"
         required: false
         default: ""
       customExtensions:
@@ -50,7 +50,7 @@ on:
         type: string
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4"
         required: false
         type: string
         default: ""
@@ -151,7 +151,7 @@ jobs:
               $sapis = ['micro', 'micro-cli', 'cli'];
           }
           if (!$phpVers) {
-              $phpVers = ['8.1', '8.2', '8.3'];
+              $phpVers = ['8.1', '8.2', '8.3', '8.4'];
           }
 
           $customLibraries = <<<'ARG'
