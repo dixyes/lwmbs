@@ -189,7 +189,7 @@
         "redis": {
             "type": "git",
             "path": "php-src\/ext\/redis",
-            "ref": "5.3.7",
+            "ref": "6.2.0",
             "url": "https:\/\/github.com\/phpredis\/phpredis",
             "license": {
                 "type": "file",
