@@ -77,7 +77,7 @@ trait CommonUtilTrait
     public static function setErrorHandler(): void
     {
         set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-            if (!($errno & error_reporting()) || $errno === E_STRICT) {
+            if (!($errno & error_reporting())) {
                 return;
             }
             throw new ErrorException(

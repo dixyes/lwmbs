@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 trait UnixLibraryTrait {
 
-    public function makeAutoconfEnv(string $prefix = null): string
+    public function makeAutoconfEnv(?string $prefix = null): string
     {
         if ($prefix === null) {
             $prefix = str_replace('-', '_', strtoupper($this->name));
