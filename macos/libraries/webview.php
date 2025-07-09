@@ -42,7 +42,7 @@ class Libwebview extends Library
                 'rm -rf build && ' .
                 'mkdir -p build && ' .
                 'cd build && ' .
-                'clang++ -std=c++11 -DWEBVIEW_SHARED -o webview.o ' .
+                'clang++ -std=c++11 -DWEBVIEW_BUILD_SHARED -o webview.o ' .
                     '-I ../core/include ' .
                     '-c ../core/src/webview.cc && ' .
                 'ar rcs webview_static.a webview.o', 
