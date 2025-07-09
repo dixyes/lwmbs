@@ -40,4 +40,38 @@ final class Util
             default => throw new Exception('unsupported arch: ' . $arch),
         };
     }
+    public static function makeCmakeToolchainFile(
+        string $os,
+        string $targetArch,
+        string $cflags,
+        ?string $cc=null,
+        ?string $cxx=null,
+        ?string $sdkRoot=null,
+    ):string {
+        Log::i("making cmake tool chain file for $os $targetArch with CFLAGS='$cflags'");
+        $root = realpath('.');
+        $ccLine = '';
+        if($cc) {
+            $ccLine = 'SET(CMAKE_C_COMPILER ' . Util::findCommand($cc) . ')';
+        }
+        $cxxLine = '';
+        if($cxx) {
+            $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . Util::findCommand($cxx) . ')';
+        }
+        $toolchain = <<<CMAKE
+SET(CMAKE_SYSTEM_NAME $os)
+SET(CMAKE_SYSTEM_PROCESSOR $targetArch)
+$ccLine
+$cxxLine
+SET(CMAKE_C_FLAGS "$cflags")
+SET(CMAKE_CXX_FLAGS "$cflags")
+SET(CMAKE_FIND_ROOT_PATH "$root")
+SET(CMAKE_THREAD_LIBS_INIT "-lpthread")
+CMAKE;
+        if ($sdkRoot) {
+            $toolchain .= "\nSET(CMAKE_OSX_SYSROOT \"$sdkRoot\")\n";
+        }
+        file_put_contents('./toolchain.cmake', $toolchain);
+        return realpath('./toolchain.cmake');
+    }
 }

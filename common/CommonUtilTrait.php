@@ -219,6 +219,8 @@ trait CommonUtilTrait
                 'cc' => ['compiler', false, null, 'C compiler'],
                 'cxx' => ['compiler', false, null, 'C++ compiler'],
                 'arch' => ['arch', false, php_uname('m'), 'architecture'],
+                'sdkRoot' => ['sdk root', false, null, 'path to sdk root'],
+                'extraFrameworks' => ['extraFrameworks', false, null, 'select extra frameworks, comma separated'],
             ],
             'Linux' => [
                 'cc' => ['compiler', false, null, 'C compiler'],
