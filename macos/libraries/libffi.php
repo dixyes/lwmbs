@@ -45,6 +45,9 @@ class Liblibffi extends Library
                 "--target={$this->config->arch}-apple-darwin " .
                 '--prefix= ' . //use prefix=/
                 '--libdir=/lib && ' .
+                // force ptrauth for arm64
+                ($this->config->arch === 'arm64' ?
+                    'echo "\n#ifndef HAVE_ARM64E_PTRAUTH\n#define HAVE_ARM64E_PTRAUTH 1\n#endif\n" >> aarch64-apple-darwin/fficonfig.h &&' : '').
                 "make clean && " .
                 "make -j{$this->config->concurrency} && " .
                 'make install DESTDIR=' . realpath('.'),
