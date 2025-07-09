@@ -33,6 +33,11 @@ class Config extends CommonConfig
     public string $gnuArch;
     public string $cFlags;
     public string $cxxFlags;
+    public ?string $sdkRoot;
+    /**
+     * @var array<string>
+     */
+    public array $extraFrameworks;
     public string $cmakeToolchainFile;
 
     public const NEEDED_COMMANDS = ['make', 'bison', 'flex', 'pkg-config', 'git', 'autoconf', 'automake', 'tar', 'unzip', 'xz', 'gzip', 'bzip2', 'cmake'];
@@ -43,6 +48,8 @@ class Config extends CommonConfig
             cc: $cmdArgs['named']['cc'] ?? null,
             cxx: $cmdArgs['named']['cxx'] ?? null,
             arch: $cmdArgs['named']['arch'] ?? null,
+            sdkRoot: $cmdArgs['named']['sdkRoot'] ?? null,
+            extraFrameworks: $cmdArgs['named']['extraFrameworks'] ?? null,
         );
     }
 
@@ -50,6 +57,8 @@ class Config extends CommonConfig
         ?string $cc = null,
         ?string $cxx = null,
         ?string $arch = null,
+        ?string $sdkRoot = null,
+        ?string $extraFrameworks = null,
     ) {
         Log::i("check commands");
         $lackingCommands = Util::lackingCommands(static::NEEDED_COMMANDS);
@@ -68,6 +77,14 @@ class Config extends CommonConfig
         Log::i('choose cxx: ' . $this->cxx);
         $this->arch = $arch ?? php_uname('m');
         Log::i('choose arch: ' . $this->arch);
+        $this->sdkRoot = $sdkRoot ? $sdkRoot : null;
+        if ($this->sdkRoot === null && getenv('SDKROOT')) {
+            $this->sdkRoot = getenv('SDKROOT');
+        }
+        Log::i('choose sdk root: ' . ($this->sdkRoot === null ? '<null, use default>' : $this->sdkRoot));
+        if ($this->sdkRoot) {
+            putenv("SDKROOT={$this->sdkRoot}");
+        }
 
         $this->gnuArch = Util::gnuArch($this->arch);
 
@@ -78,7 +95,9 @@ class Config extends CommonConfig
             os: 'Darwin',
             targetArch: $this->arch,
             cflags: Util::getArchCFlags($this->arch),
+            sdkRoot: $this->sdkRoot,
         );
+        $this->extraFrameworks = $extraFrameworks ? array_map('trim', explode(',', $extraFrameworks)) : [];
 
         $this->configureEnv =
             'PKG_CONFIG_PATH="' . realpath('lib/pkgconfig') . '" ' .
@@ -148,6 +167,9 @@ class Config extends CommonConfig
         foreach ($libs as $lib) {
             array_push($frameworks, ...$lib->getFrameworks());
         }
+        $frameworks = array_merge($frameworks, $this->extraFrameworks);
+        // the last duplicate framework should be kept, not the first occurrence
+        $frameworks = array_reverse(array_unique(array_reverse($frameworks)));
 
         if($asString) {
             return implode(' ', array_map(fn($x)=>"-framework $x",$frameworks));

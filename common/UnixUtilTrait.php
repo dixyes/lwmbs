@@ -36,37 +36,6 @@ trait UnixUtilTrait {
         return implode(' ', array_map(fn($x)=> "-Xcompiler $x", $flags));
     }
 
-    public static function makeCmakeToolchainFile(
-        string $os,
-        string $targetArch,
-        string $cflags,
-        ?string $cc=null,
-        ?string $cxx=null
-    ):string {
-        Log::i("making cmake tool chain file for $os $targetArch with CFLAGS='$cflags'");
-        $root = realpath('.');
-        $ccLine = '';
-        if($cc) {
-            $ccLine = 'SET(CMAKE_C_COMPILER ' . Util::findCommand($cc) . ')';
-        }
-        $cxxLine = '';
-        if($cxx) {
-            $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . Util::findCommand($cxx) . ')';
-        }
-        $toolchain = <<<CMAKE
-SET(CMAKE_SYSTEM_NAME $os)
-SET(CMAKE_SYSTEM_PROCESSOR $targetArch)
-$ccLine
-$cxxLine
-SET(CMAKE_C_FLAGS "$cflags")
-SET(CMAKE_CXX_FLAGS "$cflags")
-SET(CMAKE_FIND_ROOT_PATH "$root")
-SET(CMAKE_THREAD_LIBS_INIT "-lpthread")
-CMAKE;
-        file_put_contents('./toolchain.cmake', $toolchain);
-        return realpath('./toolchain.cmake');
-    }
-
     public static function replaceConfigHeaderLine(string $line, string $replace = '', string $file = 'src/php-src/main/php_config.h') {
         $header = file_get_contents($file);
         $header = preg_replace('/^' . $line . '$/m', $replace, $header);
