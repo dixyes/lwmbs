@@ -43,6 +43,7 @@ class Libwebview extends Library
                 'mkdir -p build && ' .
                 'cd build && ' .
                 'clang++ -std=c++11 -DWEBVIEW_BUILD_SHARED -o webview.o ' .
+                    '--target=' . $this->config->arch . '-apple-darwin ' .
                     '-I ../core/include ' .
                     '-c ../core/src/webview.cc && ' .
                 'ar rcs webview_static.a webview.o', 
