@@ -366,6 +366,10 @@ jobs:
           #!/bin/sh
 
           #set -x
+          # do not stop at the first failure, collect the result and fail at the end
+          set +e
+
+          failed=0
 
           # NOTE: to build these binaries on your machine, just use dixyes/prepared-lwmbs:{$matrix['imageTag']} image
 
@@ -471,6 +475,7 @@ jobs:
               if [ ! "\$ret" = "0" ]
               then
                   echo "::error::failed build lib for $flavor"
+                  failed=1
               else
               BASH);
               foreach ($matrix['sapis'] as $sapi) {
@@ -514,6 +519,7 @@ jobs:
                       if [ ! "\$ret" = "0" ]
                       then
                           echo "::error::failed build $flavor shared $sapi"
+                          failed=1
                       else
                           # copy the built bin out
                           mkdir -p /out/{$flavor}_shared
@@ -540,6 +546,7 @@ jobs:
                           if [ ! "\$ret" = "0" ]
                           then
                               echo "::error::failed build $flavor static $sapi"
+                              failed=1
                           else
                               # copy the built bin out
                               mkdir -p /out/{$flavor}_static
@@ -571,6 +578,13 @@ jobs:
           }
 
           $writesh("\n");
+          $writesh(<<<BASH
+          if [ "\$failed" != "0" ]
+          then
+              echo "::error::build failed"
+              exit 1
+          fi
+          BASH);
 
       - name: Build
         shell: sh {0}
@@ -578,6 +592,12 @@ jobs:
         run: |
           set +e
           . /tmp/build.sh
+          ret="$?"
+          if [ "$ret" != "0" ]
+          then
+              echo "::error::build script failed with status $ret"
+              exit 1
+          fi
           # mkdir -p /out/min_shared
           # touch /out/min_shared/micro.sfx
           # php /lwmbs/dump_licenses.php \
@@ -622,8 +642,33 @@ jobs:
             github: ${{ toJson(github) }},
             inputs: ${{ toJson(inputs) }},
           }
+          const fs = require('fs');
           const core = require('@actions/core');
 
-          const { main } = require('/lwmbs/.github/workflows/upload.js')
-          main('${{ secrets.GITHUB_TOKEN }}', 'linux', context).catch(err => core.setFailed(err.message))
+          const binFile = {
+            micro: 'micro.sfx',
+            'micro-cli': 'micro_cli.sfx',
+            cli: 'php',
+          };
+          // static binaries are built for musl only
+          let flavors = context.matrix.flavors.map(flavor => [`${flavor}_shared`, `${flavor}_static`]).flat();
+          if (context.matrix.libc !== 'musl') {
+            flavors = flavors.filter(flavor => flavor.endsWith('_shared'));
+          }
+          const missing = [];
+          for (const flavor of flavors) {
+            for (const sapi of context.matrix.sapis) {
+              const filePath = `/out/${flavor}/${binFile[sapi]}`;
+              if (!fs.existsSync(filePath)) {
+                missing.push(filePath);
+              }
+            }
+          }
+
+          if (missing.length) {
+            core.setFailed(`missing expected artifacts:\n${missing.join('\n')}`);
+          } else {
+            const { main } = require('/lwmbs/.github/workflows/upload.js')
+            main('${{ secrets.GITHUB_TOKEN }}', 'linux', context).catch(err => core.setFailed(err instanceof Error ? err.message : String(err)))
+          }
 
