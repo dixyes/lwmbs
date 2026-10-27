@@ -210,10 +210,13 @@ jobs:
                           'zts' => $zts,
                           'volumes' => [],
                       ];
-                      if ($imageTag === "linux-glibc-x86_64") {
+                      if ($libc === 'glibc') {
+                        # the node bundled with the runner needs glibc 2.28, manylinux2014
+                        # provides glibc 2.17, so share a volume to mount a compatible
+                        # node over the bundled one
                         $job['volumes'] = [
-                          '/node20217:/node20217:rw,rshared',
-                          '/node20217:/__e/node20:ro,rshared',
+                          '/node24:/node24:rw',
+                          '/node24:/__e/node24:ro',
                         ];
                       }
                       $jobs[] = $job;
@@ -270,11 +273,23 @@ jobs:
     steps:
 
       # https://github.com/actions/runner/issues/2906
-      - name: Setup node 20 for centos:7
-        if: matrix.imageTag == 'linux-glibc-x86_64'
+      - name: Setup node for manylinux2014
+        if: matrix.libc == 'glibc'
         shell: bash
         run: |
-          cp -r /opt/nodejs/* /node20217
+          if [ -x /opt/node24/bin/node ]; then
+            cp -a /opt/node24/. /node24/
+          elif [ '${{ matrix.arch }}' = 'x86_64' ]; then
+            # unofficial glibc 2.17 build, aarch64 has none, the image ships node 22
+            node_ver=24.22.1
+            node_sha=fb8ae2b650b593b2db2c6e01d69f3dd13661e21b333f8393d661be1e46ea5e82
+            curl -fsSL --retry 3 -o /tmp/node24.tar.xz \
+              "https://unofficial-builds.nodejs.org/download/release/v${node_ver}/node-v${node_ver}-linux-x64-glibc-217.tar.xz"
+            echo "${node_sha}  /tmp/node24.tar.xz" | sha256sum -c -
+            tar -xf /tmp/node24.tar.xz --strip-components=1 -C /node24
+          else
+            cp -a /opt/nodejs/. /node24/
+          fi
 
       - name: Restore sources
         uses: actions/cache/restore@v4
