@@ -120,11 +120,22 @@ class CliBuild
             throw new Exception("failed to build cli");
         }
 
-        if (php_uname('m') === $this->config->arch) {
+        $hostArch = php_uname('m');
+        $runner = null;
+        if ($hostArch === $this->config->arch) {
+            $runner = '';
+        } elseif ($hostArch === 'arm64' && $this->config->arch === 'x86_64') {
+            if (Util::rosettaAvailable()) {
+                $runner = 'arch -x86_64 ';
+            } else {
+                Log::w('Rosetta is not available, skipping sanity check');
+            }
+        }
+        if ($runner !== null) {
             Log::i('running sanity check');
             exec(
                 $this->config->setX . ' && ' .
-                    'src/php-src/sapi/cli/php -r "echo \"hello\";"',
+                    $runner . 'src/php-src/sapi/cli/php -r "echo \"hello\";"',
                 $output,
                 $ret
             );

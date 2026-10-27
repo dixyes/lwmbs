@@ -125,9 +125,17 @@ class MicroBuild
             throw new Exception("failed to build micro");
         }
 
-        if (php_uname('m') === $this->config->arch) {
+        $hostArch = php_uname('m');
+        $sapiName = !$fakeCli ? 'micro' : 'cli';
+        if ($hostArch === $this->config->arch) {
             Util::sanityCheck();
-            Util::sapiNameCheck(!$fakeCli ? 'micro' : 'cli');
+            Util::sapiNameCheck($sapiName);
+        } elseif ($hostArch === 'arm64' && $this->config->arch === 'x86_64') {
+            if (Util::rosettaAvailable()) {
+                Util::rosettaSanityCheck($sapiName);
+            } else {
+                Log::w('Rosetta is not available, skipping sanity checks');
+            }
         }
 
         if ($this->config->getExt('phar')) {

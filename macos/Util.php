@@ -33,11 +33,50 @@ final class Util
         return (int) $output[0];
     }
 
-    public static function getArchCFlags(string $arch):string {
+    public static function getArchCFlags(string $arch): string
+    {
+        return '--target=' . static::getArchTarget($arch);
+    }
+
+    public static function getArchLDFlags(string $arch): string
+    {
+        return '--target=' . static::getArchTarget($arch);
+    }
+
+    private static function getArchTarget(string $arch): string
+    {
         return match ($arch) {
-            'x86_64' => '--target=x86_64-apple-darwin',
-            'arm64','aarch64' => '--target=arm64-apple-darwin',
+            'x86_64' => 'x86_64-apple-darwin',
+            'arm64', 'aarch64' => 'arm64-apple-darwin',
             default => throw new Exception('unsupported arch: ' . $arch),
         };
+    }
+
+    public static function rosettaAvailable(): bool
+    {
+        exec('arch -x86_64 /usr/bin/true 2>/dev/null', $output, $ret);
+        return $ret === 0;
+    }
+
+    public static function rosettaSanityCheck(string $expectedSapi): void
+    {
+        Log::i('running sanity checks with Rosetta');
+        self::runMicroBinary('hello.exe', '<?php echo "hello";', 'hello', 'micro failed sanity check');
+        self::runMicroBinary('sapiName.exe', '<?php echo PHP_SAPI;', $expectedSapi, 'micro failed SAPI name check');
+    }
+
+    private static function runMicroBinary(string $file, string $code, string $expected, string $error): void
+    {
+        // remove the executable to avoid strange macos behavior on executable changed
+        @unlink($file);
+        file_put_contents(
+            $file,
+            file_get_contents('src/php-src/sapi/micro/micro.sfx') . $code
+        );
+        chmod($file, 0755);
+        exec('arch -x86_64 ./' . $file, $output, $ret);
+        if ($ret !== 0 || trim(implode('', $output)) !== $expected) {
+            throw new Exception($error);
+        }
     }
 }
