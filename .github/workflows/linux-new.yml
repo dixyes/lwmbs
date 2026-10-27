@@ -24,10 +24,10 @@ on:
         required: false
         default: ""
       zts:
-        description: "build ZTS, otherwise build NTS"
+        description: "zts, nts, or both, empty for zts"
         required: false
-        type: boolean
-        default: true
+        type: string
+        default: "zts"
       customExtensions:
         description: "custom extensions, used for custom flavor build"
         required: false
@@ -69,10 +69,10 @@ on:
         type: string
         default: ""
       zts:
-        description: "build ZTS, otherwise build NTS"
+        description: "zts, nts, or both, empty for zts"
         required: false
-        type: boolean
-        default: true
+        type: string
+        default: "zts"
       customExtensions:
         description: "custom extensions, used for custom flavor build"
         required: false
@@ -162,7 +162,36 @@ jobs:
           $phpVers = arg2arr(<<<'ARG'
           ${{ inputs.phpVers }}
           ARG);
-          $zts = ${{ inputs.zts }};
+          $ztsArgs = arg2arr(<<<'ARG'
+          ${{ inputs.zts }}
+          ARG);
+          $ztsModes = [];
+          foreach ($ztsArgs ?: ['zts'] as $ztsArg) {
+              switch (strtolower($ztsArg)) {
+                  case 'zts':
+                  case 'true':
+                      $ztsModes['zts'] = true;
+                      break;
+                  case 'nts':
+                  case 'false':
+                      $ztsModes['nts'] = true;
+                      break;
+                  case 'both':
+                      $ztsModes['zts'] = true;
+                      $ztsModes['nts'] = true;
+                      break;
+                  default:
+                      echo "invalid zts input: {$ztsArg}\n";
+                      exit(1);
+              }
+          }
+          $ztsList = [];
+          if (isset($ztsModes['zts'])) {
+              $ztsList[] = true;
+          }
+          if (isset($ztsModes['nts'])) {
+              $ztsList[] = false;
+          }
 
           if (!$flavors) {
               $flavors = ['min', 'lite', 'max-swow'];
@@ -189,37 +218,49 @@ jobs:
           $customLibraries = trim($customLibraries);
           $customExtensions = trim($customExtensions);
 
+          $jobs = [];
+
           foreach ($archs as $arch) {
               foreach ($libcs as $libc) {
+                  # arm64 alpine containers cannot run js actions, so this leg
+                  # runs on the runner host and wraps the musl steps in docker
+                  $host = $arch === 'aarch64' && $libc === 'musl';
+                  if ($host) {
+                      echo "aarch64 musl: JavaScript Actions in Alpine containers are only supported on x64 Linux runners, run on the host instead\n";
+                  }
                   foreach ($phpVers as $phpVer) {
-                      $runner = match ($arch) {
-                          'aarch64' => 'ubuntu-24.04-arm',
-                          default => 'ubuntu-latest',
-                      };
-                      $imageTag = "linux-${libc}-${arch}";
-                      $job = [
-                          'flavors' => $flavors,
-                          'customLibraries' => $customLibraries,
-                          'customExtensions' => $customExtensions,
-                          'imageTag' => $imageTag,
-                          'arch' => $arch,
-                          'runner' => $runner,
-                          'sapis' => $sapis,
-                          'libc' => $libc,
-                          'phpVer' => $phpVer,
-                          'zts' => $zts,
-                          'volumes' => [],
-                      ];
-                      if ($libc === 'glibc') {
-                        # the node bundled with the runner needs glibc 2.28, manylinux2014
-                        # provides glibc 2.17, so share a volume to mount a compatible
-                        # node over the bundled one
-                        $job['volumes'] = [
-                          '/node24:/node24:rw',
-                          '/node24:/__e/node24:ro',
-                        ];
+                      foreach ($ztsList as $zts) {
+                          $runner = match ($arch) {
+                              'aarch64' => 'ubuntu-24.04-arm',
+                              default => 'ubuntu-latest',
+                          };
+                          $imageTag = "linux-${libc}-${arch}";
+                          $job = [
+                              'flavors' => $flavors,
+                              'customLibraries' => $customLibraries,
+                              'customExtensions' => $customExtensions,
+                              'imageTag' => $imageTag,
+                              'containerImage' => $host ? '' : "ghcr.io/dixyes/prepared-lwmbs:{$imageTag}",
+                              'host' => $host,
+                              'arch' => $arch,
+                              'runner' => $runner,
+                              'sapis' => $sapis,
+                              'libc' => $libc,
+                              'phpVer' => $phpVer,
+                              'zts' => $zts,
+                              'volumes' => [],
+                          ];
+                          if ($libc === 'glibc') {
+                            # the node bundled with the runner needs glibc 2.28, manylinux2014
+                            # provides glibc 2.17, so share a volume to mount a compatible
+                            # node over the bundled one
+                            $job['volumes'] = [
+                              '/node24:/node24:rw',
+                              '/node24:/__e/node24:ro',
+                            ];
+                          }
+                          $jobs[] = $job;
                       }
-                      $jobs[] = $job;
                   }
               }
           }
@@ -259,14 +300,16 @@ jobs:
     name: ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ matrix.zts && 'zts' || 'nts' }} ${{ toJson(matrix.flavors) }}
     runs-on: ${{ matrix.runner }}
     container:
-      image: 'ghcr.io/dixyes/prepared-lwmbs:${{ matrix.imageTag }}'
+      # an empty image runs the job on the runner host, see the aarch64 musl
+      # note in gen-jobs: arm64 alpine containers cannot run javascript actions
+      image: ${{ matrix.containerImage || '' }}
       volumes: ${{ matrix.volumes }}
     needs:
       - gen-jobs
     permissions:
       contents: write
     strategy:
-      max-parallel: 6
+      max-parallel: 12
       fail-fast: false
       matrix:
         include: ${{ fromJson(needs.gen-jobs.outputs.jobs) }}
@@ -291,6 +334,25 @@ jobs:
             cp -a /opt/nodejs/. /node24/
           fi
 
+      - name: Prepare host and build container
+        if: matrix.host
+        shell: bash
+        run: |
+          sudo mkdir -p /lwmbs /out /downloads /src
+          sudo touch /versionFile
+          sudo chown -R "$(id -u):$(id -g)" /lwmbs /out /downloads /src /versionFile
+          # the generated build script uses absolute / paths, so bind mount the
+          # same paths into a long lived container and drive it with docker exec
+          sudo docker run -d --name lwmbs-build \
+            --entrypoint sleep \
+            -v /lwmbs:/lwmbs \
+            -v /out:/out \
+            -v /downloads:/downloads \
+            -v /src:/src \
+            -v /versionFile:/versionFile \
+            "ghcr.io/dixyes/prepared-lwmbs:${{ matrix.imageTag }}" \
+            infinity
+
       - name: Restore sources
         uses: actions/cache/restore@v4
         id: cache-restore
@@ -308,18 +370,34 @@ jobs:
         run: |
           export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
 
-          # prepare lwmbs
-          cd /lwmbs
-          git remote set-url origin "https://github.com/${{ inputs.workflowRepo || github.repository }}"
-          git fetch origin ${{ inputs.workflowRev || github.sha }}
-          git checkout FETCH_HEAD
+          if [ '${{ matrix.host }}' = 'true' ]
+          then
+            # keep a host side checkout: the lwmbs scripts and upload.js are
+            # used on the host, and the container mounts this checkout
+            if [ ! -d /lwmbs/.git ]
+            then
+              git clone --no-checkout "https://github.com/${{ inputs.workflowRepo || github.repository }}" /lwmbs
+            fi
+            cd /lwmbs
+            git remote set-url origin "https://github.com/${{ inputs.workflowRepo || github.repository }}"
+            git fetch origin ${{ inputs.workflowRev || github.sha }}
+            git checkout FETCH_HEAD
+            sudo docker exec -e GITHUB_TOKEN="$GITHUB_TOKEN" lwmbs-build sh -c 'cd / && php /lwmbs/fetch_source.php "" "" "--phpVer=${{ matrix.phpVer }}" "--versionFile=/versionFile"'
+            sudo chown -R "$(id -u):$(id -g)" /downloads /versionFile
+          else
+            # prepare lwmbs
+            cd /lwmbs
+            git remote set-url origin "https://github.com/${{ inputs.workflowRepo || github.repository }}"
+            git fetch origin ${{ inputs.workflowRev || github.sha }}
+            git checkout FETCH_HEAD
 
-          cd /
-          php /lwmbs/fetch_source.php \
-            "" \
-            "" \
-            "--phpVer=${{ matrix.phpVer }}" \
-            "--versionFile=/versionFile"
+            cd /
+            php /lwmbs/fetch_source.php \
+              "" \
+              "" \
+              "--phpVer=${{ matrix.phpVer }}" \
+              "--versionFile=/versionFile"
+          fi
 
           matched_key="${{ steps.cache-restore.outputs.cache-matched-key }}"
           src_hash="$(sha256sum /versionFile | head -c 64)"
@@ -591,8 +669,17 @@ jobs:
         working-directory: /
         run: |
           set +e
-          . /tmp/build.sh
-          ret="$?"
+          if [ '${{ matrix.host }}' = 'true' ]
+          then
+            # the host job has no job container, run the script inside ours
+            sudo docker cp /tmp/build.sh lwmbs-build:/tmp/build.sh
+            sudo docker exec -w / lwmbs-build sh /tmp/build.sh
+            ret="$?"
+            sudo chown -R "$(id -u):$(id -g)" /out
+          else
+            . /tmp/build.sh
+            ret="$?"
+          fi
           if [ "$ret" != "0" ]
           then
               echo "::error::build script failed with status $ret"
@@ -616,16 +703,29 @@ jobs:
         if: always()
         shell: sh {0}
         run: |
-          if [ '${{ matrix.libc }}' = 'musl' ]
+          if [ '${{ matrix.host }}' = 'true' ]
           then
-              apk add gcompat libstdc++
+            # the runner host has node already, install the actions packages
+            # locally instead of into a container
+            mkdir -p /tmp/actions-npm
+            npm install --prefix /tmp/actions-npm \
+              @actions/core@1.11.1 \
+              @actions/github@5.1.1 \
+              @actions/artifact@2.3.0 \
+              @actions/exec@1.1.1
+            echo "NODE_PATH=/tmp/actions-npm/node_modules" >> "$GITHUB_ENV"
+          else
+            if [ '${{ matrix.libc }}' = 'musl' ]
+            then
+                apk add gcompat libstdc++
+            fi
+            npm i -g \
+              @actions/core@1.11.1 \
+              @actions/github@5.1.1 \
+              @actions/artifact@2.3.0 \
+              @actions/exec@1.1.1
+            echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
           fi
-          npm i -g \
-            @actions/core@1.11.1 \
-            @actions/github@5.1.1 \
-            @actions/artifact@2.3.0 \
-            @actions/exec@1.1.1
-          echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
           which node
           node --version
 
@@ -671,4 +771,9 @@ jobs:
             const { main } = require('/lwmbs/.github/workflows/upload.js')
             main('${{ secrets.GITHUB_TOKEN }}', 'linux', context).catch(err => core.setFailed(err instanceof Error ? err.message : String(err)))
           }
+
+      - name: Clean up build container
+        if: always() && matrix.host
+        shell: bash
+        run: sudo docker rm -f lwmbs-build || true
 
