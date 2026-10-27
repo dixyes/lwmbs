@@ -106,8 +106,29 @@ class CommonConfig extends \stdClass
     {
         $ret = [];
         $descs = CommonExtension::getAllExtensionDescs();
+
+        $phpVersion = null;
+        $versionHeader = 'src/php-src/main/php_version.h';
+        if (is_file($versionHeader)) {
+            preg_match(
+                '/#\s*define\s+PHP_MAJOR_VERSION\s+(\d+)\s+#\s*define\s+PHP_MINOR_VERSION\s+(\d+)/',
+                file_get_contents($versionHeader),
+                $match,
+            );
+            if ($match) {
+                $phpVersion = "{$match[1]}.{$match[2]}";
+            }
+        }
+
         foreach ($descs as $desc) {
             $ext = $this->exts[$desc->name] ?? null;
+            // PHP 8.6 always builds opcache and has no configure switch
+            if ($desc->name === 'opcache' && $phpVersion !== null && version_compare($phpVersion, '8.6', '>=')) {
+                if ($ext) {
+                    Log::w("opcache is not optional on PHP $phpVersion and is skipped");
+                }
+                continue;
+            }
             if ($ext) {
                 $ret[] = $ext->getExtensionEnabledArg();
             } else {
