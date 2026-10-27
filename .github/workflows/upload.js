@@ -54,6 +54,7 @@ async function main(token, osName, context) {
   }
   let versionFile = await fs.readFile(versionFilePath);
   let srcHash = crypto.createHash('sha256').update(versionFile).digest('hex');
+  const ztsTag = context.matrix.zts ? 'ts' : 'nts'
 
   let tagName
   let release
@@ -114,12 +115,12 @@ async function main(token, osName, context) {
         switch (osName) {
           case 'linux':
             let _flavor = flavor.split('_').reverse().join('_')
-            artifactName = `${sapi}_${_flavor}_${context.matrix.phpVer}_${context.matrix.libc}_${context.matrix.arch}_${srcHash}`
+            artifactName = `${sapi}_${_flavor}_${context.matrix.phpVer}_${ztsTag}_${context.matrix.libc}_${context.matrix.arch}_${srcHash}`
             break;
           case 'windows':
           // fall through
           case 'macos':
-            artifactName = `${sapi}_${flavor}_${context.matrix.phpVer}_${context.matrix.arch}_${srcHash}`
+            artifactName = `${sapi}_${flavor}_${context.matrix.phpVer}_${ztsTag}_${context.matrix.arch}_${srcHash}`
             break;
         }
 
