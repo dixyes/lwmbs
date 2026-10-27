@@ -81,7 +81,6 @@ class SourceCode
         }
 
         $patchNames = [
-            'static_opcache',
             'static_extensions_win32',
             'cli_checks',
             'disable_huge_page',
@@ -89,6 +88,10 @@ class SourceCode
             'win32',
             'zend_stream',
         ];
+        // opcache needs no static patch since PHP 8.5
+        if ((int) $majMin < 85) {
+            array_unshift($patchNames, 'static_opcache');
+        }
         $patchNames = array_merge($patchNames, match (PHP_OS_FAMILY) {
             'Windows' => [
                 'cli_static',
@@ -100,7 +103,7 @@ class SourceCode
             default => [],
         });
         $patches = [];
-        $serial = ['80', '81', '82', '83', '84'];
+        $serial = ['80', '81', '82', '83', '84', '85', '86', '87'];
         foreach ($patchNames as $patchName) {
             if (file_exists($this->path . "/sapi/micro/patches/{$patchName}.patch")) {
                 $patches[] = "sapi/micro/patches/{$patchName}.patch";
