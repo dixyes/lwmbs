@@ -91,12 +91,15 @@ on:
 jobs:
   gen-jobs:
     name: Generate jobs
-    runs-on: macos-13
+    runs-on: macos-latest
     outputs:
       jobs: ${{ steps.gen-jobs.outputs.jobs }}
     permissions:
       contents: write
     steps:
+      - name: Setup PHP
+        run: brew install php
+
       - name: Generate jobs
         id: gen-jobs
         shell: php {0}
@@ -215,7 +218,7 @@ jobs:
 
   build:
     name: ${{ matrix.phpVer }} ${{ matrix.arch }} ${{ matrix.zts && 'zts' || 'nts' }} ${{ toJson(matrix.flavors) }}
-    runs-on: macos-13
+    runs-on: macos-latest
     needs:
       - gen-jobs
     permissions:
@@ -253,9 +256,9 @@ jobs:
           mkdir -p build
           cd build
 
-          brew install bison re2c automake autoconf
+          brew install bison re2c automake autoconf php
           brew link automake
-          echo "PATH=/usr/local/opt/bison/bin:/usr/local/opt/re2c/bin:$PATH" >> "$GITHUB_ENV"
+          echo "PATH=/opt/homebrew/opt/bison/bin:/usr/local/opt/bison/bin:/opt/homebrew/opt/re2c/bin:/usr/local/opt/re2c/bin:$PATH" >> "$GITHUB_ENV"
 
           php ../fetch_source.php \
             "" \
