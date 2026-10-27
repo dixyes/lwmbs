@@ -232,6 +232,7 @@ trait CommonUtilTrait
         $namedKeys['fakeCli'] = ['BOOL', false, false, 'build with PHP_MICRO_FAKE_CLI defination'];
         if (!$libsOnly) {
             $namedKeys['allStatic'] = ['static', false, false, 'use -all-static in php build'];
+            $namedKeys['no-zts'] = ['BOOL', false, false, 'build NTS instead of ZTS'];
         }
 
         $positionalNames = [
@@ -248,6 +249,9 @@ trait CommonUtilTrait
         );
 
         $config = Config::fromCmdArgs($cmdArgs);
+        if ($cmdArgs['named']['no-zts'] ?? false) {
+            $config->zts = false;
+        }
 
         $libNames = array_filter(array_map('trim', explode(',', $cmdArgs['positional']['libraries'])));
 
