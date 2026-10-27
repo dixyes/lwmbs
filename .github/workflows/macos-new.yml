@@ -16,9 +16,14 @@ on:
         required: false
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7"
         required: false
         default: ""
+      zts:
+        description: "build ZTS, otherwise build NTS"
+        required: false
+        type: boolean
+        default: true
       customExtensions:
         description: "custom extensions, used for custom flavor build"
         required: false
@@ -50,10 +55,15 @@ on:
         type: string
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7"
         required: false
         type: string
         default: ""
+      zts:
+        description: "build ZTS, otherwise build NTS"
+        required: false
+        type: boolean
+        default: true
       customExtensions:
         description: "custom extensions, used for custom flavor build"
         required: false
@@ -140,6 +150,7 @@ jobs:
           $phpVers = arg2arr(<<<'ARG'
           ${{ inputs.phpVers }}
           ARG);
+          $zts = ${{ inputs.zts }};
 
           if (!$flavors) {
               $flavors = ['min', 'lite', 'max-swow'];
@@ -151,7 +162,7 @@ jobs:
               $sapis = ['micro', 'micro-cli', 'cli'];
           }
           if (!$phpVers) {
-              $phpVers = ['8.1', '8.2', '8.3', '8.4'];
+              $phpVers = ['8.1', '8.2', '8.3', '8.4', '8.5', '8.6', '8.7'];
           }
 
           $customLibraries = <<<'ARG'
@@ -172,6 +183,7 @@ jobs:
                       'arch' => $arch,
                       'sapis' => $sapis,
                       'phpVer' => $phpVer,
+                      'zts' => $zts,
                   ];
                   $jobs[] = $job;
               }
@@ -202,7 +214,7 @@ jobs:
           # file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
 
   build:
-    name: ${{ matrix.phpVer }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
+    name: ${{ matrix.phpVer }} ${{ matrix.arch }} ${{ matrix.zts && 'zts' || 'nts' }} ${{ toJson(matrix.flavors) }}
     runs-on: macos-13
     needs:
       - gen-jobs
@@ -406,6 +418,9 @@ jobs:
                       'micro-cli' => 'build_micro.php --fakeCli',
                       'cli' => 'build_cli.php',
                   };
+                  if (!$matrix['zts']) {
+                      $command .= ' --no-zts';
+                  }
 
                   $targetBin = match ($sapi) {
                       'micro' => './src/php-src/sapi/micro/micro.sfx',

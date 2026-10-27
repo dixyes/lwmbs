@@ -20,9 +20,14 @@ on:
         required: false
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7"
         required: false
         default: ""
+      zts:
+        description: "build ZTS, otherwise build NTS"
+        required: false
+        type: boolean
+        default: true
       customExtensions:
         description: "custom extensions, used for custom flavor build"
         required: false
@@ -59,10 +64,15 @@ on:
         type: string
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7"
         required: false
         type: string
         default: ""
+      zts:
+        description: "build ZTS, otherwise build NTS"
+        required: false
+        type: boolean
+        default: true
       customExtensions:
         description: "custom extensions, used for custom flavor build"
         required: false
@@ -152,6 +162,7 @@ jobs:
           $phpVers = arg2arr(<<<'ARG'
           ${{ inputs.phpVers }}
           ARG);
+          $zts = ${{ inputs.zts }};
 
           if (!$flavors) {
               $flavors = ['min', 'lite', 'max-swow'];
@@ -166,7 +177,7 @@ jobs:
               $libcs = ['musl', 'glibc'];
           }
           if (!$phpVers) {
-              $phpVers = ['8.1', '8.2', '8.3', '8.4'];
+              $phpVers = ['8.1', '8.2', '8.3', '8.4', '8.5', '8.6', '8.7'];
           }
 
           $customLibraries = <<<'ARG'
@@ -181,6 +192,10 @@ jobs:
           foreach ($archs as $arch) {
               foreach ($libcs as $libc) {
                   foreach ($phpVers as $phpVer) {
+                      $runner = match ($arch) {
+                          'aarch64' => 'ubuntu-24.04-arm',
+                          default => 'ubuntu-latest',
+                      };
                       $imageTag = "linux-${libc}-${arch}";
                       $job = [
                           'flavors' => $flavors,
@@ -188,9 +203,11 @@ jobs:
                           'customExtensions' => $customExtensions,
                           'imageTag' => $imageTag,
                           'arch' => $arch,
+                          'runner' => $runner,
                           'sapis' => $sapis,
                           'libc' => $libc,
                           'phpVer' => $phpVer,
+                          'zts' => $zts,
                           'volumes' => [],
                       ];
                       if ($imageTag === "linux-glibc-x86_64") {
@@ -236,8 +253,8 @@ jobs:
 
 
   build:
-    name: ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
-    runs-on: ubuntu-latest
+    name: ${{ matrix.phpVer }} ${{ matrix.libc }} ${{ matrix.arch }} ${{ matrix.zts && 'zts' || 'nts' }} ${{ toJson(matrix.flavors) }}
+    runs-on: ${{ matrix.runner }}
     container:
       image: 'ghcr.io/dixyes/prepared-lwmbs:${{ matrix.imageTag }}'
       volumes: ${{ matrix.volumes }}
@@ -447,6 +464,9 @@ jobs:
                       'micro-cli' => 'build_micro.php --fakeCli',
                       'cli' => 'build_cli.php',
                   };
+                  if (!$matrix['zts']) {
+                      $command .= ' --no-zts';
+                  }
 
                   $targetBin = match ($sapi) {
                       'micro' => '/src/php-src/sapi/micro/micro.sfx',

@@ -16,9 +16,14 @@ on:
         required: false
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7"
         required: false
         default: ""
+      zts:
+        description: "build ZTS, otherwise build NTS"
+        required: false
+        type: boolean
+        default: true
       customExtensions:
         description: "custom extensions, used for custom flavor build"
         required: false
@@ -50,10 +55,15 @@ on:
         type: string
         default: ""
       phpVers:
-        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4"
+        description: "PHP versions, empty for all, available: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7"
         required: false
         type: string
         default: ""
+      zts:
+        description: "build ZTS, otherwise build NTS"
+        required: false
+        type: boolean
+        default: true
       customExtensions:
         description: "custom extensions, used for custom flavor build"
         required: false
@@ -140,6 +150,7 @@ jobs:
           $phpVers = arg2arr(<<<'ARG'
           ${{ inputs.phpVers }}
           ARG);
+          $zts = ${{ inputs.zts }};
 
           if (!$flavors) {
               $flavors = ['min', 'lite', 'max-swow'];
@@ -151,7 +162,7 @@ jobs:
               $sapis = ['micro', 'micro-cli', 'cli'];
           }
           if (!$phpVers) {
-              $phpVers = ['8.1', '8.2', '8.3', '8.4'];
+              $phpVers = ['8.1', '8.2', '8.3', '8.4', '8.5', '8.6', '8.7'];
           }
 
           $customLibraries = <<<'ARG'
@@ -177,6 +188,7 @@ jobs:
                       'arch' => $arch,
                       'sapis' => $sapis,
                       'phpVer' => $phpVer,
+                      'zts' => $zts,
                   ];
                   $jobs[] = $job;
               }
@@ -207,7 +219,7 @@ jobs:
           # file_put_contents(getenv('GITHUB_OUTPUT'), "jobs=$json");
 
   build:
-    name: ${{ matrix.phpVer }} ${{ matrix.arch }} ${{ toJson(matrix.flavors) }}
+    name: ${{ matrix.phpVer }} ${{ matrix.arch }} ${{ matrix.zts && 'zts' || 'nts' }} ${{ toJson(matrix.flavors) }}
     runs-on: windows-latest
     # TODO: use docker
     # container: "ghcr.io/dixyes/prepared-lwmbs:windows-${{ matrix.arch }}-src"
@@ -454,15 +466,23 @@ jobs:
               } else {
               PWSH);
               foreach ($matrix['sapis'] as $sapi) {
+                  $buildType = $matrix['zts'] ? 'Release_TS' : 'Release';
                   $command = match ($sapi) {
-                      'micro' => 'build_micro.php',
-                      'micro-cli' => 'build_micro.php --fakeCli',
+                      'micro', 'micro-cli' => 'build_micro.php',
                       'cli' => 'build_cli.php',
                   };
+                  $commandArgs = [];
+                  if ($sapi === 'micro-cli') {
+                      $commandArgs[] = '--fakeCli';
+                  }
+                  if (!$matrix['zts']) {
+                      $commandArgs[] = '--no-zts';
+                  }
+                  $commandArgs = implode(' ', $commandArgs);
 
                   $targetBin = match ($sapi) {
-                      'micro', 'micro-cli' => "\\src\\php-src\\{$matrix['arch']}\\Release_TS\\micro.sfx",
-                      'cli' => "\\src\\php-src\\{$matrix['arch']}\\Release_TS\\php.exe",
+                      'micro', 'micro-cli' => "\\src\\php-src\\{$matrix['arch']}\\{$buildType}\\micro.sfx",
+                      'cli' => "\\src\\php-src\\{$matrix['arch']}\\{$buildType}\\php.exe",
                   };
                   $binName = match ($sapi) {
                       'micro' => "micro.sfx",
@@ -471,8 +491,8 @@ jobs:
                   };
 
                   $targetBinPDB = match ($sapi) {
-                      'micro', 'micro-cli' => "\\src\\php-src\\{$matrix['arch']}\\Release_TS\\micro.pdb",
-                      'cli' => "\\src\\php-src\\{$matrix['arch']}\\Release_TS\\php.pdb",
+                      'micro', 'micro-cli' => "\\src\\php-src\\{$matrix['arch']}\\{$buildType}\\micro.pdb",
+                      'cli' => "\\src\\php-src\\{$matrix['arch']}\\{$buildType}\\php.pdb",
                   };
                   $binNamePDB = match ($sapi) {
                       'micro' => "micro.pdb",
@@ -489,8 +509,8 @@ jobs:
                       # $sapi
                       # delete the built bin to avoid cache
                       Remove-Item -ErrorAction SilentlyContinue -Force `
-                          src/php-src/{$matrix['arch']}/Release_TS/sapi/micro/php_micro.obj
-                      & php \${lwmbsDir}\\$command `
+                          src/php-src/{$matrix['arch']}/{$buildType}/sapi/micro/php_micro.obj
+                      & php \${lwmbsDir}\\$command {$commandArgs} `
                           "$libraries" `
                           "$extensions" `
                           "--phpBinarySDKDir=\$phpSdkDir" `
