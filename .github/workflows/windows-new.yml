@@ -361,7 +361,7 @@ jobs:
           \$buildDir = "C:\\build"
           \$phpSdkDir = "C:\\tools\\php-sdk-binary-tools"
           \$lwmbsDir = "C:\\lwmbs"
-          \$vsVer = "17"
+          \$vsVer = "18"
           \$outDir = "C:\\out"
 
           Set-Location -Path \$buildDir
