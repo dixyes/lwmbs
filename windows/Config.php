@@ -72,7 +72,8 @@ class Config extends CommonConfig
             '15' => "Visual Studio 15 2017",
             '16' => "Visual Studio 16 2019",
             '17' => "Visual Studio 17 2022",
-            default => throw new Exception("not supported vs version {$vsVer} supported: 14,15,16,17"),
+            '18' => "Visual Studio 18 2026",
+            default => throw new Exception("not supported vs version {$vsVer} supported: 14,15,16,17,18"),
         };
 
         $this->cmakeToolchainFile = Util::makeCmakeToolchainFile($this->cmakeArch);
@@ -84,7 +85,8 @@ class Config extends CommonConfig
             '15' => 'vc15',
             '16' => 'vs16',
             '17' => 'vs17',
-            default => throw new Exception("?????"),
+            '18' => 'vs18',
+            default => throw new Exception("not supported vs version {$vsVer} supported: 14,15,16,17,18"),
         };
         $this->phpBinarySDKCmd = "\"{$this->phpBinarySDKDir}\\phpsdk-starter.bat\" -c {$crt} -a {$this->arch} ";
 
