@@ -1,0 +1,2 @@
+# keep the patches LF even when the repo is checked out with autocrlf
+*.patch -text

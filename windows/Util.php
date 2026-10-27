@@ -49,6 +49,7 @@ CMAKE;
     }
 
     public static function patchLibxml() {
+        self::backportLibxml2();
         $config_w32 = file_get_contents('src\php-src\ext\libxml\config.w32');
         $config_w32 = preg_replace('/CHECK_LIB.+libiconv.+/', '', $config_w32);
         $config_w32 = preg_replace('/ADD_EXTENSION_DEP\s*\(\s*\'libxml\'\s*,\s*\'iconv\'\s*\)/', 'true', $config_w32);
@@ -56,6 +57,49 @@ CMAKE;
         $config_w32 = file_get_contents('src\php-src\win32\build\config.w32');
         $config_w32 = preg_replace('/dllmain.c\s+/', '', $config_w32);
         file_put_contents('src\php-src\win32\build\config.w32', $config_w32);
+    }
+
+    // php-src bc7537db splits the libxml2 export list for 2.15 on 8.4 and later,
+    // apply the same split to 8.1 - 8.3
+    private static function backportLibxml2(): void
+    {
+        $version_h = @file_get_contents('src\php-src\main\php_version.h');
+        if ($version_h === false) {
+            throw new Exception('failed to read PHP version header');
+        }
+        if (!preg_match('/#\s*define\s+PHP_MAJOR_VERSION\s+(\d+)/', $version_h, $major)
+            || !preg_match('/#\s*define\s+PHP_MINOR_VERSION\s+(\d+)/', $version_h, $minor)) {
+            throw new Exception('failed to detect PHP version');
+        }
+        $phpVer = "{$major[1]}.{$minor[1]}";
+        $patchName = match ($phpVer) {
+            '8.1' => 'libxml2_215_81.patch',
+            '8.2' => 'libxml2_215_82.patch',
+            '8.3' => 'libxml2_215_83.patch',
+            default => null,
+        };
+        if ($patchName === null) {
+            return;
+        }
+
+        $config_w32 = file_get_contents('src\php-src\ext\libxml\config.w32');
+        if (str_contains($config_w32, 'php_libxml2_legacy.def')) {
+            Log::i('libxml2 2.15 backport already applied');
+            return;
+        }
+
+        Log::i("applying libxml2 2.15 backport for PHP {$phpVer}");
+        // the patch adds this file, remove a stale copy first
+        $legacy = 'src\php-src\ext\libxml\php_libxml2_legacy.def';
+        if (is_file($legacy)) {
+            unlink($legacy);
+        }
+        $patch = __DIR__ . DIRECTORY_SEPARATOR . 'patches' . DIRECTORY_SEPARATOR . $patchName;
+        $ret = 0;
+        passthru("cd src\\php-src && git apply \"$patch\"", $ret);
+        if ($ret !== 0) {
+            throw new Exception("failed to apply libxml2 2.15 backport for PHP {$phpVer}");
+        }
     }
     
     public static function zstdAPCufix(bool $apcuEnabled = false) {
