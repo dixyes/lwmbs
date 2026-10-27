@@ -586,10 +586,10 @@ jobs:
               apk add gcompat libstdc++
           fi
           npm i -g \
-            @actions/core \
-            @actions/github \
-            @actions/artifact \
-            @actions/exec
+            @actions/core@1.11.1 \
+            @actions/github@5.1.1 \
+            @actions/artifact@2.3.0 \
+            @actions/exec@1.1.1
           echo "NODE_PATH=$(npm root --quiet -g)" >> "$GITHUB_ENV"
           which node
           node --version

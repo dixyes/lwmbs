@@ -585,10 +585,10 @@ jobs:
         if: always()
         run: |
           & npm i -g `
-            '@actions/core' `
-            '@actions/github' `
-            '@actions/artifact' `
-            '@actions/exec'
+            '@actions/core@1.11.1' `
+            '@actions/github@5.1.1' `
+            '@actions/artifact@2.3.0' `
+            '@actions/exec@1.1.1'
           $nodePath = & npm root --quiet -g
           $nodePath = $nodePath.Trim()
           Write-OutPut "NODE_PATH=$nodePath" | Out-File -FilePath "${env:GITHUB_ENV}" -Append
