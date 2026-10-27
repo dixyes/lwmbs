@@ -160,8 +160,9 @@
             }
         },
         "libxml2": {
-            "type": "url",
-            "url": "https:\/\/gitlab.gnome.org\/GNOME\/libxml2\/-\/archive\/v2.12.3\/libxml2-v2.12.3.tar.gz",
+            "type": "ghtag",
+            "repo": "GNOME\/libxml2",
+            "match": "\/^v(?<version>2\\.\\d+\\.\\d+)$\/",
             "license": {
                 "type": "file",
                 "path": "Copyright"
@@ -189,7 +190,7 @@
         "redis": {
             "type": "git",
             "path": "php-src\/ext\/redis",
-            "ref": "6.2.0",
+            "ref": "6.3.0",
             "url": "https:\/\/github.com\/phpredis\/phpredis",
             "license": {
                 "type": "file",
