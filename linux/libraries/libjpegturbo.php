@@ -62,6 +62,7 @@ EOF
                     '-DENABLE_SHARED=OFF ' .
                     '-DBUILD_SHARED_LIBS=OFF ' .
                     '-DWITH_JAVA=OFF ' .
+                    '-DWITH_TOOLS=OFF ' .
                     '-DCMAKE_INSTALL_PREFIX=/ ' .
                     '-DCMAKE_INSTALL_LIBDIR=/lib ' .
                     '-DCMAKE_INSTALL_INCLUDEDIR=/include ' .
