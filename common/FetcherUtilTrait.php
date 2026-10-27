@@ -24,6 +24,11 @@ trait FetcherUtilTrait
 
     static function latestPHP(string $ver): string
     {
+        // track the development branch for unreleased versions
+        if ($ver === '8.7') {
+            return 'master';
+        }
+
         $info = json_decode(static::fetch(url: "https://www.php.net/releases/index.php?json&version=$ver"), true);
         $version = $info['version'] ?? null;
 
