@@ -286,16 +286,20 @@ trait CommonUtilTrait
     public static function patchPhar(): bool
     {
         $phar_c = file_get_contents("src/php-src/ext/phar/phar.c");
-        $pharPatched = strpos($phar_c, 'char *micro_get_filename(void);') !== false;
-        if ($pharPatched) {
+        $hasDeclaration = preg_match('/\b(?:const\s+)?char\s*\*\s*micro_get_filename\s*\(\s*void\s*\)\s*;/', $phar_c) === 1;
+        $hasCondition = str_contains($phar_c, 'micro_get_filename())');
+        if ($hasDeclaration && $hasCondition) {
             Log::i('phar already patched');
             return true;
-        } else {
-            Log::i('patching phar.c');
+        }
+
+        Log::i('patching phar.c');
+
+        if (!$hasDeclaration) {
             $count = -1;
             $phar_c = preg_replace(
                 '/\n[ \t]*static\s+zend_op_array\s*\*\s*phar_compile_file\s*\(\s*zend_file_handle\s*\*\s*file_handle\s*,\s*int\s+type\s*\)/',
-                "\nchar *micro_get_filename(void);\n\\0",
+                "\nconst char *micro_get_filename(void);\n\\0",
                 $phar_c,
                 count: $count,
             );
@@ -303,35 +307,54 @@ trait CommonUtilTrait
                 Log::e('failed to patch phar.c');
                 return false;
             }
-
-            $phar_c = preg_replace(
-                '/strstr\s*\(\s*(ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename)\s*,\s*"\.phar"\s*\)/',
-                '(strstr($1, micro_get_filename()) || $0)',
-                $phar_c,
-                count: $count,
-            );
-            if ($count !== 1) {
-                Log::e('failed to patch phar.c');
-                return false;
-            }
-
-            file_put_contents("src/php-src/ext/phar/phar.c", $phar_c);
-            return true;
         }
+
+        if (!$hasCondition) {
+            $count = -1;
+            if (str_contains($phar_c, 'phar_has_marker_in_filename(file_handle->filename)')) {
+                // PHP 8.6 and later
+                $phar_c = preg_replace(
+                    '/^([ \t]*)if \(phar_has_marker_in_filename\(file_handle->filename\)\s*&&\s*!strstr\(ZSTR_VAL\(file_handle->filename\),\s*":\/\/"\)\) \{/m',
+                    "$1if ((phar_has_marker_in_filename(file_handle->filename)\n" .
+                        "$1\t\t|| strstr(ZSTR_VAL(file_handle->filename), micro_get_filename()))\n" .
+                        "$1\t&& !strstr(ZSTR_VAL(file_handle->filename), \"://\")) {",
+                    $phar_c,
+                    count: $count,
+                );
+            } else {
+                $phar_c = preg_replace(
+                    '/strstr\s*\(\s*(ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename)\s*,\s*"\.phar"\s*\)/',
+                    '(strstr($1, micro_get_filename()) || $0)',
+                    $phar_c,
+                    count: $count,
+                );
+            }
+            if ($count !== 1) {
+                Log::e('failed to patch phar.c');
+                return false;
+            }
+        }
+
+        file_put_contents("src/php-src/ext/phar/phar.c", $phar_c);
+        return true;
     }
 
     public static function unpatchPhar(): bool
     {
         $phar_c = file_get_contents("src/php-src/ext/phar/phar.c");
-        $pharPatched = strpos($phar_c, 'char *micro_get_filename(void);') !== false;
-        if (!$pharPatched) {
+        $hasDeclaration = preg_match('/\b(?:const\s+)?char\s*\*\s*micro_get_filename\s*\(\s*void\s*\)\s*;/', $phar_c) === 1;
+        $hasCondition = str_contains($phar_c, 'micro_get_filename())');
+        if (!$hasDeclaration && !$hasCondition) {
             Log::i('phar is not patched');
             return true;
-        } else {
-            Log::i('recovering phar.c');
+        }
+
+        Log::i('recovering phar.c');
+
+        if ($hasDeclaration) {
             $count = -1;
             $phar_c = preg_replace(
-                '/\nchar \*micro_get_filename\(void\);\n/',
+                '/\n(?:const\s+)?char\s*\*\s*micro_get_filename\s*\(\s*void\s*\)\s*;\n/',
                 "",
                 $phar_c,
                 count: $count,
@@ -340,20 +363,32 @@ trait CommonUtilTrait
                 Log::e('failed to recover phar.c');
                 return false;
             }
+        }
 
-            $phar_c = preg_replace(
-                '/\(strstr\((ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename), micro_get_filename\(\)\) \|\| (strstr\s*\(\s*(ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename)\s*,\s*"\.phar"\s*\))\)/',
-                '$2',
-                $phar_c,
-                count: $count,
-            );
+        if ($hasCondition) {
+            $count = -1;
+            if (str_contains($phar_c, 'phar_has_marker_in_filename(file_handle->filename)')) {
+                $phar_c = preg_replace(
+                    '/^([ \t]*)if \(\(phar_has_marker_in_filename\(file_handle->filename\)\s*\n\s*\|\| strstr\(ZSTR_VAL\(file_handle->filename\), micro_get_filename\(\)\)\)\s*\n\s*&& !strstr\(ZSTR_VAL\(file_handle->filename\), ":\/\/"\)\) \{/m',
+                    "$1if (phar_has_marker_in_filename(file_handle->filename) && !strstr(ZSTR_VAL(file_handle->filename), \"://\")) {",
+                    $phar_c,
+                    count: $count,
+                );
+            } else {
+                $phar_c = preg_replace(
+                    '/\(strstr\((ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename), micro_get_filename\(\)\) \|\| (strstr\s*\(\s*(ZSTR_VAL\s*\(\s*file_handle\s*->\s*filename\s*\)|file_handle\s*->\s*filename)\s*,\s*"\.phar"\s*\))\)/',
+                    '$2',
+                    $phar_c,
+                    count: $count,
+                );
+            }
             if ($count !== 1) {
                 Log::e('failed to recover phar.c');
                 return false;
             }
-
-            file_put_contents("src/php-src/ext/phar/phar.c", $phar_c);
-            return true;
         }
+
+        file_put_contents("src/php-src/ext/phar/phar.c", $phar_c);
+        return true;
     }
 }
