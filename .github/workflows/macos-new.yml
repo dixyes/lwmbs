@@ -311,6 +311,10 @@ jobs:
           #!/bin/sh
 
           #set -x
+          # do not stop at the first failure, collect the result and fail at the end
+          set +e
+
+          failed=0
 
           # cached in github actions
           # echo "::group::Prepare source"
@@ -413,6 +417,7 @@ jobs:
               if [ ! "\$ret" = "0" ]
               then
                   echo "::error::failed build lib for $flavor"
+                  failed=1
               else
               BASH);
               foreach ($matrix['sapis'] as $sapi) {
@@ -454,6 +459,7 @@ jobs:
                       if [ ! "\$ret" = "0" ]
                       then
                           echo "::error::failed build $flavor $sapi"
+                          failed=1
                       else
                           # copy the built bin out
                           mkdir -p ./out/{$flavor}
@@ -479,6 +485,13 @@ jobs:
           }
 
           $writesh("\n");
+          $writesh(<<<BASH
+          if [ "\$failed" != "0" ]
+          then
+              echo "::error::build failed"
+              exit 1
+          fi
+          BASH);
 
       - name: Build
         shell: sh {0}
@@ -486,6 +499,12 @@ jobs:
         run: |
           set +e
           . /tmp/build.sh
+          ret="$?"
+          if [ "$ret" != "0" ]
+          then
+              echo "::error::build script failed with status $ret"
+              exit 1
+          fi
           # mkdir -p ./out/min
           # touch ./out/min/micro.sfx
           # php ../dump_licenses.php \
@@ -524,10 +543,30 @@ jobs:
             github: ${{ toJson(github) }},
             inputs: ${{ toJson(inputs) }},
           }
+          const fs = require('fs');
           const core = require('@actions/core');
 
-          const { main } = require('${{ github.workspace }}/.github/workflows/upload.js')
-          main('${{ secrets.GITHUB_TOKEN }}', 'macos', context).catch(err => core.setFailed(err.message))
+          const binFile = {
+            micro: 'micro.sfx',
+            'micro-cli': 'micro_cli.sfx',
+            cli: 'php',
+          };
+          const missing = [];
+          for (const flavor of context.matrix.flavors) {
+            for (const sapi of context.matrix.sapis) {
+              const filePath = `build/out/${flavor}/${binFile[sapi]}`;
+              if (!fs.existsSync(filePath)) {
+                missing.push(filePath);
+              }
+            }
+          }
+
+          if (missing.length) {
+            core.setFailed(`missing expected artifacts:\n${missing.join('\n')}`);
+          } else {
+            const { main } = require('${{ github.workspace }}/.github/workflows/upload.js')
+            main('${{ secrets.GITHUB_TOKEN }}', 'macos', context).catch(err => core.setFailed(err instanceof Error ? err.message : String(err)))
+          }
 
 
 
