@@ -51,11 +51,16 @@ CMAKE;
     public static function patchLibxml() {
         self::backportLibxml2();
         $config_w32 = file_get_contents('src\php-src\ext\libxml\config.w32');
-        $config_w32 = preg_replace('/CHECK_LIB.+libiconv.+/', '', $config_w32);
+        // php 8.5 moved the libiconv check into a compound expression,
+        // older versions have it as a standalone condition line
+        $config_w32 = preg_replace('/^\s*(?:CHECK_LIB\("libiconv|\(\(PHP_ICONV)[^\n]*&&[^\n]*\n/m', '', $config_w32);
         $config_w32 = preg_replace('/ADD_EXTENSION_DEP\s*\(\s*\'libxml\'\s*,\s*\'iconv\'\s*\)/', 'true', $config_w32);
+        if (stripos($config_w32, 'libiconv') !== false || stripos($config_w32, 'PHP_ICONV') !== false) {
+            throw new Exception('failed to remove the iconv requirement from ext/libxml/config.w32');
+        }
         file_put_contents('src\php-src\ext\libxml\config.w32', $config_w32);
         $config_w32 = file_get_contents('src\php-src\win32\build\config.w32');
-        $config_w32 = preg_replace('/dllmain.c\s+/', '', $config_w32);
+        $config_w32 = preg_replace('/dllmain\.c\s+/', '', $config_w32);
         file_put_contents('src\php-src\win32\build\config.w32', $config_w32);
     }
 
