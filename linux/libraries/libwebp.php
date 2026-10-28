@@ -23,6 +23,8 @@ class Liblibwebp extends Library
     use LinuxLibraryTrait;
     protected string $name = 'libwebp';
     protected array $staticLibs = [
+        'libwebpmux.a',
+        'libwebpdemux.a',
         'libwebp.a',
         'libsharpyuv.a',
     ];
@@ -84,7 +86,8 @@ EOF,
                     '-DWEBP_BUILD_IMG2WEBP=OFF ' .
                     '-DWEBP_BUILD_VWEBP=OFF ' .
                     '-DWEBP_BUILD_WEBPINFO=OFF ' .
-                    '-DWEBP_BUILD_LIBWEBPMUX=OFF ' .
+                    // gd in php 8.6+ needs the webp mux API
+                    '-DWEBP_BUILD_LIBWEBPMUX=ON ' .
                     '-DWEBP_BUILD_WEBPMUX=OFF ' .
                     '-DWEBP_BUILD_EXTRAS=OFF ' .
                     '-DWEBP_UNICODE=ON ' .
