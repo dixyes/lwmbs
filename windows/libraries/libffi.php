@@ -97,11 +97,17 @@ class Liblibffi extends Library
             throw new Exception('cannot determine libffi version');
         }
         $version = $matches[1];
+        // FFI_VERSION_NUMBER encodes X.Y.Z as X * 10000 + Y * 100 + Z
+        $versionParts = array_pad(array_map('intval', explode('.', $version)), 3, 0);
+        $versionNumber = $versionParts[0] * 10000 + $versionParts[1] * 100 + $versionParts[2];
 
         // update msvc_build\aarch64\aarch64_include\ffi.h
         $ffi_h = file_get_contents('src\libffi\include\ffi.h.in');
         foreach ([
             '@VERSION@' => $version,
+            // 3.8 feature
+            '@FFI_VERSION_STRING@' => $version,
+            '@FFI_VERSION_NUMBER@' => (string) $versionNumber,
             '@TARGET@' => 'AARCH64',
             '@HAVE_LONG_DOUBLE@' => '_M_ARM64',
             '@FFI_EXEC_TRAMPOLINE_TABLE@' => '0',
