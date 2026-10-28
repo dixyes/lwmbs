@@ -141,17 +141,35 @@ class SourceCode
                 file_put_contents($this->path . '/ext/openssl/openssl.c', $openssl_c);
                 break;
             case '81':
-                // libxml new ver
-                Log::i('patching php 8.1 for libxml2');
-                $patch = 'https://github.com/dixyes/php-src/commit/a9f172466d2a7ddda192d116b4a5a2b1577a45cc.diff';
+                // recent php 8.1 releases already support libxml2 2.12+
+                $libxml_c = @file_get_contents($this->path . '/ext/libxml/libxml.c');
+                if ($libxml_c === false || !str_contains($libxml_c, 'LIBXML_VERSION >= 21200')) {
+                    Log::i('patching php 8.1 for libxml2');
+                    $patch = 'https://github.com/dixyes/php-src/commit/a9f172466d2a7ddda192d116b4a5a2b1577a45cc.diff';
+                    $ret = 0;
+                    passthru(
+                        'cd ' . $this->path . ' && ' .
+                            'curl -L ' . $patch . ' | patch -p1',
+                        $ret
+                    );
+                    if ($ret != 0) {
+                        Log::w("failed to patch php 8.1 for libxml new ver");
+                    }
+                } else {
+                    Log::i('php 8.1 already supports libxml2 2.12+');
+                }
+
+                // sha1.c still uses K&R definitions, rejected by C23 compilers
+                Log::i('patching php 8.1 sha1 for C23');
+                $patch = __DIR__ . DIRECTORY_SEPARATOR . 'patches' . DIRECTORY_SEPARATOR . 'php81_sha1_ansi.patch';
                 $ret = 0;
                 passthru(
                     'cd ' . $this->path . ' && ' .
-                        'curl -L ' . $patch . ' | patch -p1',
+                        (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' "' . $patch . '" | patch -p1',
                     $ret
                 );
                 if ($ret != 0) {
-                    Log::w("failed to patch php 8.1 for libxml new ver");
+                    throw new Exception('failed to patch php 8.1 sha1');
                 }
 
                 // musl fopencookie patch
