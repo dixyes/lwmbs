@@ -172,6 +172,26 @@ class SourceCode
                     throw new Exception('failed to patch php 8.1 sha1');
                 }
 
+                // OpenSSL 4 removed ERR_NUM_ERRORS and made ASN1_STRING opaque
+                $openssl_c = @file_get_contents($this->path . '/ext/openssl/openssl.c');
+                if ($openssl_c === false || !str_contains($openssl_c, 'PHP_OPENSSL_ERR_BUFFER_SIZE')) {
+                    // the backport commit also changes NEWS, which does not match
+                    // the 8.1 branch content, so exclude it from the patch
+                    Log::i('patching php 8.1 for OpenSSL 4');
+                    $patch = 'https://github.com/php/php-src/commit/19255f4b784cedf6dd4bb21e97def348d335dd69.diff';
+                    $ret = 0;
+                    passthru(
+                        'cd ' . $this->path . ' && ' .
+                            'curl -L ' . $patch . ' | git apply --exclude=NEWS -p1 --ignore-whitespace',
+                        $ret
+                    );
+                    if ($ret != 0) {
+                        throw new Exception('failed to patch php 8.1 for OpenSSL 4');
+                    }
+                } else {
+                    Log::i('php 8.1 already supports OpenSSL 4');
+                }
+
                 // musl fopencookie patch
                 Log::i('patching php 8.1 for musl fopencookie');
                 $patch = 'https://github.com/php/php-src/commit/577b8ae4226368e66fee7a9b5c58f9e2428372fc.diff';
