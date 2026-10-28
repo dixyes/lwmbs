@@ -75,6 +75,8 @@ class Libfreetype extends Library
             "cd {$this->sourceDir} && " .
                 "{$this->config->configureEnv} " . 'cmake -B builddir ' .
                     '-DBUILD_SHARED_LIBS=OFF ' .
+                    // HVF needs Apple's private SDK library, consumers cannot link it
+                    '-DFT_DISABLE_HVF=ON ' .
                     $bzip2 . ' ' .
                     $harfbuzz . ' ' .
                     $libpng . ' ' .
