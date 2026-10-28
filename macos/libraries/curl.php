@@ -116,7 +116,9 @@ class Libcurl extends Library
                 "{$this->config->configureEnv} " . ' cmake ' .
                 // '--debug-find ' .
                 '-DCMAKE_BUILD_TYPE=Release ' .
+                '-DBUILD_CURL_EXE=OFF ' .
                 '-DBUILD_SHARED_LIBS=OFF ' .
+                '-DBUILD_STATIC_LIBS=ON ' .
                 $libssh2 .
                 $zlib .
                 $brotli .
