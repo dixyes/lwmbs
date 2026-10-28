@@ -356,6 +356,9 @@ jobs:
           # pwsh 7.3+ support this
           \$PSNativeCommandArgumentPassing = 'Standard'
 
+          # do not stop at the first failure, collect the result and fail at the end
+          \$failed = \$false
+
           # NOTE: to build these binaries on your machine, you may require php8.1+, vs, git, cmake, 7z(-zstd/nanazip better), perl
 
           \$buildDir = "C:\\build"
@@ -463,6 +466,7 @@ jobs:
 
               if (\$ret -ne 0) {
                   Write-Host "::error::failed build lib for $flavor"
+                  \$failed = \$true
               } else {
               PWSH);
               foreach ($matrix['sapis'] as $sapi) {
@@ -526,6 +530,7 @@ jobs:
                       Write-Host "::endgroup::"
                       if (\$ret -ne 0) {
                           Write-Host "::error::failed build $flavor $sapi"
+                          \$failed = \$true
                       }
                   PWSH);
               }
@@ -546,7 +551,13 @@ jobs:
           }
 
           $writeps("\n");
-      
+          $writeps(<<<PWSH
+          if (\$failed) {
+              Write-Host "::error::build failed"
+              exit 1
+          }
+          PWSH);
+
       # - name: Enable pwsh PSNativeCommandArgumentPassing
       #   shell: pwsh
       #   run: |
@@ -563,7 +574,13 @@ jobs:
           Remove-Item C:\build\src\php-src\ext\swow -Force
           New-Item -ItemType SymbolicLink -Path "C:\build\src\php-src\ext\swow" -Target "C:\build\src\php-src\ext\swow-src\ext"
 
+          $global:LASTEXITCODE = 0
           . C:\build\build.ps1
+          $ret = $LASTEXITCODE
+          if ($ret -ne 0) {
+              Write-Host "::error::build script failed with status $ret"
+              exit 1
+          }
 
           # New-Item -Path C:\out\custom\licenses -ItemType Directory -Force
           # Out-File -FilePath C:\out\custom\micro.sfx -Encoding Ascii -Force
@@ -606,7 +623,27 @@ jobs:
             github: ${{ toJson(github) }},
             inputs: ${{ toJson(inputs) }},
           }
+          const fs = require('fs');
           const core = require('@actions/core');
 
-          const { main } = require('C:\\lwmbs\\.github\\workflows\\upload.js')
-          main('${{ secrets.GITHUB_TOKEN }}', 'windows', context).catch(err => core.setFailed(err.message))
+          const binFile = {
+            micro: 'micro.sfx',
+            'micro-cli': 'micro_cli.sfx',
+            cli: 'php.exe',
+          };
+          const missing = [];
+          for (const flavor of context.matrix.flavors) {
+            for (const sapi of context.matrix.sapis) {
+              const filePath = `C:\\out\\${flavor}\\${binFile[sapi]}`;
+              if (!fs.existsSync(filePath)) {
+                missing.push(filePath);
+              }
+            }
+          }
+
+          if (missing.length) {
+            core.setFailed(`missing expected artifacts:\n${missing.join('\n')}`);
+          } else {
+            const { main } = require('C:\\lwmbs\\.github\\workflows\\upload.js')
+            main('${{ secrets.GITHUB_TOKEN }}', 'windows', context).catch(err => core.setFailed(err instanceof Error ? err.message : String(err)))
+          }
