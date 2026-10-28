@@ -63,7 +63,8 @@ class CliBuild
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
-                ($this->config->zts ? '--enable-zts' : '') . ' ' .
+                // php-src win32 defaults to zts
+                ($this->config->zts ? '--enable-zts' : '--disable-zts') . ' ' .
                 $this->config->makeExtensionArgs() . '"',
             $ret
         );
@@ -143,9 +144,10 @@ class CliBuild
             'ARM64' => 'arm64',
         } === $this->config->arch) {
             Log::i('running sanity check');
+            $buildType = $this->config->zts ? 'Release_TS' : 'Release';
             exec(
                 'cd src\php-src && ' .
-                "{$this->config->arch}\\Release_TS\\php.exe -r \"echo \\\"hello\\\";\"",
+                "{$this->config->arch}\\{$buildType}\\php.exe -r \"echo \\\"hello\\\";\"",
                 $output,
                 $ret
             );

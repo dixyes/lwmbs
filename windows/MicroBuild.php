@@ -59,7 +59,8 @@ class MicroBuild
                 '--disable-phpdbg ' .
                 '--disable-cli ' .
                 '--enable-micro ' .
-                ($this->config->zts ? '--enable-zts' : '') . ' ' .
+                // php-src win32 defaults to zts
+                ($this->config->zts ? '--enable-zts' : '--disable-zts') . ' ' .
                 $this->config->makeExtensionArgs() . '"',
             $ret
         );
@@ -153,9 +154,10 @@ class MicroBuild
             'ARM64' => 'arm64',
         } === $this->config->arch) {
             Log::i('running sanity check');
+            $buildType = $this->config->zts ? 'Release_TS' : 'Release';
             file_put_contents(
                 'hello.exe',
-                file_get_contents("src\\php-src\\{$this->config->arch}\\Release_TS\\micro.sfx") . '<?php echo "hello";'
+                file_get_contents("src\\php-src\\{$this->config->arch}\\{$buildType}\\micro.sfx") . '<?php echo "hello";'
             );
             exec(
                 'hello.exe',
