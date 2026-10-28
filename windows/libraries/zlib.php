@@ -49,9 +49,8 @@ class Libzlib extends Library
                 'cmake -B builddir ' .
                     "-A \"{$this->config->cmakeArch}\" " .
                     "-G \"{$this->config->cmakeGeneratorName}\" " .
-                    '-DBUILD_SHARED_LIBS=OFF ' .
-                    '-DSKIP_INSTALL_FILES=ON ' .
-                    //'-DCMAKE_C_FLAGS_MINSIZEREL="/MT /O1 /Ob1 /DNDEBUG" ' .
+                    '-DZLIB_BUILD_SHARED=OFF ' .
+                    '-DZLIB_BUILD_STATIC=ON ' .
                     '-DCMAKE_INSTALL_PREFIX="' . realpath('deps') . '" ' .
                     "-DCMAKE_TOOLCHAIN_FILE={$this->config->cmakeToolchainFile} " .
                 '&& ' .
@@ -62,9 +61,17 @@ class Libzlib extends Library
             throw new Exception("failed to build {$this->name}");
         }
 
-        //copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib.lib');
-        copy('deps/lib/zlibstatic.lib', 'deps/lib/zlib_a.lib');
-        unlink('deps/bin/zlib.dll');
-        unlink('deps/lib/zlib.lib');
+        // zlib 1.3.2 names the win32 static library zs.lib, the shared target
+        // z.dll with z.lib as its import library; 1.2.x used zlibstatic.lib,
+        // zlib1.dll and zlib.lib. Provide the static names the php sdk and the
+        // cmake find module look for and drop the dynamic artifacts
+        $staticLib = is_file('deps/lib/zs.lib') ? 'deps/lib/zs.lib' : 'deps/lib/zlibstatic.lib';
+        copy($staticLib, 'deps/lib/zlib_a.lib');
+        copy($staticLib, 'deps/lib/zlibstatic.lib');
+        foreach (['deps/bin/z.dll', 'deps/bin/zlib1.dll', 'deps/bin/zlib.dll', 'deps/lib/z.lib', 'deps/lib/zlib.lib'] as $dynamic) {
+            if (is_file($dynamic)) {
+                unlink($dynamic);
+            }
+        }
     }
 }
