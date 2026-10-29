@@ -206,6 +206,28 @@ class SourceCode
                 }
                 break;
         }
+
+        if (PHP_OS_FAMILY === 'Windows' && (int) $majMin >= 85) {
+            // MSVC implements the vreinterpretq intrinsics used by zend_simd
+            // as macros, a compound literal argument is split at its commas
+            $simd = @file_get_contents($this->path . '/Zend/zend_simd.h');
+            if ($simd !== false && !str_contains($simd, 'XSSE_SET_S8')) {
+                // 8.5 releases use the indented header, master uses another form
+                $patch = $majMin === '85'
+                    ? 'https://github.com/php/php-src/commit/706299fb393185b3c96a3fec1cfbffbcd21646d8.diff'
+                    : 'https://github.com/dixyes/php-src/commit/d2ad27fe98f2d21342db1ccc060c8f2fb298f480.patch';
+                Log::i('patching php zend_simd for MSVC arm64');
+                $ret = 0;
+                passthru(
+                    'cd ' . $this->path . ' && ' .
+                        'curl -L ' . $patch . ' | git apply --ignore-whitespace -p1',
+                    $ret
+                );
+                if ($ret != 0) {
+                    throw new Exception('failed to patch zend_simd for MSVC arm64');
+                }
+            }
+        }
     }
 
     public function prepare(bool $shallowClone = false)
