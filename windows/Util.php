@@ -43,6 +43,10 @@ SET(CMAKE_CXX_FLAGS_DEBUG "$cflags")
 SET(CMAKE_EXE_LINKER_FLAGS "$ldflags")
 SET(CMAKE_FIND_ROOT_PATH "$root")
 SET(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
+# CMake 4.0+ adds MSVC runtime checks to Debug targets through
+# CMAKE_MSVC_RUNTIME_CHECKS, /RTC1 conflicts with the /O1 in CMAKE_C_FLAGS,
+# and try_compile builds its test programs in the Debug configuration
+SET(CMAKE_MSVC_RUNTIME_CHECKS "")
 CMAKE;
         file_put_contents('./toolchain.cmake', $toolchain);
         return realpath('./toolchain.cmake');
