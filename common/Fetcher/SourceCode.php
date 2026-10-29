@@ -225,6 +225,26 @@ class SourceCode
                 break;
         }
 
+        if ($majMin === '81' || $majMin === '82') {
+            // a PHP 8.5 host binary defines a ZEND_VM_KIND userland constant,
+            // which collides with the internal constant of those generators
+            $vm_gen = @file_get_contents($this->path . '/Zend/zend_vm_gen.php');
+            if ($vm_gen !== false && !str_contains($vm_gen, 'ZEND_VM_GEN_KIND')) {
+                // the upstream fix needs fuzz to apply to the older generators
+                Log::i('patching php zend_vm_gen for PHP 8.5 host');
+                $patch = 'https://github.com/php/php-src/commit/d3ef80649e6.diff';
+                $ret = 0;
+                passthru(
+                    'cd ' . $this->path . ' && ' .
+                        'curl -L ' . $patch . ' | patch -p1 -F3 --no-backup-if-mismatch',
+                    $ret
+                );
+                if ($ret != 0) {
+                    throw new Exception('failed to patch zend_vm_gen for PHP 8.5 host');
+                }
+            }
+        }
+
         if (PHP_OS_FAMILY === 'Windows' && (int) $majMin >= 85) {
             // MSVC implements the vreinterpretq intrinsics used by zend_simd
             // as macros, a compound literal argument is split at its commas
