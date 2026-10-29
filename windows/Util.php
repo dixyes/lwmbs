@@ -188,7 +188,7 @@ if (PHP_GD != "no") {
 		gdft.c gd_gd2.c gd_gd.c gd_gif_in.c gd_gif_out.c gdhelpers.c gd_io.c gd_io_dp.c \
 		gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_png.c gd_ss.c \
 		gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
-		gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c {$avif} \
+		gd_filter.c {$pixelate}gd_rotate.c gd_color_match.c gd_webp.c {$avif} \
 		gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
 	AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
 	AC_DEFINE('HAVE_GD_BUNDLED', 1, "Bundled GD");
@@ -205,7 +205,9 @@ if (PHP_GD != "no") {
 	PHP_INSTALL_HEADERS("", "ext/gd ext/gd/libgd" );
 }
 JS;
+	$pixelate = file_exists('src\php-src\ext\gd\libgd\gd_pixelate.c') ? 'gd_pixelate.c ' : '';
 	$config_w32 = str_replace('{$avif}', $avif, $config_w32);
+	$config_w32 = str_replace('{$pixelate}', $pixelate, $config_w32);
     file_put_contents('src\php-src\ext\gd\config.w32', $config_w32);
 
     $gd_interpolation_c = file_get_contents('src\php-src\ext\gd\libgd\gd_interpolation.c');
