@@ -1,0 +1,35 @@
+--- a/yaml.c
++++ b/yaml.c
+@@ -286,6 +286,24 @@
+
+ 	ZEND_HASH_FOREACH_STR_KEY_VAL(callbacks, key, entry) {
+ 		if (key) {
++#if PHP_VERSION_ID >= 80700
++			zend_fcall_info_cache fcc;
++			char *error = NULL;
++
++			if (!zend_is_callable(entry, &fcc, &error)) {
++				if (error != NULL) {
++					php_error_docref(NULL, E_WARNING,
++							"Callback for tag '%s', '%s' is not valid",
++							key->val, error);
++					efree(error);
++
++				} else {
++					php_error_docref(NULL, E_WARNING,
++							"Callback for tag '%s' is not valid", key->val);
++				}
++				return FAILURE;
++			}
++#else
+ 			zend_string *name;
+
+ 			if (!zend_is_callable(entry, 0, &name)) {
+@@ -303,6 +321,7 @@
+ 			} else {
+ 				zend_string_release(name);
+ 			}
++#endif
+
+ 			if (zend_string_equals_literal(key, YAML_TIMESTAMP_TAG)) {
+ 				YAML_G(timestamp_decoder) = entry;

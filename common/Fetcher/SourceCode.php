@@ -268,6 +268,34 @@ class SourceCode
         }
     }
 
+    private function prepareYaml(): void
+    {
+        // PHP 8.7 reverted zend_is_callable() to its pre-8.5 signature
+        $version_h = @file_get_contents(static::$srcDir . '/php-src/main/php_version.h');
+        if ($version_h === false) {
+            throw new Exception('failed to read PHP version header');
+        }
+        if (!preg_match('/#\s*define\s+PHP_MAJOR_VERSION\s+(\d+)/', $version_h, $major)
+            || !preg_match('/#\s*define\s+PHP_MINOR_VERSION\s+(\d+)/', $version_h, $minor)) {
+            throw new Exception('failed to detect PHP version');
+        }
+        if ((int) "{$major[1]}{$minor[1]}" < 87) {
+            return;
+        }
+
+        Log::i('patching yaml for PHP 8.7+');
+        $patch = __DIR__ . DIRECTORY_SEPARATOR . 'patches' . DIRECTORY_SEPARATOR . 'yaml_php87_compat.patch';
+        $ret = 0;
+        passthru(
+            'cd ' . $this->path . ' && ' .
+                (PHP_OS_FAMILY === 'Windows' ? 'type' : 'cat') . ' "' . $patch . '" | patch -p1',
+            $ret
+        );
+        if ($ret != 0) {
+            throw new Exception('failed to patch yaml');
+        }
+    }
+
     public function prepare(bool $shallowClone = false)
     {
         if ($this->filePath) {
@@ -288,6 +316,9 @@ class SourceCode
                 break;
             case 'php':
                 $this->preparePHP();
+                break;
+            case 'yaml':
+                $this->prepareYaml();
                 break;
         }
     }
