@@ -192,6 +192,24 @@ class SourceCode
                     Log::i('php 8.1 already supports OpenSSL 4');
                 }
 
+                // libbcmath still uses K&R declarations, rejected by C23 compilers
+                $bcmath_add_c = @file_get_contents($this->path . '/ext/bcmath/libbcmath/src/add.c');
+                if ($bcmath_add_c === false || str_contains($bcmath_add_c, 'bc_add (n1, n2, result, scale_min)')) {
+                    Log::i('patching php 8.1 bcmath for C23');
+                    $patch = 'https://github.com/php/php-src/commit/21664fb9357a6a89f3b228a6fc7a0d07b396908b.diff';
+                    $ret = 0;
+                    passthru(
+                        'cd ' . $this->path . ' && ' .
+                            'curl -L ' . $patch . ' | git apply --ignore-whitespace -p1',
+                        $ret
+                    );
+                    if ($ret != 0) {
+                        throw new Exception('failed to patch php 8.1 bcmath');
+                    }
+                } else {
+                    Log::i('php 8.1 bcmath has ANSI declarations');
+                }
+
                 // musl fopencookie patch
                 Log::i('patching php 8.1 for musl fopencookie');
                 $patch = 'https://github.com/php/php-src/commit/577b8ae4226368e66fee7a9b5c58f9e2428372fc.diff';
