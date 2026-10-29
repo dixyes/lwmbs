@@ -46,6 +46,12 @@ class CommonConfig extends \stdClass
         return $this->exts[$name] ?? null;
     }
 
+    // why the opcache JIT cannot be built here, null when it can
+    public function opcacheJitDisabledReason(?string $phpVersion): ?string
+    {
+        return null;
+    }
+
     public function useCPP(): bool
     {
         foreach ($this->exts as $ext) {
@@ -134,6 +140,12 @@ class CommonConfig extends \stdClass
             } else {
                 $ret[] = $desc->getArg(false);
             }
+        }
+        // some platforms cannot link the PHP < 8.5 JIT TLS setup, the JIT is
+        // optional and the opcache itself still gets built
+        if ($this->getExt('opcache') && ($reason = $this->opcacheJitDisabledReason($phpVersion)) !== null) {
+            Log::w("disabling opcache JIT: {$reason}");
+            $ret[] = '--disable-opcache-jit';
         }
         return implode(' ', $ret);
     }
