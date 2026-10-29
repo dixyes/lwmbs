@@ -166,8 +166,12 @@ if (PHP_GD != "no") {
 		AC_DEFINE("HAVE_LIBZ", 1, "Zlib support");
 	}
 	if ((CHECK_LIB("libwebp_a.lib", "gd", PHP_GD) || CHECK_LIB("libwebp.lib", "gd", PHP_GD)) &&
+		(CHECK_LIB("libwebpdemux_a.lib", "gd", PHP_GD) || CHECK_LIB("libwebpdemux.lib", "gd", PHP_GD)) &&
+		(CHECK_LIB("libwebpmux_a.lib", "gd", PHP_GD) || CHECK_LIB("libwebpmux.lib", "gd", PHP_GD)) &&
 		CHECK_HEADER_ADD_INCLUDE("decode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
-		CHECK_HEADER_ADD_INCLUDE("encode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp")) {
+		CHECK_HEADER_ADD_INCLUDE("demux.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
+		CHECK_HEADER_ADD_INCLUDE("encode.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp") &&
+		CHECK_HEADER_ADD_INCLUDE("mux.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\webp")) {
 		AC_DEFINE("HAVE_LIBWEBP", 1, "WebP support");
 		AC_DEFINE("HAVE_GD_WEBP", 1, "WebP support");
 	}
@@ -189,7 +193,7 @@ if (PHP_GD != "no") {
 		gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_png.c gd_ss.c \
 		gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
 		gd_filter.c {$pixelate}gd_rotate.c gd_color_match.c gd_webp.c {$avif} \
-		gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
+		gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c {$gdExtra}gd_tga.c", "gd");
 	AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
 	AC_DEFINE('HAVE_GD_BUNDLED', 1, "Bundled GD");
 	AC_DEFINE('HAVE_GD_BMP', 1, "BMP support");
@@ -206,8 +210,12 @@ if (PHP_GD != "no") {
 }
 JS;
 	$pixelate = file_exists('src\php-src\ext\gd\libgd\gd_pixelate.c') ? 'gd_pixelate.c ' : '';
+	$gdExtra = (file_exists('src\php-src\ext\gd\libgd\gd_metadata.c') ? 'gd_metadata.c ' : '')
+		. (file_exists('src\php-src\ext\gd\libgd\gd_nnquant.c') ? 'gd_nnquant.c ' : '')
+		. (file_exists('src\php-src\ext\gd\libgd\gd_color.c') ? 'gd_color.c ' : '');
 	$config_w32 = str_replace('{$avif}', $avif, $config_w32);
 	$config_w32 = str_replace('{$pixelate}', $pixelate, $config_w32);
+	$config_w32 = str_replace('{$gdExtra}', $gdExtra, $config_w32);
     file_put_contents('src\php-src\ext\gd\config.w32', $config_w32);
 
     $gd_interpolation_c = file_get_contents('src\php-src\ext\gd\libgd\gd_interpolation.c');
