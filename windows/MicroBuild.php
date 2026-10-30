@@ -55,6 +55,8 @@ class MicroBuild
                 '--disable-debug ' .
                 '--enable-debug-pack ' .
                 '--disable-all ' .
+                // --disable-all turns the default-on pcre-jit off
+                '--with-pcre-jit ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
                 '--disable-cli ' .
