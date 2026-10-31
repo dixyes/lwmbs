@@ -115,21 +115,6 @@ class Config extends CommonConfig
         }
     }
 
-    // the PHP < 8.5 JIT reads the TS cache TLS index out of a general dynamic
-    // relocation sequence expected to be relaxed at link time; linking opcache
-    // into the executable makes the linker attempt that relaxation and fail on
-    // the hand written sequence (GH-15074). PHP 8.5 rewrote the TLS setup
-    // (GH-18939), the rewrite is not backported, and 8.1/8.2 also lack the
-    // tlsgd register fix (GH-18743). Only ZTS builds emit the sequence
-    public function opcacheJitDisabledReason(?string $phpVersion): ?string
-    {
-        if ($this->zts && $this->libc === CLib::MUSL && $this->arch === 'x86_64'
-            && $phpVersion !== null && version_compare($phpVersion, '8.5', '<')) {
-            return "PHP $phpVersion cannot link the ZTS JIT TLS setup on musl x86_64";
-        }
-        return null;
-    }
-
     public function makeAutoconfArgs(string $name, array $libSpecs): string
     {
         $ret = '';
