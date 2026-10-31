@@ -32,6 +32,19 @@ trait UnixUtilTrait {
         return array_filter($flags, fn ($flag) => static::checkCCFlag($flag, $cc));
     }
 
+    // checkCCFlag preprocesses only, which accepts any flag; linker flags need
+    // an actual link
+    public static function checkCClinkFlag(string $flag, string $cc): bool
+    {
+        $ret = 0;
+        exec(
+            'echo \'int main(void){return 0;}\' | ' . $cc . ' -x c - -o /dev/null ' . $flag . ' 2>/dev/null',
+            $dummy,
+            $ret
+        );
+        return $ret === 0;
+    }
+
     public static function libtoolCCFlags(array $flags):string {
         return implode(' ', array_map(fn($x)=> "-Xcompiler $x", $flags));
     }

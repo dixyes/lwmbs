@@ -59,12 +59,16 @@ class CliBuild
             $cflags .= ' -D__MUSL__';
         }
 
+        // the opcache JIT reads the VM stack with the libgcc unwinder, linking
+        // libgcc statically keeps libgcc_s.so.1 out of the runtime dependencies
+        $static_libgcc = Util::checkCClinkFlag('-static-libgcc', $this->config->cc)
+            ? ' -static-libgcc'
+            : '';
+
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
             case CLib::GLIBC:
-                if (Util::getCCType($this->config->cc) === 'gcc') {
-                    $cflags .= ' -static-libgcc';
-                }
+                $cflags .= $static_libgcc;
                 $cflags .= ' -I"' . realpath('include') . '"';
                 break;
             case CLib::MUSL:
@@ -149,7 +153,7 @@ class CliBuild
                 "EXTRA_LIBS=\"$extra_libs\" " .
                 "EXTRA_LDFLAGS_PROGRAM='$use_lld" .
                 ($this->config->allStatic ? ' -all-static' : '') .
-                " $static_cpp' " .
+                "$static_libgcc $static_cpp' " .
                 'cli && ' .
                 'cd sapi/cli && ' .
                 "{$this->config->crossCompilePrefix}objcopy --only-keep-debug php php.debug && " .

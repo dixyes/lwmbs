@@ -67,9 +67,8 @@ class MicroBuild
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
             case CLib::GLIBC:
-                if (Util::getCCType($this->config->cc) === 'gcc') {
-                    $cflags .= ' -static-libgcc';
-                }
+                // micro's build adds -static-libgcc to the link command itself,
+                // see the link flag check in sapi/micro/config.m4
                 $cflags .= ' -I"' . realpath('include') . '"';
                 break;
             case CLib::MUSL:
