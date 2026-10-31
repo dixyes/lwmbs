@@ -55,6 +55,15 @@ class MicroBuild
 
         $use_lld = '';
 
+        // A musl compiler wrapper links against musl, but the host ldd reports
+        // the host libc, so php-src configure cannot detect musl and leaves
+        // __MUSL__ undefined. The TSRM TLS model and the JIT TLS resolver both
+        // need the define
+        if ($this->config->libc === CLib::MUSL_WRAPPER) {
+            Log::i('injecting -D__MUSL__ for the musl wrapper build');
+            $cflags .= ' -D__MUSL__';
+        }
+
         switch ($this->config->libc) {
             case CLib::MUSL_WRAPPER:
             case CLib::GLIBC:
