@@ -60,8 +60,9 @@ class CliBuild
                 '--disable-debug ' .
                 '--enable-debug-pack ' .
                 '--disable-all ' .
-                // --disable-all turns the default-on pcre-jit off
+                // --disable-all turns the default-on pcre-jit and opcache-jit off
                 '--with-pcre-jit ' .
+                '--enable-opcache-jit ' .
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
                 '--enable-cli ' .
