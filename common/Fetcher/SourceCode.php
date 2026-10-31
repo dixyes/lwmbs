@@ -266,6 +266,75 @@ class SourceCode
                 }
             }
         }
+
+        $this->patchOpcacheJitTls($majMin);
+    }
+
+    private function patchOpcacheJitTls(string $majMin): void
+    {
+        // The JIT reads _tsrm_ls_cache through a hand written TLS sequence and
+        // resolves it at startup. PHP 8.5 rewrote that resolver: it follows the
+        // relaxation the linker applies when opcache is linked into the
+        // executable. Without it the static opcache build does not link on musl
+        // (8.3/8.4, x86_64) and the JIT crashes at startup on musl aarch64,
+        // which is exactly the configuration lwmbs ships.
+        $tlsPatches = [
+            '81' => 'fbdf60ed1313b10771c864253347901d028ab6ff',
+            '82' => '025c37ba4f6c7fbd4ff1be6a9f024807251e25eb',
+            '83' => '82e2a234c37c1bad18c4dc329c443a37b5859b08',
+            '84' => '36f06f44ad01d43771ddf549987d00d19a77af6e',
+        ];
+        if (isset($tlsPatches[$majMin])) {
+            $tlsHeader = $this->path . '/ext/opcache/jit/tls/zend_jit_tls.h';
+            if (is_file($tlsHeader)) {
+                Log::i('php opcache JIT TLS resolver already backported');
+            } else {
+                Log::i('patching php opcache JIT TLS resolver');
+                $patch = "https://github.com/dixyes/php-src/commit/{$tlsPatches[$majMin]}.patch";
+                $ret = 0;
+                passthru(
+                    'cd ' . $this->path . ' && ' .
+                        'curl -L ' . $patch . ' | git apply --ignore-whitespace -p1',
+                    $ret
+                );
+                if ($ret != 0) {
+                    throw new Exception('failed to patch php opcache JIT TLS resolver');
+                }
+            }
+        }
+
+        // PHP 8.4 skips the opcache JIT on Windows ARM64 on its own, because
+        // the x86 dynasm JIT does not build there. Backport that guard to 8.2
+        // and 8.3 so those branches can enable the JIT unconditionally on x64
+        if ($majMin === '82' || $majMin === '83') {
+            $winPatches = [
+                '82' => 'aba664017d810263cf9c169e395a4d976025593f',
+                '83' => '4976fdba2f4095dbed67a242153562c1fd984d72',
+            ];
+            $opcacheConfig = $this->path . '/ext/opcache/config.w32';
+            $config = @file_get_contents($opcacheConfig);
+            if ($config === false) {
+                throw new Exception('failed to read opcache config.w32');
+            }
+            if (str_contains($config, 'TARGET_ARCH == \'arm64\'')) {
+                Log::i('php opcache JIT already skipped on Windows ARM64');
+            } else {
+                Log::i('patching php opcache JIT for Windows ARM64');
+                $patch = "https://github.com/dixyes/php-src/commit/{$winPatches[$majMin]}.patch";
+                $ret = 0;
+                // the static_opcache patch changes a line next to the JIT guard
+                // in the same file, so the context of this patch does not match
+                // exactly; allow the fuzz the other patches in this tree get
+                passthru(
+                    'cd ' . $this->path . ' && ' .
+                        'curl -L ' . $patch . ' | patch -p1 --forward --fuzz=3',
+                    $ret
+                );
+                if ($ret != 0) {
+                    throw new Exception('failed to patch php opcache JIT for Windows ARM64');
+                }
+            }
+        }
     }
 
     private function prepareYaml(): void
