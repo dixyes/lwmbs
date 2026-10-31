@@ -30,6 +30,11 @@ class MicroBuild
         Log::i("building micro");
         $ret = 0;
 
+        $microIni = realpath(__DIR__ . '/../defaults/micro.ini');
+        if ($microIni === false) {
+            throw new Exception('missing defaults/micro.ini');
+        }
+
         $extra_libs = $this->config->getFrameworks(true) . ' ';
         if (!$bloat) {
             $extra_libs .= implode(' ', $this->config->getAllStaticLibFiles());
@@ -80,6 +85,9 @@ class MicroBuild
                 '--disable-cgi ' .
                 '--disable-phpdbg ' .
                 '--enable-micro ' .
+                // the ini replaces micro's own default_ini.ini, so it repeats
+                // those entries and adds the pcre JIT off switch
+                '--with-micro-hardcoded-ini=' . $microIni . ' ' .
                 ($this->config->zts ? '--enable-zts' : '') . ' ' .
                 $this->config->makeExtensionArgs() . ' ' .
                 $this->config->configureEnv,

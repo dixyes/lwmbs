@@ -32,6 +32,11 @@ class MicroBuild
 
         $ret = 0;
 
+        $microIni = realpath(__DIR__ . '/../defaults/micro.ini');
+        if ($microIni === false) {
+            throw new Exception('missing defaults/micro.ini');
+        }
+
         Util::patchLibxml();
         if ($this->config->getExt('zstd')) {
             Util::zstdAPCufix();
@@ -62,6 +67,9 @@ class MicroBuild
                 '--disable-phpdbg ' .
                 '--disable-cli ' .
                 '--enable-micro ' .
+                // the ini replaces micro's own default_ini.ini, so it repeats
+                // those entries and adds the pcre JIT off switch
+                '--with-micro-hardcoded-ini=' . $microIni . ' ' .
                 // php-src win32 defaults to zts
                 ($this->config->zts ? '--enable-zts' : '--disable-zts') . ' ' .
                 $this->config->makeExtensionArgs() . '"',

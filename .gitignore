@@ -14,4 +14,6 @@
 !windows/**
 !common
 !common/**
+!defaults
+!defaults/**
 !src.json
