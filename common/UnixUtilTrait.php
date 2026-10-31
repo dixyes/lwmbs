@@ -54,7 +54,8 @@ trait UnixUtilTrait {
         string $targetArch,
         string $cflags,
         ?string $cc=null,
-        ?string $cxx=null
+        ?string $cxx=null,
+        ?string $deploymentTarget=null
     ):string {
         Log::i("making cmake tool chain file for $os $targetArch with CFLAGS='$cflags'");
         $root = realpath('.');
@@ -66,11 +67,19 @@ trait UnixUtilTrait {
         if($cxx) {
             $cxxLine = 'SET(CMAKE_CXX_COMPILER ' . Util::findCommand($cxx) . ')';
         }
+        // CACHE + FORCE is required: a plain SET() here is overwritten by CMake's
+        // own default, which silently produced a host-version deployment target
+        $deployLine = '';
+        if($deploymentTarget !== null) {
+            $deployLine = 'SET(CMAKE_OSX_DEPLOYMENT_TARGET "' . $deploymentTarget
+                . '" CACHE STRING "Minimum macOS version" FORCE)';
+        }
         $toolchain = <<<CMAKE
 SET(CMAKE_SYSTEM_NAME $os)
 SET(CMAKE_SYSTEM_PROCESSOR $targetArch)
 $ccLine
 $cxxLine
+$deployLine
 SET(CMAKE_C_FLAGS "$cflags")
 SET(CMAKE_CXX_FLAGS "$cflags")
 SET(CMAKE_FIND_ROOT_PATH "$root")

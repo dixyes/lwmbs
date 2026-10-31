@@ -23,6 +23,11 @@ final class Util
     use CommonUtilTrait;
     use UnixUtilTrait;
 
+    // Apple documents macOS 11-26.x as the deployment-target range for Xcode 26.x,
+    // and arm64 cannot target anything older than 11.0. Keep this in sync with
+    // the CMAKE_OSX_DEPLOYMENT_TARGET we hand to CMake below
+    public const MACOSX_DEPLOYMENT_TARGET = '11.0';
+
     public static function getCpuCount(): int
     {
         exec('sysctl -n hw.ncpu', $output, $ret);
@@ -35,12 +40,14 @@ final class Util
 
     public static function getArchCFlags(string $arch): string
     {
-        return '--target=' . static::getArchTarget($arch);
+        return '--target=' . static::getArchTarget($arch)
+            . ' -mmacosx-version-min=' . static::MACOSX_DEPLOYMENT_TARGET;
     }
 
     public static function getArchLDFlags(string $arch): string
     {
-        return '--target=' . static::getArchTarget($arch);
+        return '--target=' . static::getArchTarget($arch)
+            . ' -mmacosx-version-min=' . static::MACOSX_DEPLOYMENT_TARGET;
     }
 
     private static function getArchTarget(string $arch): string

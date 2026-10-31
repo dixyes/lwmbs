@@ -85,6 +85,7 @@ class Config extends CommonConfig
             cflags: $this->cFlags,
             cc: $cmakeCC,
             cxx: $cmakeCXX,
+            deploymentTarget: Util::MACOSX_DEPLOYMENT_TARGET,
         );
 
         $this->configureEnv =
